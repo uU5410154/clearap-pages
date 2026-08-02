@@ -1,0 +1,3298 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ClearAP — 3-way matching built for messy supplier invoices</title>
+<meta name="description" content="AI reads supplier invoices, matches them to PO and receipt lines — AP reviews only exceptions.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'%3E%3Crect width='28' height='28' rx='7' fill='%234d8dff'/%3E%3Cpath d='M18.5 10.2A5.4 5.4 0 1 0 18.6 17.9' stroke='%23fff' stroke-width='2.4' stroke-linecap='round' fill='none'/%3E%3C/svg%3E">
+<link rel="canonical" href="https://clearap.io/">
+<link rel="preload" href="vendor/fonts/InterVariable.woff2" as="font" type="font/woff2" crossorigin>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ClearAP">
+<meta property="og:url" content="https://clearap.io/">
+<meta property="og:title" content="ClearAP — 3-way matching built for messy supplier invoices">
+<meta property="og:description" content="AI reads supplier invoices, matches them to PO and receipt lines — AP reviews only exceptions.">
+<meta property="og:image" content="https://clearap.io/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="ClearAP — 3-way matching built for messy supplier invoices">
+<meta name="twitter:description" content="AI reads supplier invoices, matches them to PO and receipt lines — AP reviews only exceptions.">
+<style>
+/* ============ Fonts ============ */
+@font-face{
+  font-family:"Inter Variable";
+  src:url("vendor/fonts/InterVariable.woff2") format("woff2");
+  font-weight:100 900;font-style:normal;font-display:swap;
+}
+@font-face{
+  font-family:"JetBrains Mono";
+  src:url("vendor/fonts/JetBrainsMono-Regular.woff2") format("woff2");
+  font-weight:400;font-style:normal;font-display:swap;
+}
+
+/* ============ Tokens ============ */
+:root{
+  color-scheme:dark;
+  --bg:#08090a;
+  --bg-2:#0e0f10;
+  --panel:#101112;
+  --panel-2:#161719;
+  --border:#ffffff14;
+  --border-strong:#ffffff24;
+  --ink:#f7f8f8;
+  --ink-2:rgba(255,255,255,.7);
+  --ink-3:rgba(255,255,255,.45);
+  --ink-4:#62666d;
+  --accent:#4d8dff;
+  --wash:rgba(77,141,255,.10);
+  --ok:#2dd882; --warn:#f5b83d; --serious:#ec835a; --danger:#ff5c5c;
+  --radius:10px;
+  --sans:"Inter Variable","SF Pro Display",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  --ease-out-quad:cubic-bezier(.25,.46,.45,.94);
+  --ease-out-quart:cubic-bezier(.165,.84,.44,1);
+  --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='256' height='256'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='256' height='256' filter='url(%23n)'/%3E%3C/svg%3E");
+  font-feature-settings:"cv01","ss03";
+}
+
+/* ============ Base ============ */
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--sans);font-size:15px;letter-spacing:-.011em;
+  background:var(--bg);color:var(--ink);line-height:1.6;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;
+}
+img,svg{max-width:100%;display:block}
+a{color:var(--accent);text-decoration:none}
+button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
+::selection{background:rgba(77,141,255,.35)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+section{padding:64px 0;position:relative}
+@media(min-width:768px){section{padding:96px 0}}
+@media(min-width:1024px){section{padding:128px 0}.wrap{padding:0 32px}}
+/* Section seams — embossed hairline pair (light atop dark), flat bg */
+.alt{border-top:1px solid #000;border-bottom:1px solid #000;box-shadow:0 -1px 0 #ffffff2e,0 1px 0 #ffffff2e}
+/* Vercel-style structural rails — content shell guides, desktop only */
+.rails{display:none}
+@media(min-width:1024px){
+  .rails{display:block;position:fixed;top:0;bottom:0;left:50%;transform:translateX(-50%);
+    width:min(100%,1344px);border-inline:1px solid #ffffff17;pointer-events:none}
+}
+
+h1{font-size:clamp(38px,5vw,64px);font-weight:510;letter-spacing:-.022em;line-height:1.06;text-wrap:balance}
+@supports (text-box: trim-both cap alphabetic){h1{text-box:trim-both cap alphabetic}}
+h2{font-size:clamp(32px,4vw,48px);font-weight:510;letter-spacing:-.022em;line-height:1.1;text-wrap:balance}
+h3{font-size:17px;font-weight:590;letter-spacing:-.01em}
+.num,.tnum{font-variant-numeric:tabular-nums}
+
+.eyebrow{
+  display:inline-block;font-family:var(--mono);font-size:11px;font-weight:400;
+  text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3);
+}
+.section-head{max-width:660px;margin-bottom:48px}
+.section-head h2{margin-top:14px}
+.section-head h2:first-child{margin-top:0}
+.section-head p{color:var(--ink-2);margin-top:14px;font-size:15px}
+/* Split-grid section headers — H2 left, description right */
+@media(min-width:1024px){
+  .section-head.split{display:grid;grid-template-columns:1fr 1fr;gap:12px 48px;max-width:none;align-items:end}
+  .section-head.split .eyebrow{grid-column:1/-1}
+  .section-head.split h2{grid-column:1;margin-top:0}
+  .section-head.split p{grid-column:2;max-width:38ch;margin:0 0 4px}
+}
+.accent-text{color:var(--accent)}
+.h1-u{display:inline-block} /* sentence-unit wrapping — the numbers stack cleanly */
+
+/* Icon plumbing: symbols carry no paint; each instance inherits */
+.ic{fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+/* Dot-grid ground — fine 6px halftone, always mask-faded (no hard edges) */
+.dotted::before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background-image:radial-gradient(circle at 1px 1px,#ffffff12 1px,transparent 0);
+  background-size:6px 6px;
+  opacity:.5;
+  -webkit-mask-image:radial-gradient(ellipse 80% 70% at 50% 0%,#000 20%,transparent 70%);
+  mask-image:radial-gradient(ellipse 80% 70% at 50% 0%,#000 20%,transparent 70%);
+}
+
+/* ============ Buttons ============ */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  height:40px;padding:0 16px;border-radius:9999px;font-weight:510;font-size:15px;
+  letter-spacing:-.011em;white-space:nowrap;
+  transition:filter .16s var(--ease-out-quad),background .16s var(--ease-out-quad),
+    box-shadow .16s var(--ease-out-quad),transform .16s var(--ease-out-quad);
+}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{filter:brightness(115%)}
+.btn-secondary{
+  background:#ffffff0d;color:var(--ink);border:none;
+  -webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);
+  box-shadow:inset 0 0 0 1px #ffffff08,inset 0 1px #ffffff0a,0 0 0 1px #0009,0 4px 4px #0000001a;
+}
+.btn-secondary:hover{background:#ffffff14}
+.btn-sm{height:32px;padding:0 14px;font-size:13px}
+.btn:disabled{opacity:.5;cursor:default;filter:none !important;box-shadow:none !important;transform:none !important}
+
+/* ============ Nav ============ */
+.nav{
+  position:sticky;top:0;z-index:60;
+  background:#0b0b0bcc;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-bottom:1px solid #ffffff14;
+}
+.nav-inner{display:flex;align-items:center;gap:24px;height:64px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:590;font-size:16px;letter-spacing:-.012em;color:var(--ink)}
+.nav-links{display:none;gap:26px;margin-left:auto;margin-right:6px}
+.nav-links a{color:var(--ink-2);font-size:13.5px;font-weight:510;letter-spacing:-.013em;transition:color .16s var(--ease-out-quad)}
+.nav-links a:hover{color:var(--ink)}
+.nav .btn{margin-left:auto}
+@media(min-width:960px){.nav-links{display:flex}.nav .btn{margin-left:0}}
+
+/* ============ Hero ============ */
+.hero{position:relative;overflow:hidden;padding:96px 0 64px}
+.hero-glow{ /* one monochrome top-center radial — no colored blobs */
+  position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 0%,#ffffff1f 0%,#ffffff0a 48%,transparent 76%);
+}
+.hero::after{ /* film grain */
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:0;
+  background-image:var(--grain);background-size:256px 256px;
+  mix-blend-mode:overlay;opacity:.5;
+}
+.hero-grid{display:grid;gap:56px;align-items:center;position:relative}
+.hero-grid>*{min-width:0}
+@media(min-width:960px){.hero-grid{grid-template-columns:1.02fr 1fr}}
+.hero h1{margin:20px 0 18px}
+.hero-sub{font-size:15px;color:var(--ink-2);max-width:38ch}
+.hero-ctas{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+
+/* App frame chrome (hero mock + demo) — three-layer backplate */
+.frame{
+  min-width:0;position:relative;
+  background:var(--panel);border-radius:12px;overflow:hidden;
+  box-shadow:
+    inset 0.2px 0.2px 2px rgba(255,255,255,.1),
+    0 0 0 1px #ffffff25,
+    0 1px 1px #00000005,
+    0 8px 16px -4px #0000000a,
+    0 24px 32px -8px #0000000f,
+    0 1.5px 1.5px rgba(0,0,0,.25),
+    0 0 0 1px #08090a;
+}
+.frame::after{ /* film grain on product surfaces */
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background-image:var(--grain);background-size:256px 256px;
+  mix-blend-mode:multiply;opacity:.4;
+}
+.chrome{display:flex;align-items:center;gap:7px;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--bg-2)}
+.chrome .cdot{width:10px;height:10px;border-radius:50%;background:var(--ink-3);opacity:.45;flex:none}
+.chrome-url{
+  flex:1;width:0;min-width:0;margin:0 10px;background:var(--panel);border:1px solid var(--border);border-radius:7px;
+  font-family:var(--mono);font-size:11px;color:var(--ink-3);padding:4px 12px;max-width:280px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.chrome-chip{
+  display:inline-flex;align-items:center;gap:6px;margin-left:auto;
+  font-family:var(--mono);font-size:10px;font-weight:400;letter-spacing:.02em;color:var(--ink-3);
+  border:1px solid var(--border);border-radius:6px;padding:3px 8px;background:var(--panel);white-space:nowrap;
+}
+.chrome-chip .sdot{width:6px;height:6px}
+@media(max-width:480px){.chrome-chip{display:none}}
+
+/* Hero mock internals */
+.hero-visual{position:relative}
+.hero-visual::before{ /* ambient stage behind the product shot — radial only, no hard edges */
+  content:"";position:absolute;inset:-64px -72px -88px;z-index:-1;pointer-events:none;
+  background:radial-gradient(55% 45% at 50% 32%,#ffffff08,transparent 72%);
+}
+.mock-body{padding:16px;background:#090a0b}
+.mock-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.mock-kpi{background:var(--panel-2);border:1px solid var(--border);border-radius:9px;padding:10px 12px}
+.mock-kpi b{display:block;font-size:19px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.mock-kpi span{font-size:10.5px;color:var(--ink-3);letter-spacing:.02em}
+.mock-row{display:flex;align-items:center;gap:12px;padding:9px 6px;border-top:1px solid var(--border);font-size:12.5px}
+.mock-row .mono{font-family:var(--mono);font-size:11.5px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.mock-row .amt{color:var(--ink-2)}
+.mock-row .grow{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500;color:var(--ink)}
+/* Status pills — 6px dot + label on panel-2 */
+.pill{
+  display:inline-flex;align-items:center;gap:7px;
+  font-size:11.5px;font-weight:500;padding:3px 10px;border-radius:7px;
+  border:1px solid var(--border);background:var(--panel-2);color:var(--ink-2);white-space:nowrap;
+}
+.sdot{width:6px;height:6px;border-radius:50%;flex:none;background:var(--ink-3)}
+.s-ok .sdot{background:var(--ok)}
+.s-warn .sdot{background:var(--warn)}
+.s-serious .sdot{background:var(--serious)}
+.s-critical .sdot{background:var(--danger)}
+
+/* ============ Cards / grids ============ */
+.grid{display:grid;gap:16px}
+.grid-2{grid-template-columns:1fr}
+.grid-3{grid-template-columns:1fr}
+.grid-4{grid-template-columns:1fr}
+@media(min-width:640px){
+  .grid-2,.grid-3,.grid-4{grid-template-columns:repeat(2,1fr)}
+}
+@media(min-width:960px){
+  .grid-3{grid-template-columns:repeat(3,1fr)}
+  .grid-4{grid-template-columns:repeat(4,1fr)}
+}
+.card{
+  position:relative;background:var(--panel);border:none;border-radius:12px;
+  padding:26px;overflow:hidden;
+  box-shadow:inset 0 0 0 1px #ffffff14,inset 0 1px 0 #ffffff0a;
+  transition:box-shadow .16s var(--ease-out-quad);
+}
+.card:hover{
+  box-shadow:inset 0 0 0 1px #ffffff24,inset 0 1px 0 #ffffff0a,
+    0px 8px 2px 0px #0000,0px 5px 2px 0px #00000003,0px 3px 2px 0px #0000000a,
+    0px 1px 1px 0px #00000012,0px 0px 1px 0px #00000014;
+}
+.card h3{margin:0 0 8px}
+.card p{color:var(--ink-2);font-size:14px}
+.mk-no{color:var(--danger)}
+.mk-yes{color:var(--ok)}
+
+/* ============ Demo ============ */
+.app-body{position:relative;min-height:460px;overflow:hidden;background:var(--panel)}
+.app-view{padding:26px 22px 30px}
+@media(min-width:640px){.app-view{padding:34px 34px 38px}}
+.hidden{display:none !important}
+
+/* Step 1 — upload */
+.dropzone{
+  border:1px dashed var(--border-strong);border-radius:var(--radius);
+  padding:46px 22px;text-align:center;background:var(--bg-2);position:relative;overflow:hidden;
+  transition:border-color .2s,background .2s;
+}
+.dropzone::before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background-image:radial-gradient(circle at 1px 1px,rgba(255,255,255,.04) 1px,transparent 0);
+  background-size:22px 22px;
+}
+.dropzone.drag{border-color:var(--accent);background:rgba(77,141,255,.06)}
+.dz-icon{
+  position:relative;margin:0 auto 16px;width:48px;height:48px;border-radius:11px;
+  background:var(--wash);border:1px solid rgba(77,141,255,.2);
+  display:flex;align-items:center;justify-content:center;color:var(--accent);
+}
+.dropzone h3{font-size:16.5px;position:relative}
+.dropzone p{color:var(--ink-3);font-size:13px;margin-top:6px;position:relative}
+.chips{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:24px;position:relative}
+.file-chip{
+  display:inline-flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--border-strong);
+  border-radius:8px;padding:8px 14px;font-family:var(--mono);font-size:12px;color:var(--ink-2);
+  transition:border-color .15s,color .15s;
+}
+.file-chip:hover{border-color:var(--accent);color:var(--ink)}
+.file-chip .ic{color:var(--ink-3)}
+.dz-note{margin-top:16px;font-size:12px;color:var(--ink-3);text-align:center}
+
+/* Step 2 — terminal processing */
+.term{max-width:560px;margin:0 auto;background:var(--bg);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.term-bar{display:flex;align-items:center;gap:8px;padding:9px 14px;border-bottom:1px solid var(--border);background:var(--bg-2)}
+.term-bar .ic{color:var(--ink-3)}
+.term-bar span{font-size:11.5px;font-weight:600;letter-spacing:.02em;color:var(--ink-3)}
+.term-body{padding:16px 18px 18px;font-family:var(--mono);font-size:12.5px;line-height:2;min-height:290px}
+.term-line{color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.term-line .p-ok{color:var(--ok)}
+.term-line .p-run{color:var(--accent)}
+.term-line .p-done{color:var(--ok)}
+.term-line.cmd{color:var(--ink)}
+.term-line.dim{color:var(--ink-3)}
+.cursor{display:inline-block;width:7px;height:14px;background:var(--accent);vertical-align:-2px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.term-progress{height:2px;background:var(--panel-2);overflow:hidden}
+.term-progress i{display:block;height:100%;width:0;background:var(--accent);transition:width .3s ease}
+
+/* Step 3 — dashboard */
+.kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:18px}
+@media(min-width:640px){.kpis{grid-template-columns:repeat(4,1fr)}}
+.kpi{background:var(--panel-2);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.kpi b{display:block;font-size:23px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.kpi span{font-size:11px;color:var(--ink-3);letter-spacing:.02em}
+.tbl-scroll{overflow-x:auto;border:1px solid var(--border);border-radius:10px;background:var(--panel)}
+table{border-collapse:collapse;width:100%;min-width:640px;font-size:13px}
+thead th{
+  text-align:left;font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.12em;
+  font-weight:500;color:var(--ink-3);
+  padding:10px 14px;background:var(--bg-2);border-bottom:1px solid var(--border);white-space:nowrap;
+}
+tbody td{padding:10px 14px;border-bottom:1px solid var(--border);white-space:nowrap;color:var(--ink-2)}
+tbody td:first-child{font-family:var(--mono);font-size:12px;color:var(--ink)}
+tbody tr:last-child td{border-bottom:none}
+tbody tr{cursor:pointer;transition:background .12s}
+tbody tr:hover{background:rgba(77,141,255,.05)}
+.conf-cell{display:flex;align-items:center;gap:9px}
+.conf-bar{width:44px;height:3px;border-radius:2px;background:var(--panel-2);overflow:hidden;flex:none}
+.conf-bar i{display:block;height:100%;background:var(--accent);border-radius:2px}
+.dash-foot{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-top:16px}
+.dash-foot p{font-size:12.5px;color:var(--ink-3)}
+
+/* Drawer */
+.drawer-scrim{position:absolute;inset:0;background:rgba(4,5,8,.55);opacity:0;pointer-events:none;transition:opacity .25s;z-index:5}
+.drawer-scrim.open{opacity:1;pointer-events:auto}
+.drawer{
+  position:absolute;top:0;right:0;bottom:0;width:min(500px,96%);
+  background:var(--bg-2);border-left:1px solid var(--border-strong);z-index:6;
+  transform:translateX(102%);transition:transform .3s cubic-bezier(.32,.72,.22,1);
+  display:flex;flex-direction:column;box-shadow:-24px 0 48px -24px rgba(0,0,0,.45);
+}
+.drawer.open{transform:translateX(0)}
+.drawer-head{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:12px}
+.drawer-head h4{font-family:var(--mono);font-size:15px;font-weight:400;letter-spacing:.02em}
+.drawer-head .sub{font-size:12.5px;color:var(--ink-3);margin-top:4px;display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+.drawer-close{margin-left:auto;color:var(--ink-3);padding:5px;border-radius:7px}
+.drawer-close:hover{background:var(--panel-2);color:var(--ink)}
+.drawer-body{flex:1;overflow-y:auto;padding:18px 20px}
+.drawer-sec{font-size:11.5px;font-weight:600;letter-spacing:.02em;color:var(--ink-3);margin:20px 0 12px}
+.drawer-sec:first-child{margin-top:0}
+.field{margin-bottom:13px}
+.field-top{display:flex;justify-content:space-between;gap:12px;font-size:13px}
+.field-top .lbl{color:var(--ink-2)}
+.field-top .val{font-weight:600;font-variant-numeric:tabular-nums;text-align:right;color:var(--ink)}
+.field-bar{display:flex;align-items:center;gap:9px;margin-top:5px}
+.field-bar .conf-bar{width:100%}
+.field-bar span{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);font-variant-numeric:tabular-nums;flex:none;width:34px;text-align:right}
+.vlist{list-style:none}
+.vlist li{display:flex;gap:11px;padding:7px 0;font-size:13px;align-items:flex-start;color:var(--ink-2)}
+.vlist .mk{flex:none;font-family:var(--mono);font-size:12.5px;line-height:1.6}
+.vlist .why{display:block;font-size:12px;color:var(--ink-3)}
+.drawer-foot{padding:16px 20px;border-top:1px solid var(--border);background:var(--panel)}
+.drawer-foot .btn{width:100%}
+.exc-note{font-size:12px;color:var(--ink-3);margin-top:10px;text-align:center}
+
+/* ============ How it works ============ */
+.how-num{font-family:var(--mono);font-size:11px;font-weight:400;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);margin-bottom:14px;font-variant-numeric:tabular-nums}
+.how-step h3{margin-top:0}
+
+/* ============ Pricing ============ */
+.price-card{display:flex;flex-direction:column}
+.price-card.popular{box-shadow:inset 0 0 0 1px #ffffff1f,inset 0 1px 0 #ffffff0a}
+.pop-tag{display:block;font-family:var(--mono);font-size:10px;font-weight:400;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin-bottom:6px}
+.price-card h3{margin:0 0 4px}
+.price{font-size:36px;font-weight:510;letter-spacing:-.022em;font-variant-numeric:tabular-nums;margin:8px 0 2px}
+.price small{font-size:13.5px;font-weight:500;color:var(--ink-3);letter-spacing:0}
+.price-note{font-size:12.5px;color:var(--ink-3)}
+.plan-feats{list-style:none;margin:18px 0 22px;flex:1}
+.plan-feats li{display:flex;gap:10px;padding:5px 0;font-size:13.5px;color:var(--ink-2)}
+.plan-feats .mk{flex:none;font-family:var(--mono);font-size:12.5px;color:var(--ok);line-height:1.6}
+
+/* ============ FAQ ============ */
+.faq{max-width:720px}
+details{border:1px solid var(--border);border-radius:10px;background:var(--panel);margin-bottom:10px;overflow:hidden}
+details:hover{border-color:var(--border-strong)}
+summary{
+  cursor:pointer;list-style:none;padding:15px 18px;font-weight:600;font-size:14.5px;
+  display:flex;align-items:center;gap:12px;
+}
+summary::-webkit-details-marker{display:none}
+summary .chev{margin-left:auto;color:var(--ink-3);transition:transform .2s;flex:none}
+details[open] .chev{transform:rotate(180deg)}
+details .ans{padding:0 18px 16px;color:var(--ink-2);font-size:14px}
+
+/* ============ Final CTA ============ */
+.final{
+  position:relative;overflow:hidden;text-align:center;
+  background:var(--panel);border:none;border-radius:12px;
+  box-shadow:inset 0 0 0 1px #ffffff14,inset 0 1px 0 #ffffff0a;
+  padding:96px 24px;
+}
+.final::before{
+  content:"";position:absolute;top:0;left:0;right:0;height:70%;
+  background:radial-gradient(ellipse at 50% 0%,#ffffff14 0%,#ffffff06 48%,transparent 76%);
+  pointer-events:none;
+}
+.final .eyebrow{position:relative}
+.final h2{position:relative;margin-top:14px}
+.final p{color:var(--ink-2);margin:14px auto 28px;max-width:460px;position:relative}
+.final .hero-ctas{justify-content:center;margin-top:0;position:relative}
+
+/* ============ Footer ============ */
+footer{padding:56px 0 32px;color:var(--ink-3);font-size:13px;border-top:1px solid var(--border);background:var(--bg-2)}
+.foot-grid{display:grid;gap:32px 24px;grid-template-columns:1fr 1fr}
+@media(min-width:640px){.foot-grid{grid-template-columns:2fr 1fr 1fr 1fr}}
+.foot-brand{grid-column:1 / -1}
+@media(min-width:640px){.foot-brand{grid-column:auto}}
+.foot-brand .brand{margin-bottom:10px}
+.foot-brand p{max-width:260px;font-size:13px;color:var(--ink-3)}
+.foot-brand .copy{margin-top:14px;font-size:12px}
+.foot-col h5{font-size:12px;font-weight:600;color:var(--ink-2);margin-bottom:12px}
+.foot-col ul{list-style:none}
+.foot-col li{padding:4px 0}
+.foot-col a,.foot-col button{color:var(--ink-3);font-size:13px;text-align:left;padding:0}
+.foot-col a:hover,.foot-col button:hover{color:var(--ink)}
+.foot-col .plain{font-size:13px;color:var(--ink-3)}
+
+/* ============ Modal ============ */
+.modal-scrim{
+  position:fixed;inset:0;background:rgba(4,5,8,.7);z-index:90;
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  opacity:0;pointer-events:none;transition:opacity .22s;
+}
+.modal-scrim.open{opacity:1;pointer-events:auto}
+.modal{
+  background:var(--panel);border:1px solid var(--border-strong);border-radius:12px;
+  max-width:440px;width:100%;padding:30px 28px;position:relative;overflow:hidden;
+  box-shadow:inset 0 1px 0 #ffffff0a,0 32px 64px -16px rgba(0,0,0,.5);
+  transform:translateY(14px) scale(.98);transition:transform .22s ease;
+}
+.modal-scrim.open .modal{transform:none}
+.modal h3{font-size:20px;letter-spacing:-.02em}
+.modal .m-sub{color:var(--ink-2);font-size:13.5px;margin:8px 0 18px}
+.modal label{display:block;font-size:12.5px;font-weight:600;margin:14px 0 6px;color:var(--ink-2)}
+.modal input,.modal select{
+  width:100%;padding:11px 14px;border:1px solid var(--border-strong);border-radius:9px;
+  font:inherit;font-size:14.5px;background:var(--panel-2);color:var(--ink);
+}
+.modal input::placeholder{color:var(--ink-3)}
+.modal input:focus,.modal select:focus{outline:2px solid var(--accent);outline-offset:0;border-color:var(--accent)}
+.m-err{color:var(--danger);font-size:12.5px;margin-top:6px;display:none}
+.modal .btn{width:100%;margin-top:20px}
+.m-fine{font-size:11.5px;color:var(--ink-3);margin-top:12px;text-align:center}
+.m-success{text-align:center;padding:8px 0}
+.m-success .big{
+  width:52px;height:52px;border-radius:12px;background:rgba(45,216,130,.1);
+  border:1px solid rgba(45,216,130,.25);color:var(--ok);
+  display:flex;align-items:center;justify-content:center;margin:0 auto 16px;
+}
+
+/* ============ Toast ============ */
+.toasts{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:100;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none;width:max-content;max-width:92vw}
+.toast{
+  display:flex;align-items:center;gap:9px;background:var(--panel-2);border:1px solid var(--border-strong);
+  color:var(--ink);font-size:13px;font-weight:500;
+  padding:10px 16px;border-radius:9px;box-shadow:inset 0 1px 0 #ffffff0a,0 12px 32px -12px rgba(0,0,0,.5);
+  animation:toast-in .3s ease;max-width:100%;
+}
+.toast .ic{color:var(--ok)}
+@keyframes toast-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.toast.bye{opacity:0;transition:opacity .3s}
+
+/* ============ Stats peek ============ */
+.stats-peek{
+  position:fixed;bottom:14px;right:14px;z-index:95;background:var(--panel);border:1px solid var(--border-strong);
+  border-radius:10px;box-shadow:0 24px 48px -16px rgba(0,0,0,.45);padding:14px 16px;
+  font-family:var(--mono);font-size:11.5px;max-width:280px;max-height:50vh;overflow:auto;
+}
+.stats-peek h4{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px;font-weight:500}
+.stats-peek ul{list-style:none}
+.stats-peek li{display:flex;justify-content:space-between;gap:14px;padding:2px 0;color:var(--ink-2)}
+.stats-peek b{font-variant-numeric:tabular-nums;color:var(--ink)}
+
+/* ============ ERP stack row ============ */
+.stack-row{margin-top:34px;border:1px solid var(--border);border-radius:var(--radius);background:var(--panel);padding:18px 22px;display:flex;flex-wrap:wrap;gap:12px 28px;align-items:center}
+.stack-row .lbl{font-size:11px;font-weight:600;letter-spacing:.02em;color:var(--ink-3);flex:none}
+.stack-row .erp{font-size:13.5px;font-weight:600;color:var(--ink-2)}
+.stack-note{margin-top:10px;font-size:12px;color:var(--ink-3)}
+
+/* ============ AP workbench additions ============ */
+.term-line .p-warn{color:var(--warn)}
+.mchip{display:inline-block;font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;border:1px solid var(--border);border-radius:6px;padding:2px 8px;color:var(--ink-2);background:var(--panel-2)}
+.mchip.none{border-color:transparent;background:none;color:var(--ink-3)}
+.due-sub{display:block;font-family:var(--mono);font-size:10px;color:var(--ink-3)}
+.due-sub.late{color:var(--danger)}
+.dash-head{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:14px}
+.dash-head .ttl{font-size:12px;font-weight:600;letter-spacing:.02em;color:var(--ink-3)}
+.drawer table{min-width:0}
+.tot-tbl{width:100%;margin-top:6px;font-size:13px}
+.tot-tbl td{padding:6px 0;border:none;white-space:nowrap;color:var(--ink-2)}
+.tot-tbl td.r{text-align:right;font-family:var(--mono);font-size:12.5px;font-variant-numeric:tabular-nums;color:var(--ink)}
+.tot-tbl tr.grand td{border-top:1px solid var(--border-strong);font-weight:650;color:var(--ink)}
+.mini-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:9px;background:var(--panel)}
+.mini{min-width:430px;width:100%;font-size:12px}
+.mini thead th{padding:8px 10px;font-size:9.5px}
+.mini tbody td{padding:8px 10px;font-family:var(--mono);font-size:11px;color:var(--ink-2);cursor:default}
+.mini tbody tr{cursor:default}
+.mini tbody tr:hover{background:none}
+.mini td.d{font-family:var(--sans);font-size:12px;color:var(--ink)}
+.mini td.r{text-align:right;font-variant-numeric:tabular-nums}
+.var-note{display:block;font-family:var(--mono);font-size:10px;color:var(--danger);white-space:normal;margin-top:3px}
+.je-tot td{border-top:1px solid var(--border-strong);border-bottom:none;color:var(--ink);font-weight:650}
+.je-chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.doa-chip{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--warn);border:1px solid rgba(245,184,61,.3);background:rgba(245,184,61,.08);border-radius:6px;padding:4px 10px;margin-bottom:10px}
+.edit-btn{font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--accent);border:1px solid rgba(77,141,255,.3);border-radius:5px;padding:1px 7px;background:var(--wash)}
+.npo{border:1px dashed var(--border-strong);border-radius:9px;padding:14px;font-size:12.5px;color:var(--ink-2)}
+.npo .cat{font-family:var(--mono);font-size:11px;color:var(--ink);display:block;margin:6px 0 10px}
+
+/* ============ Reveal on scroll (html.js gate — no-JS users see everything) ============ */
+html.js .reveal{opacity:0;transform:translateY(6px);transition:opacity .5s var(--ease-out-quart),transform .5s var(--ease-out-quart)}
+html.js .reveal.in{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none !important;transition:none !important}
+  html.js .reveal{opacity:1;transform:none}
+}
+
+/* ============ v3 additions — PO board, ROI, close strip, control, proof ============ */
+/* 3D mount: hero content sits above the (stage-2, JS-created) canvas layer */
+.hero-grid{z-index:1}
+
+/* Hero PO-board miniature */
+.po-mini-head{font-family:var(--mono);font-size:11px;color:var(--ink-2);margin-bottom:9px;letter-spacing:.02em}
+.po-mini-bar{display:flex;height:7px;border-radius:4px;overflow:hidden;background:var(--panel-2);border:1px solid var(--border)}
+.po-mini-bar i{display:block;height:100%;background:var(--accent)}
+.po-mini-bar i + i{margin-left:2px}
+.po-mini-bar i.w{background:var(--warn)}
+.po-mini-roll{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);margin:8px 0 10px;font-variant-numeric:tabular-nums}
+
+/* Proof strip (replaces wordmark row) */
+.proof{padding:36px 0;border-bottom:1px solid var(--border)}
+.proof-line{text-align:center;font-size:15px;color:var(--ink-2)}
+.proof-chips{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:10px 12px;margin-top:16px}
+.proof-chips .lbl{font-size:12px;font-weight:600;color:var(--ink-3)}
+.proof-chip{font-size:12px;color:var(--ink-2);border:1px solid var(--border);border-radius:7px;background:var(--panel);padding:5px 12px}
+.proof-note{text-align:center;font-size:12.5px;color:var(--ink-3);margin-top:14px}
+
+/* Problem — split layout: stat blocks + practitioner quote */
+.prob-split{display:grid;gap:16px}
+@media(min-width:960px){.prob-split{grid-template-columns:1.15fr .95fr}}
+.prob-stats{display:grid;gap:16px;align-content:start}
+.quote{font-size:15px;line-height:1.65;color:var(--ink-2);border-left:2px solid rgba(236,131,90,.4);padding:9px 13px;background:var(--bg-2);border-radius:0 8px 8px 0}
+.quote-card{display:flex;flex-direction:column;justify-content:center}
+.quote-attr{font-size:12px;color:var(--ink-3);margin-top:12px}
+.stat-line{margin:4px 0 10px}
+.stat-line b{font-size:34px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.src{display:block;font-size:11px;color:var(--ink-3);margin-top:2px}
+
+/* Demo — view tabs + close-context widget */
+.view-tabs{display:inline-flex;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--bg-2)}
+.vtab{font-size:12px;font-weight:600;color:var(--ink-3);padding:7px 14px;transition:color .15s,background .15s}
+.vtab:hover{color:var(--ink-2)}
+.vtab.active{background:var(--panel-2);color:var(--ink)}
+.vtab + .vtab{border-left:1px solid var(--border)}
+.close-ctx{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;justify-content:space-between;border:1px solid var(--border);border-radius:9px;background:var(--bg-2);padding:10px 14px;margin-bottom:14px}
+.close-ctx .cc-line{font-family:var(--mono);font-size:11.5px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.close-ctx .cc-line b{color:var(--ink);font-weight:600}
+
+/* PO matching board */
+.po-head{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:flex-start;justify-content:space-between;margin-bottom:14px}
+.po-title{font-family:var(--mono);font-size:14px;font-weight:600;letter-spacing:.02em}
+.po-spec{font-size:12.5px;color:var(--ink-2);margin-top:4px;font-variant-numeric:tabular-nums}
+.gr-chips{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.gr-chip{font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;color:var(--ink-2);border:1px solid var(--border);border-radius:6px;background:var(--panel-2);padding:3px 9px;font-variant-numeric:tabular-nums;transition:border-color .15s,color .15s}
+.gr-chip.hl{border-color:var(--accent);color:var(--ink)}
+.gr-sum{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.po-bar{display:flex;height:10px;border-radius:5px;overflow:hidden;background:var(--panel-2);border:1px solid var(--border)}
+.po-bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .45s cubic-bezier(.22,.61,.36,1)}
+.po-bar i + i{margin-left:2px}
+.po-bar i.w{background:var(--warn)}
+.po-bar i.hl{filter:brightness(1.45)}
+.po-rollup{display:flex;flex-wrap:wrap;gap:5px 16px;font-family:var(--mono);font-size:11.5px;color:var(--ink-3);margin:10px 0 18px;font-variant-numeric:tabular-nums}
+.po-rollup b{color:var(--ink);font-weight:600}
+.po-cols{display:grid;gap:14px}
+@media(min-width:960px){.po-cols{grid-template-columns:1.25fr 1fr}}
+.po-pile{border:1px solid var(--border);border-radius:10px;background:var(--panel);overflow:hidden;align-self:start}
+.po-pile-hd{font-size:12px;font-weight:600;letter-spacing:.02em;color:var(--ink-3);padding:10px 14px;background:var(--bg-2);border-bottom:1px solid var(--border)}
+.po-row{display:flex;gap:12px;padding:11px 14px;border-top:1px solid var(--border);cursor:pointer;align-items:flex-start;transition:background .12s}
+.po-row:first-of-type{border-top:none}
+.po-row:hover{background:rgba(77,141,255,.05)}
+.po-row.sel{background:rgba(77,141,255,.08)}
+.po-row .num{font-family:var(--mono);font-size:11.5px;color:var(--ink);flex:none;width:76px;padding-top:1px}
+.po-row .desc{flex:1;min-width:0;font-size:12.5px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.po-row .res{display:block;font-family:var(--mono);font-size:10.5px;color:var(--ink-3);margin-top:3px}
+.po-row .pill{flex:none;margin-top:1px}
+.po-log .term-body{min-height:0;font-size:11.5px}
+.po-note{font-size:12px;color:var(--ink-3);margin-top:12px}
+
+/* Drawer — schematic invoice document */
+.inv-doc{border:1px solid var(--border-strong);border-radius:9px;background:var(--panel-2);padding:14px;font-family:var(--mono);font-size:10.5px;color:var(--ink-2);margin-bottom:16px;position:relative;overflow:hidden;line-height:1.8}
+.inv-doc .r{text-align:right}
+.doc-top{display:flex;justify-content:space-between;gap:14px;padding-bottom:9px;border-bottom:1px solid var(--border)}
+.doc-lines{padding:9px 0;border-bottom:1px solid var(--border)}
+.doc-line{display:flex;justify-content:space-between;gap:12px}
+.doc-line span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.doc-line span:last-child{flex:none;font-variant-numeric:tabular-nums}
+.doc-foot{display:flex;justify-content:space-between;gap:12px;padding-top:9px;flex-wrap:wrap}
+.doc-region{padding:1px 4px;margin:-1px -4px;border-radius:4px;transition:background .15s,box-shadow .15s,color .15s}
+.doc-region.hl{background:var(--wash);box-shadow:0 0 0 1px rgba(77,141,255,.45);color:var(--ink)}
+.field.linked{cursor:pointer;border-radius:6px}
+.field.linked:hover .lbl{color:var(--ink)}
+.doc-hint{font-size:11px;color:var(--ink-3);margin:-8px 0 14px}
+
+/* ROI calculator */
+.roi-card{padding:28px}
+@media(min-width:640px){.roi-card{padding:34px}}
+.roi-sliders{display:grid;gap:24px}
+@media(min-width:640px){.roi-sliders{grid-template-columns:1fr 1fr;gap:32px}}
+.roi-slider label{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:13.5px;font-weight:600;color:var(--ink-2);margin-bottom:10px}
+.roi-slider label b{font-family:var(--mono);font-size:15px;color:var(--ink);font-variant-numeric:tabular-nums;font-weight:600}
+input[type="range"]{width:100%;height:22px;background:transparent;accent-color:var(--accent);cursor:pointer}
+.roi-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:26px 0 6px}
+.roi-stat{background:var(--panel-2);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.roi-stat b{display:block;font-size:clamp(18px,3vw,25px);font-weight:650;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.roi-stat > span{font-size:11px;color:var(--ink-3);letter-spacing:.02em;display:block;margin-top:6px}
+.roi-stat .sub{font-size:11px;color:var(--ink-2);margin-top:4px}
+.roi-summary{font-size:15px;color:var(--ink);margin:16px 0 20px;font-variant-numeric:tabular-nums}
+.roi-foot{font-size:11.5px;color:var(--ink-3);line-height:1.8;margin-top:18px}
+
+/* Close calendar strip */
+.cal-scroll{overflow-x:auto;border:1px solid var(--border);border-radius:10px;background:var(--panel)}
+.cal{display:grid;grid-template-columns:132px repeat(5,minmax(128px,1fr));min-width:780px;font-size:12px}
+.cal .hd{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);padding:10px 12px;background:var(--bg-2);border-bottom:1px solid var(--border)}
+.cal .rowlbl{font-size:12px;font-weight:600;letter-spacing:.02em;color:var(--ink-2);padding:16px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center}
+.cal .cell{padding:12px;border-bottom:1px solid var(--border);border-left:1px solid var(--border);display:flex;align-items:flex-start}
+.cal .cell .pill{white-space:normal;line-height:1.4;align-items:flex-start}
+.cal .cell .pill .sdot{margin-top:4px}
+.cal .cell.dim{align-items:center;justify-content:center;font-size:11px;color:var(--ink-3)}
+.cal .last{border-bottom:none}
+.cal-cap{font-size:12.5px;color:var(--ink-2);margin-top:14px}
+.cal-lbl{font-size:11.5px;color:var(--ink-3);margin-top:6px}
+
+/* Controls matrix + feature band */
+.ctrl-list li{padding:10px 0}
+.ctrl-list li b{display:block;font-size:15px;font-weight:650;color:var(--ink);letter-spacing:-.01em}
+.ctrl-list .why{margin-top:2px}
+@media(min-width:640px){.ctrl-list{display:grid;grid-template-columns:1fr 1fr;column-gap:36px}}
+.feat-band{margin-top:16px;border:1px solid var(--border);border-radius:var(--radius);background:var(--panel);display:grid}
+.feat-band .feat{padding:18px 22px;border-top:1px solid var(--border)}
+.feat-band .feat:first-child{border-top:none}
+.feat-band .feat h3{margin:0 0 4px;font-size:15px}
+.feat-band .feat p{font-size:13px;color:var(--ink-2)}
+@media(min-width:960px){
+  .feat-band{grid-template-columns:repeat(4,1fr)}
+  .feat-band .feat{border-top:none}
+  .feat-band .feat + .feat{border-left:1px solid var(--border)}
+}
+
+/* Pricing per-invoice math */
+.ppi{display:block;font-size:12px;line-height:1.6;color:var(--ink-2);border:1px solid var(--border);border-radius:7px;background:var(--bg-2);padding:7px 11px;margin:12px 0 2px;font-variant-numeric:tabular-nums}
+.payoff{font-size:12.5px;color:var(--accent);margin-top:8px}
+.pricing-notes{margin-top:14px;font-size:12px;color:var(--ink-3);line-height:1.9}
+.assure{margin-top:20px;display:flex;flex-wrap:wrap;gap:6px 0;justify-content:center;border:1px solid var(--border);border-radius:var(--radius);background:var(--panel);padding:13px 18px;font-size:13px;color:var(--ink-2)}
+.assure span + span::before{content:"·";margin:0 14px;color:var(--ink-3)}
+
+/* ============ Stage-2 motion layer (3D-SPEC) ============ */
+/* Hero WebGL canvas — JS-created; absent under no-JS / file:// / reduced motion / no-WebGL */
+.hero-gl{position:absolute;inset:0;z-index:0;display:block;max-width:100%;pointer-events:none}
+.hero.dotted::before{z-index:1}
+@media print{.hero-gl{display:none}}
+
+/* Drawer — extraction scan-line sweep (one pass per drawer open) */
+.scan-line{
+  position:absolute;left:0;right:0;top:-25px;height:24px;pointer-events:none;
+  background:linear-gradient(to bottom,rgba(77,141,255,0),rgba(77,141,255,.18) 80%,rgba(77,141,255,.55));
+  border-bottom:1px solid rgba(77,141,255,.55);
+}
+html.js .scan-line{animation:scan-sweep .7s cubic-bezier(.22,.61,.36,1) 1 forwards}
+@keyframes scan-sweep{to{top:100%}}
+.inv-doc.scanned .doc-region{background:rgba(77,141,255,.05)}
+.inv-doc.scanned .doc-region.hl{background:var(--wash)}
+
+/* Drawer — self-drawing 3-way match connectors (SVG overlay, decorative) */
+.match-panel{position:relative}
+.match-panel .mini-wrap{position:relative}
+.mline{transition:stroke-dashoffset .3s cubic-bezier(.22,.61,.36,1)}
+.mline-dot{transform-box:fill-box;transform-origin:center;opacity:0}
+.mline-dot.pulse{opacity:1;animation:dot-pulse .24s cubic-bezier(.22,.61,.36,1) 1}
+@keyframes dot-pulse{50%{transform:scale(1.4)}}
+.match-verdict{
+  display:inline-flex;align-items:center;gap:7px;margin-top:10px;
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;
+  border:1px solid rgba(45,216,130,.3);background:rgba(45,216,130,.07);color:var(--ok);
+  border-radius:6px;padding:4px 10px;
+  opacity:0;transform:translateY(4px);
+  transition:opacity .3s cubic-bezier(.22,.61,.36,1),transform .3s cubic-bezier(.22,.61,.36,1);
+}
+.match-verdict.bad{border-color:rgba(255,92,92,.3);background:rgba(255,92,92,.07);color:var(--danger)}
+.match-verdict.in{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){.match-verdict{opacity:1;transform:none}.mline-dot{opacity:1}}
+
+/* Drawer — field → document leader line */
+.drawer-body{position:relative}
+.leader-svg{position:absolute;left:0;top:0;pointer-events:none;overflow:visible;transition:opacity .3s ease}
+
+/* ============ Pipeline — 5-beat signature animation (STORYBOARD.md) ============
+   State machine: .pipe-stage[data-step="1..5"] fully describes each beat; CSS
+   transitions animate between states, finite keyframes add the flourishes.
+   No-JS and reduced-motion ship data-step="5" (the static final composition). */
+#pipeline{padding:0}
+.pipe-outer{position:relative}
+.pipe-pin{padding:56px 0 44px}
+.pipe-head{margin-bottom:22px}
+.pipe-sents{position:absolute;inset:0;display:none;pointer-events:none;z-index:-1}
+.pipe-sents div{height:20%}
+@media(min-width:960px){
+  html.js.pipe-scrub .pipe-outer{height:270vh}
+  html.js.pipe-scrub .pipe-pin{position:sticky;top:0;min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:28px 0 20px}
+  html.js.pipe-scrub .pipe-sents{display:block}
+}
+
+/* Beat stepper — mono-numbered captions; doubles as the a11y/reduced-motion narration.
+   Sits UNDER the stage (like transport controls) so the fold shows only header + stage. */
+.pipe-steps{list-style:none;display:flex;flex-wrap:wrap;gap:6px 8px;margin-top:16px}
+.pipe-steps button{
+  display:inline-flex;align-items:center;gap:7px;
+  font-size:12px;font-weight:600;color:var(--ink-3);
+  border:1px solid var(--border);border-radius:7px;background:var(--panel);padding:6px 11px;
+  transition:color .2s,border-color .2s,background .2s;white-space:nowrap;
+}
+.pipe-steps button b{font-weight:600;color:var(--ink-3);font-variant-numeric:tabular-nums;transition:color .2s}
+.pipe-steps button:hover{color:var(--ink-2);border-color:var(--border-strong)}
+.pipe-steps button.on{color:var(--ink);border-color:rgba(77,141,255,.4);background:var(--wash)}
+.pipe-steps button.on b{color:var(--accent)}
+
+/* Stage */
+.pipe-stage{
+  position:relative;background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
+  padding:22px;display:grid;gap:16px 26px;grid-template-columns:minmax(200px,254px) 1fr;
+  align-items:start;overflow:hidden;
+}
+.pipe-stage::before{ /* one stage glow, never two */
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(60% 50% at 50% 40%,rgba(77,141,255,.07),transparent 70%);
+}
+@media(max-width:639px){.pipe-stage{grid-template-columns:1fr;padding:16px}}
+
+/* --- Document zone: paper + drive tray + queue --- */
+.pipe-doczone{position:relative;display:flex;flex-direction:column;align-items:center;min-height:346px;z-index:1}
+.pipe-paper{
+  position:relative;width:226px;aspect-ratio:8.5/11;background:#f7f7f2;border-radius:5px;
+  clip-path:polygon(0 0,calc(100% - 24px) 0,100% 24px,100% 100%,0 100%);
+  box-shadow:0 1px 2px rgba(0,0,0,.3),0 10px 26px rgba(0,0,0,.35);
+  padding:16px 16px 13px;color:#4a4f5a;overflow:hidden;z-index:2;transform-origin:50% 100%;
+  transition:transform .7s cubic-bezier(.22,1,.36,1),opacity .45s ease;
+}
+.pp-ear{position:absolute;top:0;right:0;width:24px;height:24px;background:#dddccf;
+  clip-path:polygon(0 0,100% 100%,0 100%)}
+.pp-head{display:flex;justify-content:space-between;gap:8px;align-items:baseline;border-bottom:1px solid #d8d7ca;padding-bottom:7px}
+.pp-head b{font-size:11.5px;font-weight:700;letter-spacing:-.01em;color:#2c313c}
+.pp-head span{font-family:var(--mono);font-size:10px;color:#7a8090;flex:none}
+.pp-bars{padding:10px 0 7px}
+.pp-bars i{display:block;height:6px;border-radius:3px;background:#d5d4c7;margin-bottom:6px}
+.pp-line{display:flex;justify-content:space-between;gap:8px;font-family:var(--mono);font-size:10px;color:#5a6070;padding:3px 0}
+.pp-total{display:flex;justify-content:space-between;gap:8px;border-top:1px solid #d8d7ca;margin-top:7px;padding-top:7px;font-family:var(--mono);font-size:10.5px;color:#5a6070}
+.pp-total b{font-size:11.5px;color:#2c313c;font-variant-numeric:tabular-nums}
+/* scan-line + trailing read tint (beat 2) */
+.pp-scan{position:absolute;left:0;right:0;top:0;height:2px;opacity:0;
+  background:linear-gradient(90deg,transparent,var(--accent),transparent);
+  box-shadow:0 0 12px 2px rgba(77,141,255,.45)}
+.pp-tint{position:absolute;inset:0;background:rgba(77,141,255,.07);opacity:0;transition:opacity .4s}
+@keyframes pipe-scan{0%{opacity:1;transform:translateY(0)}88%{opacity:1}100%{opacity:0;transform:translateY(288px)}}
+@keyframes pipe-drop{0%{transform:translateY(-150px) rotate(-3deg)}55%{transform:translateY(4px) rotate(0deg) scale(.94)}100%{transform:translateY(8px) scale(.58)}}
+
+.pipe-tray{position:relative;width:158px;height:46px;margin-top:-28px;z-index:1}
+.pipe-tray .t-back{position:absolute;inset:0;border-radius:9px;background:var(--panel-2);border:1px solid var(--border-strong)}
+.pipe-tray .t-slot{position:absolute;left:10px;right:10px;top:9px;height:3px;border-radius:2px;background:rgba(0,0,0,.5)}
+.pipe-tray .t-front{
+  position:absolute;left:0;right:0;bottom:0;height:26px;z-index:3;border-radius:0 0 9px 9px;
+  background:#17181b;border:1px solid var(--border-strong);border-top-color:rgba(255,255,255,.10);
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);
+}
+.pipe-queue{font-family:var(--mono);font-size:10px;color:var(--ink-3);margin-top:10px;font-variant-numeric:tabular-nums;transition:opacity .4s}
+
+/* extraction chips (beat 2) — lift off, then hand off to the sheet (beat 3) */
+.pipe-chips{position:absolute;top:9%;left:calc(100% - 26px);display:flex;flex-direction:column;align-items:flex-start;gap:7px;z-index:4}
+.pchip{
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.03em;color:var(--ink);white-space:nowrap;
+  background:rgba(22,23,26,.92);border:1px solid rgba(77,141,255,.45);border-radius:6px;padding:4px 8px;
+  box-shadow:0 0 14px rgba(77,141,255,.18),0 8px 20px -8px rgba(0,0,0,.6);
+  font-variant-numeric:tabular-nums;opacity:0;transform:translateY(8px);
+  transition:opacity .35s cubic-bezier(.22,1,.36,1),transform .5s cubic-bezier(.22,1,.36,1);
+}
+@media(max-width:639px){.pipe-chips{left:auto;right:2px}.pchip{font-size:9px}}
+
+/* --- Sheet zone: PO rollup bar + spreadsheet + sigma + end card --- */
+.pipe-sheetzone{position:relative;display:flex;flex-direction:column;gap:12px;min-width:0;z-index:1}
+.pipe-po{opacity:0;transform:translateY(4px);transition:opacity .4s,transform .4s}
+.pipe-po-line{font-family:var(--mono);font-size:11px;color:var(--ink-3);font-variant-numeric:tabular-nums;margin-bottom:7px}
+.pipe-po-line b{color:var(--ink);font-weight:600}
+.pipe-po-bar{display:flex;height:8px;border-radius:4px;overflow:hidden;background:var(--panel-2);border:1px solid var(--border)}
+.pipe-po-bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .55s cubic-bezier(.22,1,.36,1)}
+.pipe-po-bar i + i{margin-left:2px}
+.pipe-po-bar i.w{background:var(--warn)}
+.pipe-po-bar i:nth-child(2){transition-delay:.12s}
+.pipe-po-bar i:nth-child(3){transition-delay:.24s}
+.pipe-po-bar i:nth-child(4){transition-delay:.36s}
+
+.pipe-sheet-wrap{
+  position:relative;border:1px solid var(--border);border-radius:10px;background:var(--bg-2);
+  overflow-x:auto;opacity:.72;transition:opacity .45s,border-color .45s;
+}
+.pipe-sheet{width:100%;min-width:480px;border-collapse:collapse;font-family:var(--mono);font-size:11px;font-variant-numeric:tabular-nums}
+.pipe-sheet th{
+  text-align:left;font-size:8.5px;text-transform:uppercase;letter-spacing:.12em;font-weight:500;color:var(--ink-3);
+  padding:7px 10px;border-bottom:1px solid var(--border);white-space:nowrap;
+}
+.pipe-sheet td{padding:7px 10px;border-bottom:1px solid var(--border);white-space:nowrap;color:var(--ink-2)}
+.pipe-sheet tr:last-child td{border-bottom:none}
+.pipe-sheet td.r{text-align:right}
+.pipe-sheet td:first-child{color:var(--ink)}
+.pipe-sheet .pr{transition:opacity .4s}
+.pipe-sheet td .act{
+  display:none;margin-left:7px;font-size:8.5px;letter-spacing:.08em;text-transform:uppercase;
+  border:1px solid var(--border-strong);border-radius:5px;padding:1px 6px;color:var(--ink);vertical-align:1px;
+}
+.pipe-sheet .m{transition:opacity .3s;transition-delay:calc(var(--r)*130ms)}
+.pipe-sheet .m.ok{color:var(--ok)}
+.pipe-sheet .m.wa{color:var(--warn)}
+.pipe-sheet .m.no{color:var(--danger)}
+/* typed cells (beat 3) — natural width at rest; keyframe only replays the typing */
+.pr-new td span{display:inline-block;overflow:hidden;white-space:nowrap;vertical-align:bottom;max-width:calc(var(--c)*1ch + 2px)}
+@keyframes pipe-type{from{max-width:0}}
+/* autofill flash (beat 4) */
+.pipe-sheet td.amt{position:relative}
+.pipe-sheet td.amt::after{content:"";position:absolute;inset:1px;background:var(--accent);opacity:0;pointer-events:none;border-radius:3px}
+@keyframes pipe-flash{0%{opacity:.28}100%{opacity:0}}
+/* receipt (GR) column — the allocation dimension: system-assigned at beat 4, so
+   NEW work's GR cells stay empty until the calc pass ticks them in (old rows keep theirs) */
+.pipe-sheet td.gr{position:relative;transition:opacity .3s;transition-delay:calc(var(--r)*90ms)}
+.pipe-sheet td.gr::after{content:"";position:absolute;inset:1px;background:var(--accent);opacity:0;pointer-events:none;border-radius:3px}
+@media(max-width:639px){.pipe-sheet{font-size:9.5px;min-width:400px}.pipe-sheet th,.pipe-sheet td{padding:6px 7px}}
+
+/* sum row (beat 4) — the "math runs itself" payoff: a real Σ total under Amount */
+.pipe-sheet tfoot td{border-top:1px solid var(--border-strong);border-bottom:none;color:var(--ink)}
+.pipe-sheet tfoot td:first-child{color:var(--ink-2)}
+.pipe-sheet tfoot .sg{color:var(--accent);font-weight:600;margin-right:6px}
+.pipe-sheet tfoot td.amt b{font-weight:600;color:var(--ink)}
+
+.pipe-end{
+  font-family:var(--mono);font-size:12.5px;letter-spacing:.03em;color:var(--ink);text-align:right;
+  opacity:0;transform:translateY(6px);transition:opacity .5s .25s,transform .5s .25s cubic-bezier(.22,1,.36,1);
+}
+
+/* ---------- Per-beat states ---------- */
+/* Beat 1 — invoice arrives, slots INTO the drive tray: the tray stacks above the
+   paper here so its glyph + label stay readable and the queue caption is never covered */
+.pipe-stage[data-step="1"] .pipe-paper{transform:translateY(8px) scale(.58)}
+.pipe-stage[data-step="1"] .pipe-tray{z-index:3}
+html.js.pipe-live .pipe-stage[data-step="1"] .pipe-paper{animation:pipe-drop .9s cubic-bezier(.22,1,.36,1) both}
+/* Beat 2 — paper lifts back out, scan sweeps, chips lift off */
+html.js.pipe-live .pipe-stage[data-step="2"] .pp-scan{animation:pipe-scan 1.1s cubic-bezier(.4,0,.2,1) .15s both}
+.pipe-stage[data-step="2"] .pp-tint{opacity:1;transition-delay:.6s}
+.pipe-stage[data-step="2"] .pchip{opacity:1;transform:none;transition-delay:calc(.45s + var(--i)*120ms)}
+/* Beat 3+ — chips fly toward the sheet, doc zone recedes, sheet wakes */
+.pipe-stage[data-step="3"] .pchip{opacity:0;transform:translate(96px,120px) scale(.8);transition-delay:calc(var(--i)*70ms)}
+.pipe-stage[data-step="3"] .pipe-paper,.pipe-stage[data-step="4"] .pipe-paper,.pipe-stage[data-step="5"] .pipe-paper{opacity:.35}
+.pipe-stage[data-step="3"] .pp-tint,.pipe-stage[data-step="4"] .pp-tint,.pipe-stage[data-step="5"] .pp-tint{opacity:1}
+.pipe-stage[data-step="5"] .pipe-paper{opacity:.2}
+.pipe-stage[data-step="5"] .pipe-queue{opacity:.45}
+.pipe-stage[data-step="3"] .pipe-sheet-wrap,.pipe-stage[data-step="4"] .pipe-sheet-wrap,.pipe-stage[data-step="5"] .pipe-sheet-wrap{opacity:1;border-color:rgba(77,141,255,.28)}
+/* rows: new row types at 3; late rows + match marks land at 4 */
+.pipe-stage[data-step="1"] .pr-new,.pipe-stage[data-step="2"] .pr-new{opacity:0}
+html.js.pipe-live .pipe-stage[data-step="3"] .pr-new td:nth-child(1) span{animation:pipe-type .4s steps(8) .25s both}
+html.js.pipe-live .pipe-stage[data-step="3"] .pr-new td:nth-child(2) span{animation:pipe-type .35s steps(7) .38s both}
+html.js.pipe-live .pipe-stage[data-step="3"] .pr-new td:nth-child(4) span{animation:pipe-type .2s steps(3) .5s both}
+html.js.pipe-live .pipe-stage[data-step="3"] .pr-new td:nth-child(5) span{animation:pipe-type .22s steps(4) .6s both}
+html.js.pipe-live .pipe-stage[data-step="3"] .pr-new td:nth-child(6) span{animation:pipe-type .4s steps(8) .72s both}
+.pipe-stage[data-step="1"] .pr-late,.pipe-stage[data-step="2"] .pr-late,.pipe-stage[data-step="3"] .pr-late{opacity:0}
+/* already-processed rows keep their ✓ + GR at rest; only NEW work's marks +
+   allocations land at beat 4 */
+.pipe-stage[data-step="1"] :is(.pr-new,.pr-late) :is(.m,.gr),
+.pipe-stage[data-step="2"] :is(.pr-new,.pr-late) :is(.m,.gr),
+.pipe-stage[data-step="3"] :is(.pr-new,.pr-late) :is(.m,.gr){opacity:0}
+.pipe-stage[data-step="1"] .pr-sum,.pipe-stage[data-step="2"] .pr-sum,.pipe-stage[data-step="3"] .pr-sum{opacity:0}
+/* Beat 4 — math runs: GR allocation ticks in first, then the amount flash sweep,
+   Σ total row lands, PO bar climbs */
+html.js.pipe-live .pipe-stage[data-step="4"] .pr td.gr::after{animation:pipe-flash .9s ease-out both;animation-delay:calc(var(--r)*90ms)}
+html.js.pipe-live .pipe-stage[data-step="4"] .pr td.amt::after{animation:pipe-flash .9s ease-out both;animation-delay:calc(var(--r)*90ms + 220ms)}
+.pipe-stage[data-step="4"] .pipe-po,.pipe-stage[data-step="5"] .pipe-po{opacity:1;transform:none}
+.pipe-stage[data-step="4"] .pipe-po-bar i,.pipe-stage[data-step="5"] .pipe-po-bar i{width:var(--w)}
+.pipe-cover{
+  font-family:var(--mono);font-size:10px;letter-spacing:.03em;color:var(--ink-3);
+  font-variant-numeric:tabular-nums;opacity:0;transition:opacity .5s .15s;
+}
+.pipe-stage[data-step="4"] .pipe-cover,.pipe-stage[data-step="5"] .pipe-cover{opacity:1}
+/* Beat 5 — exceptions only: dup/over-GR/no-PO pop with actions; ✓ rows and the
+   in-tolerance pass (.pr-tol) dim out of the way */
+.pipe-stage[data-step="5"] :is(.pr-ok,.pr-tol){opacity:.28}
+.pipe-stage[data-step="5"] .pr-exc td{background:rgba(77,141,255,.045)}
+.pipe-stage[data-step="5"] .pr-warn td:first-child{box-shadow:inset 2px 0 0 var(--warn)}
+.pipe-stage[data-step="5"] :is(.pr-dup,.pr-hold) td:first-child{box-shadow:inset 2px 0 0 var(--danger)}
+.pipe-stage[data-step="5"] .pipe-sheet td .act{display:inline-block}
+.pipe-stage[data-step="5"] .pipe-end{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){
+  .pipe-stage .pipe-po-bar i{width:var(--w)} /* final composition always fully painted */
+}
+
+/* ============ Premium pass — gradient hairline, weights, hero hook ============ */
+/* Gradient hairline border (mask-composite) — hero card + pricing "Most popular" */
+.hairline{position:relative}
+.hairline::before{
+  content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;
+  background:linear-gradient(180deg,#ffffff1f,#ffffff08);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  mask-composite:exclude;
+  pointer-events:none;z-index:2;
+}
+
+/* Metric numerals — variable-weight refinement, never faux-bold */
+.kpi b,.mock-kpi b,.roi-stat b,.stat-line b{font-weight:590;letter-spacing:-.022em}
+.roi-summary{font-weight:510}
+.tot-tbl tr.grand td,.je-tot td{font-weight:590}
+summary{font-weight:510}
+.field-top .val{font-weight:510}
+.ctrl-list li b{font-weight:590}
+.feat-band .feat h3{font-weight:590}
+
+/* ---------- Hero card self-resolve (one-shot; markup ships the resolved state) ---------- */
+.hero-visual .po-mini-bar i{width:var(--w);transition:width .55s var(--ease-out-quart)}
+.hero-visual .po-mini-bar i:nth-child(4){transition-delay:.18s}
+[data-hero="matching"] .po-mini-bar i:nth-child(3),
+[data-hero="matching"] .po-mini-bar i:nth-child(4){width:0;transition:none}
+.chip-wait{display:none}
+:is([data-hero="matching"],[data-hero="resolve"],[data-hero="tol"],[data-hero="blocked"]) .chip-wait{display:inline-flex}
+:is([data-hero="matching"],[data-hero="resolve"],[data-hero="tol"],[data-hero="blocked"]) .chip-done{display:none}
+.hp .lb-wait{display:none}
+:is([data-hero="matching"],[data-hero="resolve"]) .hp .lb-done{display:none}
+:is([data-hero="matching"],[data-hero="resolve"]) .hp .lb-wait{display:inline}
+[data-hero="tol"] .hp-2 .lb-done{display:none}
+[data-hero="tol"] .hp-2 .lb-wait{display:inline}
+:is([data-hero="matching"],[data-hero="resolve"]) .hp .sdot{background:var(--ink-3)}
+[data-hero="tol"] .hp-2 .sdot{background:var(--ink-3)}
+@keyframes heroStamp{50%{transform:scale(1.6)}}
+@media(prefers-reduced-motion:no-preference){
+  html.js :is([data-hero="blocked"],[data-hero="done"]) .hp-2 .sdot{animation:heroStamp .3s var(--ease-out-quart) 1}
+}
+
+/* ---------- Entrance motion — load-only, first ~1.2s, 4px travel ---------- */
+@keyframes staggerIn{from{opacity:0;transform:translateY(4px)}}
+@keyframes cardIn{to{opacity:1;-webkit-mask-position:0 0;mask-position:0 0}}
+@media(prefers-reduced-motion:no-preference){
+  html.js .hero-copy>*{animation:staggerIn .4s var(--ease-out-quart) backwards}
+  html.js .hero-copy .eyebrow{animation-delay:.05s}
+  html.js .hero-copy h1{animation-delay:.12s}
+  html.js .hero-copy .hero-sub{animation-delay:.2s}
+  html.js .hero-copy .hero-ctas{animation-delay:.28s}
+  html.js .hero-visual{ /* mask-sweep develop-in */
+    opacity:0;
+    -webkit-mask:linear-gradient(to right,#000 25%,#000000e6 50%,transparent) 150% 0/400% no-repeat;
+    mask:linear-gradient(to right,#000 25%,#000000e6 50%,transparent) 150% 0/400% no-repeat;
+    animation:cardIn .8s var(--ease-out-quart) .5s both;
+  }
+}
+</style>
+</head>
+<body>
+<div class="rails" aria-hidden="true"></div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></symbol>
+  <symbol id="i-file-text" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-zap" viewBox="0 0 24 24"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></symbol>
+  <symbol id="i-database" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 5v14c0 1.7-4 3-9 3s-9-1.3-9-3V5"/><path d="M3 12c0 1.7 4 3 9 3s9-1.3 9-3"/></symbol>
+  <symbol id="i-cpu" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M1 9h3M1 15h3M20 9h3M20 15h3"/></symbol>
+  <symbol id="i-terminal" viewBox="0 0 24 24"><path d="m4 17 6-5-6-5"/><path d="M12 19h8"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-arrow-r" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 2 9 5-9 5-9-5 9-5z"/><path d="m3 12 9 5 9-5"/><path d="m3 17 9 5 9-5"/></symbol>
+  <symbol id="i-workflow" viewBox="0 0 24 24"><rect x="3" y="3" width="6" height="6" rx="1"/><rect x="15" y="15" width="6" height="6" rx="1"/><path d="M9 6h6a2 2 0 0 1 2 2v7"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></symbol>
+  <symbol id="i-chevron-d" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-9-9"/><path d="M21 3v6h-6"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></symbol>
+  <symbol id="i-route" viewBox="0 0 24 24"><circle cx="6" cy="19" r="3"/><circle cx="18" cy="5" r="3"/><path d="M12 19h4.5a3.5 3.5 0 0 0 0-7h-9a3.5 3.5 0 0 1 0-7H12"/></symbol>
+  <symbol id="i-mail" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></symbol>
+  <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol>
+</svg>
+
+<!-- 1 · Sticky nav -->
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a href="#top" class="brand" aria-label="ClearAP home">
+      <svg width="26" height="26" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+        <rect width="28" height="28" rx="7" fill="#4d8dff"/>
+        <path d="M18.5 10.2A5.4 5.4 0 1 0 18.6 17.9" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>
+      </svg>
+      ClearAP
+    </a>
+    <nav class="nav-links" aria-label="Sections">
+      <a href="#problem">Problem</a>
+      <a href="#demo">Demo</a>
+      <a href="#roi">ROI</a>
+      <a href="#control">Controls</a>
+      <a href="#pricing">Pricing</a>
+    </nav>
+    <button class="btn btn-primary btn-sm" data-cta="nav_get_access">Get early access</button>
+  </div>
+</header>
+
+<main id="top">
+
+<!-- 2 · Hero — 3D stage-2 mount: a JS-created <canvas> is inserted as the FIRST CHILD
+     of this <section id="hero">; .hero-grid already carries position:relative + z-index:1
+     so all content stacks above it. Do not add a canvas in markup. -->
+<section class="hero dotted" id="hero" aria-label="Hero">
+  <div class="hero-glow" aria-hidden="true"></div>
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <span class="eyebrow">AI 3-way matching for accounts payable</span>
+      <h1><span class="h1-u">One PO.</span> <span class="h1-u accent-text">Seven invoices.</span> <span class="h1-u">You review three.</span></h1>
+      <p class="hero-sub">ClearAP reads every supplier invoice and matches it line-by-line to PO and receipt — splits, duplicates, over-billing caught on arrival. Nothing posts without your approval.</p>
+      <div class="hero-ctas">
+        <button class="btn btn-primary" data-cta="hero_get_access">Get early access</button>
+        <button class="btn btn-secondary" id="hero-watch" data-cta="hero_book_demo">Watch the 7-invoice match · 60s</button>
+      </div>
+    </div>
+
+    <div class="hero-visual" id="hero-visual" data-hero="done">
+      <div class="frame hairline" aria-hidden="true">
+        <div class="chrome">
+          <span class="cdot"></span><span class="cdot"></span><span class="cdot"></span>
+          <span class="chrome-url">clearap.io/app/po/PO-4471</span>
+          <span class="chrome-chip chip-wait"><span class="sdot" style="background:var(--warn)"></span>matching · 5 of 7</span>
+          <span class="chrome-chip chip-done"><span class="sdot" style="background:var(--ok)"></span>reconciled</span>
+        </div>
+        <div class="mock-body">
+          <div class="po-mini-head">PO-4471 · Meridian Industrial Supply</div>
+          <div class="po-mini-bar"><i style="--w:36%"></i><i style="--w:18%"></i><i style="--w:15%"></i><i class="w" style="--w:30.6%"></i></div>
+          <div class="mock-row" style="margin-top:10px"><span class="mono">INV-8871</span><span class="grow">+1.9% vs PO</span><span class="pill hp hp-1 s-warn"><span class="sdot"></span><span class="lb-wait">Checking…</span><span class="lb-done">In tolerance</span></span></div>
+          <div class="mock-row"><span class="mono">INV-8880</span><span class="grow">Duplicate of INV-8834</span><span class="pill hp hp-2 s-critical"><span class="sdot"></span><span class="lb-wait">Checking…</span><span class="lb-done">Blocked</span></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<script>
+/* Pre-paint: hero card starts in "matching" so the self-resolve plays from first paint.
+   No-JS and reduced-motion keep the resolved markup state. */
+if(!matchMedia("(prefers-reduced-motion: reduce)").matches){document.getElementById("hero-visual").dataset.hero="matching";}
+</script>
+
+<!-- 2b · Pipeline — the signature animation. STORYBOARD.md 5-beat spec; this IS the solution section. -->
+<section id="pipeline" class="alt" aria-label="Watch an invoice process itself">
+  <div class="pipe-outer" id="pipe-outer">
+    <div class="pipe-pin">
+      <div class="wrap">
+        <div class="section-head pipe-head">
+          <span class="eyebrow">From inbox to ledger</span>
+          <h2>Watch an invoice process itself</h2>
+        </div>
+        <div class="pipe-stage" id="pipe-stage" data-step="5" aria-hidden="true">
+          <div class="pipe-doczone">
+            <div class="pipe-paper">
+              <span class="pp-ear"></span>
+              <div class="pp-head"><b>Meridian Industrial Supply</b><span>INV-8835</span></div>
+              <div class="pp-bars"><i style="width:84%"></i><i style="width:58%"></i><i style="width:70%"></i></div>
+              <div class="pp-line"><span>M8 hex fasteners</span><span>750 × 9.78</span></div>
+              <div class="pp-line"><span>Ref</span><span>PO-4471</span></div>
+              <div class="pp-total"><span>TOTAL</span><b>$7,335.00</b></div>
+              <span class="pp-scan"></span>
+              <span class="pp-tint"></span>
+            </div>
+            <div class="pipe-tray">
+              <span class="t-back"></span>
+              <span class="t-slot"></span>
+              <span class="t-front"><svg class="ic" width="11" height="11" aria-hidden="true"><use href="#i-database"/></svg>shared drive</span>
+            </div>
+            <p class="pipe-queue">queue · INV-8834 · INV-8835 …</p>
+            <div class="pipe-chips">
+              <span class="pchip" style="--i:0">VENDOR · Meridian</span>
+              <span class="pchip" style="--i:1">PO-4471</span>
+              <span class="pchip" style="--i:2">QTY 750</span>
+              <span class="pchip" style="--i:3">@ $9.78</span>
+              <span class="pchip pchip-hero" style="--i:4">TOTAL $7,335.00</span>
+            </div>
+          </div>
+          <div class="pipe-sheetzone">
+            <div class="pipe-po">
+              <p class="pipe-po-line">PO-4471 · <b id="pipe-po-units">4,980</b> / 5,000 units · 3 receipts · <b id="pipe-po-amt">$48,704.40</b> at PO price</p>
+              <div class="pipe-po-bar"><i style="--w:36%"></i><i style="--w:18%"></i><i style="--w:15%"></i><i class="w" style="--w:30.6%"></i></div>
+            </div>
+            <div class="pipe-sheet-wrap">
+              <table class="pipe-sheet">
+                <thead><tr><th>Invoice</th><th>PO</th><th>Receipt</th><th>Qty</th><th>Price</th><th>Amount</th><th>Match</th></tr></thead>
+                <tbody>
+                  <tr class="pr pr-old pr-ok" style="--r:0"><td>INV-8801</td><td>PO-4471</td><td class="gr">GR-2210</td><td class="r">1,800</td><td class="r">9.78</td><td class="r amt">17,604.00</td><td class="m ok">✓</td></tr>
+                  <tr class="pr pr-old pr-ok" style="--r:1"><td>INV-8834</td><td>PO-4471</td><td class="gr">GR-2287</td><td class="r">900</td><td class="r">9.78</td><td class="r amt">8,802.00</td><td class="m ok">✓</td></tr>
+                  <tr class="pr pr-new pr-ok" style="--r:2"><td><span style="--c:8">INV-8835</span></td><td><span style="--c:7">PO-4471</span></td><td class="gr">GR-2287</td><td class="r"><span style="--c:3">750</span></td><td class="r"><span style="--c:4">9.78</span></td><td class="r amt"><span style="--c:8">7,335.00</span></td><td class="m ok">✓</td></tr>
+                  <tr class="pr pr-late pr-tol" style="--r:3"><td>INV-8871</td><td>PO-4471</td><td class="gr">GR-2301</td><td class="r">1,530</td><td class="r">9.97</td><td class="r amt">15,254.10</td><td class="m wa">! +1.9%</td></tr>
+                  <tr class="pr pr-late pr-exc pr-dup" style="--r:4"><td>INV-8880</td><td>PO-4471</td><td class="gr">—</td><td class="r">900</td><td class="r">9.78</td><td class="r amt">8,802.00</td><td class="m no">✗ dup<span class="act">Block</span></td></tr>
+                  <tr class="pr pr-late pr-exc pr-hold" style="--r:5"><td>INV-8892</td><td>PO-4471</td><td class="gr">— · 20 left</td><td class="r">200</td><td class="r">9.78</td><td class="r amt">1,956.00</td><td class="m no">✗ over GR<span class="act">Hold</span></td></tr>
+                  <tr class="pr pr-late pr-exc pr-warn" style="--r:6"><td>INV-8858</td><td>freight</td><td class="gr">—</td><td class="r">—</td><td class="r">—</td><td class="r amt">312.50</td><td class="m wa">! no PO<span class="act">Route</span></td></tr>
+                </tbody>
+                <!-- Σ = 17,604.00 + 8,802.00 + 7,335.00 + 15,254.10 + 8,802.00 + 1,956.00 + 312.50 = 60,065.60
+                     (JS derives the rendered Σ from these Amount cells; keep tfoot in sync for no-JS) -->
+                <tfoot>
+                  <tr class="pr pr-sum" style="--r:7"><td colspan="5"><span class="sg">Σ</span>invoiced</td><td class="r amt"><b id="pipe-sum">60,065.60</b></td><td class="m"></td></tr>
+                </tfoot>
+              </table>
+            </div>
+            <p class="pipe-cover">covers · partial receipts · one GR, many invoices · billed &gt; received · duplicates · off-PO charges</p>
+            <p class="pipe-end">That's the job now.</p>
+          </div>
+        </div>
+        <ol class="pipe-steps" id="pipe-steps">
+          <li><button type="button" data-step-btn="1"><b>01</b>Invoice arrives</button></li>
+          <li><button type="button" data-step-btn="2"><b>02</b>AI reads it</button></li>
+          <li><button type="button" data-step-btn="3"><b>03</b>Spreadsheet fills itself</button></li>
+          <li><button type="button" data-step-btn="4"><b>04</b>Math runs itself</button></li>
+          <li><button type="button" data-step-btn="5" class="on"><b>05</b>You review 3, not 7</button></li>
+        </ol>
+      </div>
+    </div>
+    <div class="pipe-sents" aria-hidden="true">
+      <div data-sent="1"></div><div data-sent="2"></div><div data-sent="3"></div><div data-sent="4"></div><div data-sent="5"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 3 · Proof strip — design-partner substance, no fake logos -->
+<section class="proof" aria-label="Design partners">
+  <div class="wrap">
+    <p class="proof-line reveal">Built alongside AP teams processing 500–5,000 invoices a month.</p>
+    <div class="proof-chips reveal">
+      <span class="lbl">Partners measure:</span>
+      <span class="proof-chip">first-pass match rate</span>
+      <span class="proof-chip">exceptions per day</span>
+      <span class="proof-chip">days to close AP</span>
+    </div>
+  </div>
+</section>
+
+<!-- 4 · Problem -->
+<section id="problem" class="alt">
+  <div class="wrap">
+    <div class="section-head split reveal">
+      <span class="eyebrow">The manual baseline</span>
+      <h2>Where AP time actually goes</h2>
+    </div>
+    <div class="prob-split">
+      <div class="prob-stats">
+        <div class="card reveal">
+          <h3>Manual keying</h3>
+          <div class="stat-line"><b class="tnum" data-count="68" data-suffix="%">68%</b><span class="src">Ardent Partners 2025</span></div>
+          <p>of organizations still key every invoice by hand.</p>
+        </div>
+        <div class="card reveal">
+          <h3>Exception backlog</h3>
+          <div class="stat-line"><b class="tnum" data-count="22" data-suffix="%">22%</b><span class="src">AFP 2025</span></div>
+          <p>of matches fail. Each one is detective work.</p>
+        </div>
+      </div>
+      <div class="card quote-card reveal">
+        <p class="quote">"The PO says $1,000, the invoice says $1,012 — 45 minutes on a $12 variance."</p>
+        <p class="quote-attr">AP manager, 1,200 invoices/mo — discovery interview</p>
+      </div>
+    </div>
+    <p class="cal-lbl reveal" style="margin-top:16px">Benchmarks illustrative: Ardent Partners 2025, AFP 2025, industry surveys.</p>
+  </div>
+</section>
+
+<!-- 6 · Live demo -->
+<section id="demo">
+  <div class="wrap" style="position:relative">
+    <div class="section-head reveal">
+      <span class="eyebrow">Live demo</span>
+      <h2>Try it with sample data</h2>
+      <p>Runs in your browser — nothing is uploaded or read.</p>
+    </div>
+
+    <div class="frame demo-frame reveal">
+      <div class="chrome">
+        <span class="cdot"></span><span class="cdot"></span><span class="cdot"></span>
+        <span class="chrome-url">clearap.io/app/invoices</span>
+        <span class="chrome-chip"><span class="sdot" style="background:var(--ok)"></span>demo</span>
+      </div>
+      <div class="app-body" id="app-body">
+
+        <!-- Step 1: upload -->
+        <div class="app-view" id="view-upload">
+          <div class="dropzone" id="dropzone">
+            <div class="dz-icon"><svg class="ic" width="22" height="22"><use href="#i-upload"/></svg></div>
+            <h3>Drag &amp; drop invoices here</h3>
+            <p>PDF, PNG, scans, or pick a sample</p>
+            <div class="chips">
+              <button class="file-chip" data-sample="INV-2107_meridian-office-supply.pdf">
+                <svg class="ic" width="14" height="14"><use href="#i-file"/></svg>
+                INV-2107_meridian-office-supply.pdf
+              </button>
+              <button class="file-chip" data-sample="INV-8841_kraton-logistics.pdf">
+                <svg class="ic" width="14" height="14"><use href="#i-file"/></svg>
+                INV-8841_kraton-logistics.pdf
+              </button>
+              <button class="file-chip" data-sample="INV-0332_helios-industrial.pdf">
+                <svg class="ic" width="14" height="14"><use href="#i-file"/></svg>
+                INV-0332_helios-industrial.pdf
+              </button>
+            </div>
+          </div>
+          <p class="dz-note">Demo only. Nothing uploaded, nothing read.</p>
+        </div>
+
+        <!-- Step 2: processing (terminal) -->
+        <div class="app-view hidden" id="view-processing">
+          <div class="term">
+            <div class="term-bar">
+              <svg class="ic" width="14" height="14"><use href="#i-terminal"/></svg>
+              <span>clearap · pipeline</span>
+            </div>
+            <div class="term-progress"><i id="proc-bar"></i></div>
+            <div class="term-body" id="term-body" aria-live="polite"></div>
+          </div>
+        </div>
+
+        <!-- Step 3: dashboard (Invoices | PO matching) -->
+        <div class="app-view hidden" id="view-dash">
+          <div class="dash-head">
+            <div class="view-tabs" role="tablist" aria-label="Workbench views">
+              <button class="vtab active" id="tab-inv" role="tab" aria-selected="true">Invoices</button>
+              <button class="vtab" id="tab-po" role="tab" aria-selected="false">PO matching</button>
+            </div>
+            <span class="ttl">AP workbench · period JUL-2026 · OPEN</span>
+          </div>
+
+          <div id="inv-panel">
+            <div class="close-ctx">
+              <span class="cc-line">Period 07 closes in <b>4 days</b> · <b>3</b> invoices received, not yet posted · accrual export ready</span>
+              <button class="btn btn-secondary btn-sm" id="accrual-btn">
+                <svg class="ic" width="14" height="14"><use href="#i-download"/></svg>
+                Export accrual JE (CSV)
+              </button>
+            </div>
+            <div class="kpis" id="kpis"></div>
+            <div class="tbl-scroll">
+              <table aria-label="Exception queue">
+                <thead>
+                  <tr><th>Invoice #</th><th>Vendor</th><th>PO #</th><th>Due date</th><th>Amount</th><th>Match</th><th>Status</th></tr>
+                </thead>
+                <tbody id="inv-rows"></tbody>
+              </table>
+            </div>
+            <div class="dash-foot">
+              <p>Sorted by payment-run urgency. Click any row.</p>
+              <button class="btn btn-secondary btn-sm" id="reset-demo">
+                <svg class="ic" width="14" height="14"><use href="#i-refresh"/></svg>
+                Process another batch
+              </button>
+            </div>
+          </div>
+
+          <!-- PO-4471 reconciliation board -->
+          <div id="po-panel" class="hidden">
+            <div class="po-head">
+              <div>
+                <p class="po-title">PO-4471 · Meridian Industrial Supply</p>
+                <p class="po-spec">5,000 × M8 hex fasteners @ $9.78 = $48,900.00 · Net 30</p>
+              </div>
+              <div>
+                <div class="gr-chips">
+                  <span class="gr-chip" data-gr-chip="GR-2210">GR-2210 · 1,800</span>
+                  <span class="gr-chip" data-gr-chip="GR-2287">GR-2287 · 1,650</span>
+                  <span class="gr-chip" data-gr-chip="GR-2301">GR-2301 · 1,530</span>
+                </div>
+                <p class="gr-sum" style="margin-top:6px">received 4,980 / 5,000 units</p>
+              </div>
+            </div>
+
+            <div class="po-bar" aria-hidden="true">
+              <i data-seg="s8801" data-w="36"></i><i data-seg="s8834" data-w="18"></i><i data-seg="s8835" data-w="15"></i><i class="w" data-seg="s8871" data-w="30.6"></i>
+            </div>
+            <div class="po-rollup" id="po-rollup">
+              <span>PO consumed <b id="ru-units" data-count="4980">4,980 / 5,000 units</b></span>
+              <span><b id="ru-amt" data-count="48704.40">$48,704.40</b> / $48,900.00 at PO price</span>
+              <span>price-variance exposure <b id="ru-var">+$290.70</b></span>
+              <span><b id="ru-flags">2 blocked · 1 routed · 1 credit applied</b></span>
+              <span>remaining on PO: <b id="ru-rem">20 units / $195.60</b></span>
+            </div>
+
+            <div class="po-cols">
+              <div class="po-pile" id="po-pile">
+                <div class="po-pile-hd">Invoice pile · 7 supplier invoices + 1 credit memo against PO-4471</div>
+                <div class="po-row" data-seg="s8801" data-gr="GR-2210">
+                  <span class="num">INV-8801</span>
+                  <span class="desc">1,800 @ $9.78 = $17,604.00<span class="res">matched → GR-2210 · full receipt</span></span>
+                  <span class="pill s-ok"><span class="sdot"></span>Matched</span>
+                </div>
+                <div class="po-row" data-seg="s8834" data-gr="GR-2287">
+                  <span class="num">INV-8834</span>
+                  <span class="desc">900 @ $9.78 = $8,802.00<span class="res">matched → GR-2287 · partial</span></span>
+                  <span class="pill s-ok"><span class="sdot"></span>Matched</span>
+                </div>
+                <div class="po-row" data-seg="s8835" data-gr="GR-2287">
+                  <span class="num">INV-8835</span>
+                  <span class="desc">750 @ $9.78 = $7,335.00<span class="res">matched → GR-2287 · remainder · split billing detected</span></span>
+                  <span class="pill s-ok"><span class="sdot"></span>Matched</span>
+                </div>
+                <div class="po-row" data-seg="s8871" data-gr="GR-2301">
+                  <span class="num">INV-8871</span>
+                  <span class="desc">1,530 @ $9.97 = $15,254.10<span class="res">price variance +1.9% vs PO ($290.70 over) → within 2% tolerance · auto-passed with note (configurable)</span></span>
+                  <span class="pill s-warn"><span class="sdot"></span>In tolerance</span>
+                </div>
+                <div class="po-row" data-gr="GR-2287">
+                  <span class="num">INV-8880</span>
+                  <span class="desc">900 @ $9.78 = $8,802.00<span class="res">duplicate of INV-8834 · same vendor / qty / amount, 4 days later → blocked</span></span>
+                  <span class="pill s-critical"><span class="sdot"></span>Blocked</span>
+                </div>
+                <div class="po-row">
+                  <span class="num">INV-8892</span>
+                  <span class="desc">200 @ $9.78 = $1,956.00<span class="res">over-billing · only 20 units remain unreceived on PO → held</span></span>
+                  <span class="pill s-critical"><span class="sdot"></span>Held</span>
+                </div>
+                <div class="po-row">
+                  <span class="num">CM-0412</span>
+                  <span class="desc">−200 @ $9.78 = −$1,956.00<span class="res">supplier credit for INV-8892 over-billing → auto-applied, hold released</span></span>
+                  <span class="pill s-ok"><span class="sdot"></span>Applied</span>
+                </div>
+                <div class="po-row">
+                  <span class="num">INV-8858</span>
+                  <span class="desc">Freight $312.50<span class="res">charge not on PO → routed to approver (non-PO line)</span></span>
+                  <span class="pill s-warn"><span class="sdot"></span>Routed</span>
+                </div>
+              </div>
+
+              <div>
+                <div class="term po-log">
+                  <div class="term-bar">
+                    <svg class="ic" width="14" height="14"><use href="#i-terminal"/></svg>
+                    <span>clearap · allocation log</span>
+                  </div>
+                  <div class="term-body" id="po-log-body" aria-live="polite"></div>
+                </div>
+                <p class="po-note">Click any invoice to trace its allocation — cumulative, line-level, against last night's ERP export.</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Detail drawer -->
+        <div class="drawer-scrim" id="drawer-scrim"></div>
+        <aside class="drawer" id="drawer" aria-label="Invoice detail">
+          <div class="drawer-head">
+            <div>
+              <h4 id="dr-title">INV-0000</h4>
+              <p class="sub" id="dr-sub">Vendor</p>
+            </div>
+            <button class="drawer-close" id="drawer-close" aria-label="Close detail">
+              <svg class="ic" width="17" height="17"><use href="#i-x"/></svg>
+            </button>
+          </div>
+          <div class="drawer-body" id="dr-body"></div>
+          <div class="drawer-foot" id="dr-foot"></div>
+        </aside>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 7 · 04 ROI calculator -->
+<section id="roi">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">ROI</span>
+      <h2>Run your own numbers</h2>
+      <p>Illustrative — week one replaces these.</p>
+    </div>
+    <div class="card roi-card reveal">
+      <div class="roi-sliders">
+        <div class="roi-slider">
+          <label for="roi-vol">Invoices per month <b id="roi-vol-val">800</b></label>
+          <input type="range" id="roi-vol" min="100" max="5000" step="50" value="800" aria-label="Invoices per month">
+        </div>
+        <div class="roi-slider">
+          <label for="roi-team">AP team size (FTE) <b id="roi-team-val">3.0</b></label>
+          <input type="range" id="roi-team" min="1" max="10" step="0.5" value="3" aria-label="AP team size in full-time equivalents">
+        </div>
+      </div>
+      <div class="roi-grid">
+        <div class="roi-stat"><b id="roi-cost-today" data-count="7520" data-prefix="$">$7,520</b><span>Your AP cost today /mo</span></div>
+        <div class="roi-stat"><b id="roi-cost-with" data-count="897" data-prefix="$">$897</b><span>With ClearAP /mo</span></div>
+        <div class="roi-stat"><b id="roi-hours" data-count="144" data-suffix=" h">144 h</b><span>Hours back per month</span><span class="sub" id="roi-fte">redeployed to vendor recs, discount capture</span></div>
+        <div class="roi-stat"><b id="roi-disc" data-count="18970" data-prefix="$">$18,970</b><span>Early-pay discounts recaptured /yr</span></div>
+      </div>
+      <p class="roi-summary" id="roi-summary">≈ $98,446 annual savings — payback at your inputs: ~2 days</p>
+      <button class="btn btn-primary" data-cta="roi_cta">Get this math on your own invoices</button>
+      <p class="roi-foot">Illustrative: ~$9.40/invoice avg, &lt;$3 best-in-class (Ardent Partners 2025); 2/10 net 30 ≈ 36% annualized.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 8 · 05 Month-end close calendar -->
+<section id="close" class="alt">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">Month-end</span>
+      <h2>Close week, before and after</h2>
+    </div>
+    <div class="card reveal" style="padding:20px">
+      <div class="cal-scroll">
+        <div class="cal">
+          <div class="hd"></div>
+          <div class="hd">Day 1</div><div class="hd">Day 2</div><div class="hd">Day 3</div><div class="hd">Day 4</div><div class="hd">Day 5</div>
+          <div class="rowlbl">Manual close</div>
+          <div class="cell"><span class="pill s-warn"><span class="sdot"></span>Chase missing invoices</span></div>
+          <div class="cell"><span class="pill s-serious"><span class="sdot"></span>Accrual guessing, emails unanswered</span></div>
+          <div class="cell"><span class="pill s-serious"><span class="sdot"></span>Key backlog, reclass miscodings</span></div>
+          <div class="cell"><span class="pill s-warn"><span class="sdot"></span>Sub-ledger tie-out</span></div>
+          <div class="cell"><span class="pill s-critical"><span class="sdot"></span>AP still open</span></div>
+          <div class="rowlbl last">With ClearAP</div>
+          <div class="cell last"><span class="pill s-ok"><span class="sdot"></span>Sub-ledger current · accrual exported</span></div>
+          <div class="cell last"><span class="pill s-ok"><span class="sdot"></span>AP closed</span></div>
+          <div class="cell dim last">free</div>
+          <div class="cell dim last">free</div>
+          <div class="cell dim last">free</div>
+        </div>
+      </div>
+      <p class="cal-lbl">Illustrative — median close is ~6 days in industry surveys.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 9 · Built for control (controls matrix + capability band) -->
+<section id="control">
+  <div class="wrap">
+    <div class="section-head split reveal">
+      <span class="eyebrow">Built for control</span>
+      <h2>Automation your auditors can test</h2>
+    </div>
+    <div class="card reveal">
+      <ul class="vlist ctrl-list">
+        <li><span class="mk mk-yes">✓</span><span><b>Human-in-the-loop</b><span class="why">Nothing posts to your ledger without a named approver.</span></span></li>
+        <li><span class="mk mk-yes">✓</span><span><b>Your tolerances, per vendor</b><span class="why">Set by vendor or category. Every change is logged.</span></span></li>
+        <li><span class="mk mk-yes">✓</span><span><b>Append-only audit log</b><span class="why">Export everything. Seven-year retention.</span></span></li>
+        <li><span class="mk mk-yes">✓</span><span><b>Segregation of duties and DoA</b><span class="why">Enforced by the engine, not by policy documents.</span></span></li>
+        <li><span class="mk mk-yes">✓</span><span><b>Bank-change and duplicate holds</b><span class="why">Suspect payments held before every payment run.</span></span></li>
+      </ul>
+      <details style="margin-top:18px;max-width:720px">
+        <summary>For your auditors<span class="chev"><svg class="ic" width="16" height="16"><use href="#i-chevron-d"/></svg></span></summary>
+        <div class="ans">SOC 2 Type I in progress — report under NDA when issued. SOC 1 (SSAE 18) Type II planned FY2027; control descriptions, ITGC summary and bridge letter available for your auditors' walkthrough. Data: encrypted in transit and at rest, US region, never used to train shared models; DPA and subprocessor list on request. ERP: journal / CSV export with batch control totals (record count, Dr/Cr totals, file hash) plus reconciliation report to tie your sub-ledger to the penny. Control matrix: duplicate guard → occurrence; capture-on-arrival accruals → completeness and cutoff; DoA routing → authorization. Full COSO mapping on request.</div>
+      </details>
+    </div>
+    <div class="feat-band reveal" aria-label="What runs underneath">
+      <div class="feat"><h3>Capture</h3><p>Every channel, nothing re-typed.</p></div>
+      <div class="feat"><h3>3-way match</h3><p>Cumulative, so it survives splits, drift and duplicates.</p></div>
+      <div class="feat"><h3>GL coding</h3><p>Learned from your own posting history.</p></div>
+      <div class="feat"><h3>Approval routing</h3><p>DoA and escalation run the chase.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 11 · Setup (self-serve) -->
+<section id="how">
+  <div class="wrap">
+    <div class="section-head split reveal">
+      <span class="eyebrow">Setup</span>
+      <h2>Set it up yourself — this afternoon</h2>
+      <p>Enterprise AP suites mean six-month rollouts and consultants. This is an afternoon, self-serve.</p>
+    </div>
+    <div class="grid grid-3">
+      <div class="card how-step reveal">
+        <div class="how-num">01 · 10 min</div>
+        <h3>Connect your invoice inbox</h3>
+        <p>Forward AP email or point at a shared drive.</p>
+      </div>
+      <div class="card how-step reveal">
+        <div class="how-num">02 · 15 min</div>
+        <h3>Import your open PO list</h3>
+        <p>A CSV export from your ERP is fine.</p>
+      </div>
+      <div class="card how-step reveal">
+        <div class="how-num">03 · same day</div>
+        <h3>Review your first matched batch</h3>
+        <p>Approve exceptions from the workbench.</p>
+      </div>
+    </div>
+    <div class="stack-row reveal">
+      <span class="lbl">Works with</span>
+      <span class="erp">QuickBooks Online</span>
+      <span class="erp">Xero</span>
+      <span class="erp">NetSuite</span>
+      <span class="erp">Dynamics 365 BC</span>
+    </div>
+    <p class="stack-note reveal">CSV / journal export works with any ERP today. API connector availability varies during early access.</p>
+  </div>
+</section>
+
+<!-- 12 · Pricing -->
+<section id="pricing" class="alt">
+  <div class="wrap">
+    <div class="section-head split reveal">
+      <h2>Pricing that scales with invoice volume</h2>
+      <p>Early access — founding rates locked for 24 months.</p>
+    </div>
+    <div class="grid grid-3">
+      <div class="card price-card reveal">
+        <h3>Starter</h3>
+        <div class="price">$149<small>/mo</small></div>
+        <p class="price-note">Up to 400 invoices / month</p>
+        <span class="ppi">≈ $0.37 per invoice at 400/mo</span>
+        <ul class="plan-feats">
+          <li><span class="mk">✓</span>Capture with confidence scores</li>
+          <li><span class="mk">✓</span>Duplicate &amp; bank-change holds</li>
+          <li><span class="mk">✓</span>CSV / journal export, any ERP</li>
+          <li><span class="mk">✓</span>Email support</li>
+        </ul>
+        <button class="btn btn-secondary" data-cta="pricing_starter">Join the early-access list</button>
+      </div>
+      <div class="card price-card popular hairline reveal">
+        <span class="pop-tag">Most popular</span>
+        <h3>Pro</h3>
+        <div class="price">$449<small>/mo</small></div>
+        <p class="price-note">Up to 1,500 invoices / month</p>
+        <span class="ppi">≈ $0.30 per invoice at 1,500/mo (vs ~$9.40 manual, illustrative)</span>
+        <p class="payoff">Pays for itself in ~50 invoices a month.</p>
+        <ul class="plan-feats">
+          <li><span class="mk">✓</span>Everything in Starter</li>
+          <li><span class="mk">✓</span>Cumulative 3-way PO / GR matching</li>
+          <li><span class="mk">✓</span>Approval routing, DOA &amp; escalation</li>
+          <li><span class="mk">✓</span>Exception-queue workbench</li>
+          <li><span class="mk">✓</span>Accrual export &amp; close tools</li>
+        </ul>
+        <button class="btn btn-primary" data-cta="pricing_pro">Join the early-access list</button>
+      </div>
+      <div class="card price-card reveal">
+        <h3>Enterprise</h3>
+        <div class="price">Custom</div>
+        <p class="price-note">Unlimited volume · shared service centers</p>
+        <ul class="plan-feats">
+          <li><span class="mk">✓</span>Everything in Pro</li>
+          <li><span class="mk">✓</span>Multi-entity &amp; multi-currency</li>
+          <li><span class="mk">✓</span>SSO / SAML, SCIM &amp; custom retention</li>
+          <li><span class="mk">✓</span>Dedicated onboarding</li>
+        </ul>
+        <button class="btn btn-secondary" data-cta="pricing_enterprise">Talk to us</button>
+      </div>
+    </div>
+    <div class="assure reveal">
+      <span>No implementation fee</span><span>No consultants</span><span>No annual lock-in</span><span>Cancel anytime</span>
+    </div>
+    <p class="pricing-notes reveal">Overage at the same per-invoice rate. Audit log on every plan.</p>
+  </div>
+</section>
+
+<!-- 13 · 10 FAQ -->
+<section id="faq">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <h2>Frequently asked questions</h2>
+    </div>
+    <div class="faq">
+      <details class="reveal">
+        <summary>What accuracy do you guarantee?<span class="chev"><svg class="ic" width="16" height="16"><use href="#i-chevron-d"/></svg></span></summary>
+        <div class="ans">Measured on your first 500 real invoices: you see the per-field scorecard and set the auto-post threshold. We don't quote a universal accuracy number — it depends on your invoice mix.</div>
+      </details>
+      <details class="reveal">
+        <summary>Do we need IT or an implementation partner?<span class="chev"><svg class="ic" width="16" height="16"><use href="#i-chevron-d"/></svg></span></summary>
+        <div class="ans">No. Setup is self-serve: connect your inbox, import open POs from a CSV, review your first batch the same day. Human help is included in early access.</div>
+      </details>
+      <details class="reveal">
+        <summary>Which ERPs do you integrate with?<span class="chev"><svg class="ic" width="16" height="16"><use href="#i-chevron-d"/></svg></span></summary>
+        <div class="ans">Today: journal / CSV export any ERP can import. API connectors ship in order of early-access demand — QuickBooks Online and Xero first, then NetSuite and Dynamics 365 Business Central. We won't claim a connector before it exists.</div>
+      </details>
+      <details class="reveal">
+        <summary>Where do you get my POs and receipts?<span class="chev"><svg class="ic" width="16" height="16"><use href="#i-chevron-d"/></svg></span></summary>
+        <div class="ans">A nightly export of open POs and goods receipts from your ERP — templates provided, ~10 minutes to set up. Every match shows the file's freshness; changed or closed POs flag stale.</div>
+      </details>
+      <details class="reveal">
+        <summary>Is this replacing my team?<span class="chev"><svg class="ic" width="16" height="16"><use href="#i-chevron-d"/></svg></span></summary>
+        <div class="ans">No. It removes keying and chasing, not judgment. Partners redeploy the hours into vendor recs, discount capture and close work.</div>
+      </details>
+      <details class="reveal">
+        <summary>Who owns the match tolerances, and what happens to exceptions?<span class="chev"><svg class="ic" width="16" height="16"><use href="#i-chevron-d"/></svg></span></summary>
+        <div class="ans">Yours — per vendor or category, role-restricted, logged. Exceptions land queued with variance computed and evidence attached. Within-tolerance PPV posts to your mapped variance account, never silently into inventory.</div>
+      </details>
+      <details class="reveal">
+        <summary>How does the accrual export work at close?<span class="chev"><svg class="ic" width="16" height="16"><use href="#i-chevron-d"/></svg></span></summary>
+        <div class="ans">Captured-but-unposted invoices export as Dr expense / Cr accrued liabilities, auto-reversing next period. Capture-on-arrival means the accrual reflects what exists, not what someone remembered to forward. GR/IR aging covers the other side of cut-off.</div>
+      </details>
+      <details class="reveal">
+        <summary>How is our data secured and controlled?<span class="chev"><svg class="ic" width="16" height="16"><use href="#i-chevron-d"/></svg></span></summary>
+        <div class="ans">Encrypted in transit and at rest, processed per-customer, never used to train shared models. SOC 2 Type I in progress — report under NDA when issued. This demo uploads nothing.</div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- 14 · Final CTA -->
+<section aria-label="Get started">
+  <div class="wrap">
+    <div class="final reveal">
+      <h2>Close AP in two days, not five</h2>
+      <p>Early access — every team onboarded personally.</p>
+      <div class="hero-ctas">
+        <button class="btn btn-primary" data-cta="final_get_access">Get early access — set up yourself</button>
+        <button class="btn btn-secondary" data-cta="final_book_demo">Book a 20-minute walkthrough</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap foot-grid">
+    <div class="foot-brand">
+      <span class="brand"><svg width="26" height="26" viewBox="0 0 28 28" fill="none" aria-hidden="true"><rect width="28" height="28" rx="7" fill="#4d8dff"/><path d="M18.5 10.2A5.4 5.4 0 1 0 18.6 17.9" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg>ClearAP</span>
+      <p>AP automation for teams on QuickBooks Online, Xero, NetSuite and Dynamics 365 BC.</p>
+      <p><a href="mailto:hello@clearap.io">hello@clearap.io</a></p>
+      <p class="copy">© 2026 ClearAP, Inc.</p>
+    </div>
+    <div class="foot-col">
+      <h5>Product</h5>
+      <ul>
+        <li><a href="#demo">Interactive demo</a></li>
+        <li><a href="#how">How it works</a></li>
+        <li><a href="#pricing">Pricing</a></li>
+        <li><a href="#faq">FAQ</a></li>
+      </ul>
+    </div>
+    <div class="foot-col">
+      <h5>Company</h5>
+      <ul>
+        <li><button type="button" data-pv="about">About</button></li>
+        <li><a href="mailto:hello@clearap.io">Contact — hello@clearap.io</a></li>
+        <li><button type="button" data-cta="footer_walkthrough">Book a walkthrough</button></li>
+      </ul>
+    </div>
+    <div class="foot-col">
+      <h5>Legal &amp; security</h5>
+      <ul>
+        <li><button type="button" data-pv="privacy">Privacy</button></li>
+        <li><button type="button" data-pv="terms">Terms</button></li>
+        <li><button type="button" data-pv="dpa">Data processing</button></li>
+        <li><a href="#control">Security overview</a></li>
+        <li><span class="plain">SOC 2 Type I in progress</span></li>
+      </ul>
+    </div>
+  </div>
+</footer>
+
+<!-- Waitlist modal -->
+<div class="modal-scrim" id="waitlist-scrim" role="dialog" aria-modal="true" aria-labelledby="wl-title">
+  <div class="modal">
+    <div id="wl-form-wrap">
+      <h3 id="wl-title">Get early access to ClearAP</h3>
+      <p class="m-sub">We'll book your 20-minute walkthrough — or take one day's invoice inbox and return the processed batch with its per-field scorecard. Mutual NDA and DPA signed before any real invoice leaves your building; redacted samples work too.</p>
+      <form id="wl-form" novalidate>
+        <label for="wl-email">Work email</label>
+        <input id="wl-email" name="email" type="email" placeholder="you@company.com" autocomplete="email" required>
+        <p class="m-err" id="wl-err">Please enter a valid email address.</p>
+        <label for="wl-role">What best describes you? <span style="color:var(--ink-3);font-weight:400">(optional)</span></label>
+        <select id="wl-role" name="role">
+          <option value="">Select a role…</option>
+          <option>AP Manager</option>
+          <option>Controller</option>
+          <option>CFO</option>
+          <option>Shared Services Lead</option>
+          <option>Other</option>
+        </select>
+        <button type="submit" class="btn btn-primary">Request access</button>
+      </form>
+      <p class="m-fine">We only use your email to contact you about early access. No spam.</p>
+    </div>
+    <div id="wl-success" class="m-success hidden">
+      <div class="big"><svg class="ic" width="24" height="24"><use href="#i-check"/></svg></div>
+      <h3>You're on the list!</h3>
+      <p class="m-sub">We onboard new teams weekly — keep an eye on your inbox.</p>
+      <button class="btn btn-secondary" id="wl-try-demo">Try the interactive demo</button>
+    </div>
+  </div>
+</div>
+
+<!-- Company / legal modal (title + body swapped per trigger) -->
+<div class="modal-scrim" id="privacy-scrim" role="dialog" aria-modal="true" aria-labelledby="pv-title">
+  <div class="modal">
+    <h3 id="pv-title">Privacy</h3>
+    <p class="m-sub" id="pv-body">ClearAP is in early access. The demo runs in your browser; we never read or upload your files. We store only the email you submit, solely for early-access contact.</p>
+    <p class="m-sub" style="margin-top:0">Questions, or want the vendor-diligence pack (DPA, subprocessors, retention, security)? Write to <a href="mailto:hello@clearap.io">hello@clearap.io</a> — a founder replies.</p>
+    <button class="btn btn-secondary" id="pv-close">Close</button>
+  </div>
+</div>
+
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script>
+"use strict";
+document.documentElement.classList.add("js");
+
+/* ---------- Config & tracking ---------- */
+const CONFIG = {
+  endpoint: "",         // optional: URL that accepts POST JSON {email, source, event, idea, ts}
+  idea: "ap-invoice-ai",
+};
+function track(event, extra = {}) {
+  const rec = { idea: CONFIG.idea, event, ts: Date.now(), ...extra };
+  const all = JSON.parse(localStorage.getItem("val_events") || "[]");
+  all.push(rec); localStorage.setItem("val_events", JSON.stringify(all));
+  if (CONFIG.endpoint) fetch(CONFIG.endpoint.replace(/\/+$/, "") + "/" + CONFIG.idea, { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify(rec) }).catch(() => {});
+}
+track("page_view");
+
+/* ---------- Hero card self-resolve — one-shot (~2 s), then static forever ----------
+   The inline pre-paint script set data-hero="matching"; this timeline walks it to
+   the resolved state. Reduced-motion / no-JS never leave the resolved markup. */
+(function () {
+  const hv = document.getElementById("hero-visual");
+  if (!hv) return;
+  if (hv.dataset.hero !== "matching") { hv.dataset.hero = "done"; return; }
+  [["resolve", 300], ["tol", 1200], ["blocked", 1500], ["done", 1800]]
+    .forEach(([st, at]) => setTimeout(() => { hv.dataset.hero = st; }, at));
+})();
+
+/* ---------- Fake data ---------- */
+const DAY = 864e5;
+const fmtUSD = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
+const fmtEUR = new Intl.NumberFormat("en-US", { style: "currency", currency: "EUR" });
+const r2 = (x) => Math.round(x * 100) / 100;
+function money(v, inv) { return ((inv && inv.cur) === "EUR" ? fmtEUR : fmtUSD).format(v); }
+function dateAgo(days) {
+  return new Date(Date.now() - days * DAY)
+    .toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+}
+/* All money math derives from lines, so subtotal / sales tax 8.25% (TX) / total / JE always agree. */
+function calc(inv) {
+  const sub = r2(inv.lines.reduce((a, l) => a + l.q * l.u, 0));
+  const vatCalc = r2(sub * 0.0825);
+  const vat = inv.vatStated != null ? inv.vatStated : vatCalc;
+  const total = r2(sub + vat);
+  const wht = inv.wht ? r2(sub * inv.wht / 100) : 0;
+  const ap = r2(total - wht);
+  const disc = inv.disc ? r2(total * inv.disc.pct / 100) : 0;
+  const discOpen = !!inv.disc && inv.days <= inv.disc.days;
+  return { sub, vatCalc, vat, total, wht, ap, disc, discOpen };
+}
+function dueInfo(inv) {
+  const left = inv.termDays - inv.days;
+  return {
+    date: dateAgo(inv.days - inv.termDays),
+    label: left < 0 ? "overdue " + (-left) + "d" : "due in " + left + "d",
+    late: left < 0,
+  };
+}
+
+/* Status meta: color class + which validation checks fail by default (per-invoice override via inv.fails) */
+const STATUS = {
+  "Approved":     { cls: "s-ok",       fails: [] },
+  "Needs Review": { cls: "s-warn",     fails: ["validation"] },
+  "Missing PO":   { cls: "s-serious",  fails: ["po", "gr"] },
+  "Tax mismatch": { cls: "s-serious",  fails: ["tax"] },
+  "Duplicate":    { cls: "s-critical", fails: ["duplicate"] },
+};
+
+const CHECKS = [
+  { key: "ocr",        label: "Capture & line-item extraction" },
+  { key: "validation", label: "Field & currency validation" },
+  { key: "duplicate",  label: "Duplicate & vendor-master guard" },
+  { key: "bank",       label: "Vendor bank-detail guard" },
+  { key: "po",         label: "PO match · line level" },
+  { key: "gr",         label: "GR match · qty tolerance 2%" },
+  { key: "tax",        label: "Sales / use tax check (use tax accrued where the vendor didn't charge)" },
+];
+
+const FAIL_REASONS = {
+  validation: (inv) => "Low confidence on amount field (" + inv.lowConf + "%) — human review suggested.",
+  duplicate:  (inv) => "Matches " + inv.dupOf + " — same vendor, same amount, received " + dateAgo(inv.days + 3) + " (3 days apart).",
+  po:         () => "No purchase order reference found on the invoice or in open POs.",
+  gr:         () => "Goods receipt cannot be matched without a PO reference.",
+  tax:        (inv) => { const c = calc(inv); return "Stated tax " + money(c.vat, inv) + " ≠ calculated " + money(c.vatCalc, inv) + " (8.25% TX sales tax on subtotal)."; },
+};
+
+/* 20 invoices — 11 Approved, 2 Duplicate, 3 Missing PO, 2 Tax mismatch, 2 Needs Review.
+   Line fields: d desc · q qty · u unit price · gl account · gn account name · cc cost center ·
+   tx tax code · cf GL confidence % · gq goods-receipt qty (when ≠ q) · vn variance note.
+   Subtotal / sales tax 8.25% (TX) / total / JE are all computed from lines — see calc(). */
+const INVOICES = [
+  { num: "INV-2107", vendor: "Meridian Office Supply", taxId: "US 84-2210475", conf: 99, status: "Approved", days: 2,
+    po: "PO-55821", gr: "GR-2231", match: "3-way", terms: "2/10 Net 30", termDays: 30, disc: { pct: 2, days: 10 },
+    lines: [
+      { d: "Copy paper A4 80gsm (box of 5 reams)", q: 40, u: 24.50, gl: "5010", gn: "Office Supplies", cc: "CC-140 Operations", tx: "TX8.25", cf: 99 },
+      { d: "Toner cartridge HP 26X", q: 6, u: 38.00, gl: "5010", gn: "Office Supplies", cc: "CC-140 Operations", tx: "TX8.25", cf: 98 },
+    ] },
+  { num: "INV-8841", vendor: "Kraton Logistics", taxId: "US 47-8830119", conf: 98, status: "Approved", days: 4,
+    po: "PO-4462", gr: "GR-2203", match: "3-way", terms: "2/10 Net 30", termDays: 30, disc: { pct: 2, days: 10 },
+    lines: [
+      { d: "Ocean freight — 40ft container", q: 2, u: 3850.00, gl: "6220", gn: "Freight In", cc: "CC-210 Supply Chain", tx: "TX8.25", cf: 97 },
+      { d: "Customs brokerage & clearance", q: 1, u: 1240.00, gl: "6230", gn: "Customs & Duties", cc: "CC-210 Supply Chain", tx: "TX8.25", cf: 95 },
+      { d: "Drayage & terminal handling", q: 4, u: 615.00, gl: "6220", gn: "Freight In", cc: "CC-210 Supply Chain", tx: "TX8.25", cf: 96 },
+      { d: "Fuel surcharge", q: 1, u: 694.39, gl: "6220", gn: "Freight In", cc: "CC-210 Supply Chain", tx: "TX8.25", cf: 68 },
+    ] },
+  { num: "INV-4415", vendor: "Vantera Software", taxId: "US 33-6641208", conf: 97, status: "Duplicate", days: 6,
+    po: "PO-55702", gr: null, match: "2-way", terms: "Net 30", termDays: 30, dupOf: "INV-4380",
+    lines: [
+      { d: "Team licenses — collaboration suite (monthly)", q: 20, u: 43.00, gl: "6410", gn: "Software Subscriptions", cc: "CC-160 IT", tx: "TX8.25", cf: 97 },
+    ] },
+  { num: "INV-0332", vendor: "Helios Industrial Parts", taxId: "US 61-0087342", conf: 99, status: "Approved", days: 7,
+    po: "PO-55688", gr: "GR-2198", match: "3-way", terms: "2/10 Net 45", termDays: 45, disc: { pct: 2, days: 10 },
+    lines: [
+      { d: "Steel bracket assemblies — B-217", q: 500, u: 62.00, gl: "1520", gn: "Inventory — Raw Materials", cc: "CC-310 Manufacturing", tx: "TX8.25", cf: 99 },
+      { d: "Hydraulic seal kits", q: 120, u: 85.50, gl: "1520", gn: "Inventory — Raw Materials", cc: "CC-310 Manufacturing", tx: "TX8.25", cf: 98 },
+      { d: "CNC machined housings", q: 40, u: 189.00, gl: "1520", gn: "Inventory — Raw Materials", cc: "CC-310 Manufacturing", tx: "TX8.25", cf: 97 },
+    ] },
+  { num: "INV-7208", vendor: "Northgate Catering", taxId: "US 27-5518907", conf: 95, status: "Missing PO", days: 9,
+    po: null, gr: null, match: "—", terms: "Net 15", termDays: 15, spendCat: "Employee events — T&E", approver: "Ops Manager (CC-110)",
+    lines: [
+      { d: "Quarterly town-hall catering", q: 1, u: 1540.00, gl: "6620", gn: "Staff Welfare & Events", cc: "CC-110 Facilities", tx: "TX8.25", cf: 91 },
+      { d: "Service staff (per hour)", q: 4, u: 45.00, gl: "6620", gn: "Staff Welfare & Events", cc: "CC-110 Facilities", tx: "TX8.25", cf: 90 },
+    ] },
+  { num: "INV-5590", vendor: "Bluepine Facilities", taxId: "US 52-9174630", conf: 98, status: "Approved", days: 11,
+    po: "PO-55645", gr: null, match: "2-way", terms: "Net 30", termDays: 30,
+    lines: [
+      { d: "Facilities maintenance contract — July", q: 1, u: 3200.00, gl: "6510", gn: "Repairs & Maintenance", cc: "CC-110 Facilities", tx: "TX8.25", cf: 98 },
+      { d: "HVAC filter replacement", q: 12, u: 62.25, gl: "6510", gn: "Repairs & Maintenance", cc: "CC-110 Facilities", tx: "TX8.25", cf: 96 },
+    ] },
+  { num: "INV-3364", vendor: "Arcadia Print Co.", taxId: "US 88-3325541", conf: 99, status: "Approved", days: 12,
+    po: "PO-55631", gr: "GR-2185", match: "3-way", terms: "Net 30", termDays: 30,
+    lines: [
+      { d: "Business cards (box of 500)", q: 10, u: 18.00, gl: "6015", gn: "Printing & Stationery", cc: "CC-130 Marketing", tx: "TX8.25", cf: 99 },
+      { d: "Letterhead (ream)", q: 4, u: 33.00, gl: "6015", gn: "Printing & Stationery", cc: "CC-130 Marketing", tx: "TX8.25", cf: 98 },
+    ] },
+  { num: "INV-9012", vendor: "Silvermaple Freight", taxId: "US 45-7702168", conf: 96, status: "Tax mismatch", days: 14,
+    po: "PO-55598", gr: "GR-2177", match: "3-way", terms: "Net 30", termDays: 30, vatStated: 612.30,
+    lines: [
+      { d: "LTL freight — regional lanes", q: 6, u: 890.00, gl: "6220", gn: "Freight In", cc: "CC-210 Supply Chain", tx: "TX8.25", cf: 96 },
+      { d: "Accessorial charges — liftgate & redelivery", q: 1, u: 1596.55, gl: "6220", gn: "Freight In", cc: "CC-210 Supply Chain", tx: "TX8.25", cf: 88 },
+    ] },
+  { num: "INV-1187", vendor: "Quorum IT Services", taxId: "US 19-4456023", conf: 99, status: "Approved", days: 16,
+    po: "PO-55560", gr: null, match: "2-way", terms: "Net 30", termDays: 30,
+    lines: [
+      { d: "Managed IT services — July", q: 1, u: 12800.00, gl: "6420", gn: "IT Services", cc: "CC-160 IT", tx: "TX8.25", cf: 99 },
+      { d: "Endpoint onboarding — new hires", q: 1, u: 2800.00, gl: "6420", gn: "IT Services", cc: "CC-160 IT", tx: "TX8.25", cf: 97 },
+    ] },
+  { num: "INV-6623", vendor: "Redcliff Packaging", taxId: "US 73-9917455", conf: 92, status: "Needs Review", days: 18,
+    po: "PO-55544", gr: "GR-2168", match: "3-way", terms: "Net 30", termDays: 30, bankHold: true,
+    fails: ["gr", "bank"], failReasons: {
+      gr: "GR-2168 shows 480 of 500 units received — over-billed 20 units ($84.00). Outside 2% qty tolerance.",
+      bank: "Bank account on this invoice differs from the last 9 Redcliff invoices — held before the payment run, verification task created." },
+    lines: [
+      { d: "Corrugated shipping cartons — C4", q: 500, u: 4.20, gl: "1530", gn: "Packaging Materials", cc: "CC-210 Supply Chain", tx: "TX8.25", cf: 97, gq: 480, vn: "qty 500 invoiced vs GR 480 — over-billed 20 units" },
+      { d: "Stretch wrap rolls", q: 24, u: 6.50, gl: "1530", gn: "Packaging Materials", cc: "CC-210 Supply Chain", tx: "TX8.25", cf: 96 },
+    ] },
+  { num: "INV-2950", vendor: "Orbitline Media", taxId: "US 30-2214980", conf: 98, status: "Approved", days: 20,
+    po: "PO-55521", gr: null, match: "2-way", terms: "Net 30", termDays: 30,
+    lines: [
+      { d: "Digital campaign management — July", q: 1, u: 8500.00, gl: "6310", gn: "Advertising & Media", cc: "CC-130 Marketing", tx: "TX8.25", cf: 98 },
+      { d: "Creative production — display set", q: 1, u: 1300.00, gl: "6310", gn: "Advertising & Media", cc: "CC-130 Marketing", tx: "TX8.25", cf: 95 },
+    ] },
+  { num: "INV-8134", vendor: "Cascadia Cleaning Co.", taxId: "US 66-8103274", conf: 94, status: "Missing PO", days: 23,
+    po: null, gr: null, match: "—", terms: "Net 30", termDays: 30, spendCat: "Facilities services", approver: "Facilities Lead (CC-110)",
+    lines: [
+      { d: "Office deep clean — monthly", q: 1, u: 980.00, gl: "6510", gn: "Repairs & Maintenance", cc: "CC-110 Facilities", tx: "TX8.25", cf: 90 },
+      { d: "Exterior window cleaning", q: 1, u: 145.00, gl: "6510", gn: "Repairs & Maintenance", cc: "CC-110 Facilities", tx: "TX8.25", cf: 88 },
+    ] },
+  { num: "INV-4471", vendor: "Meridian Office Supply", taxId: "US 84-2210475", conf: 99, status: "Approved", days: 25,
+    po: "PO-55488", gr: "GR-2151", match: "3-way", terms: "Net 30", termDays: 30,
+    lines: [
+      { d: "Ergonomic keyboards", q: 10, u: 42.50, gl: "5010", gn: "Office Supplies", cc: "CC-140 Operations", tx: "TX8.25", cf: 99 },
+      { d: "Monitor stands", q: 8, u: 28.00, gl: "5010", gn: "Office Supplies", cc: "CC-140 Operations", tx: "TX8.25", cf: 98 },
+    ] },
+  { num: "INV-7789", vendor: "Kraton Logistics", taxId: "US 47-8830119", conf: 97, status: "Duplicate", days: 27,
+    po: "PO-55462", gr: "GR-2144", match: "3-way", terms: "Net 30", termDays: 30, dupOf: "INV-7710",
+    lines: [
+      { d: "Ocean freight — 40ft container", q: 2, u: 7900.00, gl: "6220", gn: "Freight In", cc: "CC-210 Supply Chain", tx: "TX8.25", cf: 97 },
+      { d: "Port handling & documentation", q: 1, u: 1320.00, gl: "6220", gn: "Freight In", cc: "CC-210 Supply Chain", tx: "TX8.25", cf: 95 },
+    ] },
+  { num: "INV-3018", vendor: "Helios Industrial Parts", taxId: "US 61-0087342", conf: 99, status: "Approved", days: 30,
+    po: "PO-55430", gr: "GR-2139", match: "3-way", terms: "Net 45", termDays: 45,
+    lines: [
+      { d: "Aluminum extrusions — 6061-T6", q: 800, u: 21.75, gl: "1520", gn: "Inventory — Raw Materials", cc: "CC-310 Manufacturing", tx: "TX8.25", cf: 99 },
+      { d: "Fastener kits — assorted", q: 250, u: 14.60, gl: "1520", gn: "Inventory — Raw Materials", cc: "CC-310 Manufacturing", tx: "TX8.25", cf: 98 },
+      { d: "Machined base plates", q: 60, u: 88.00, gl: "1520", gn: "Inventory — Raw Materials", cc: "CC-310 Manufacturing", tx: "TX8.25", cf: 97 },
+    ] },
+  { num: "INV-5502", vendor: "Vantera Software", taxId: "US 33-6641208", conf: 95, status: "Tax mismatch", days: 33,
+    po: "PO-55401", gr: null, match: "2-way", terms: "Net 30", termDays: 30, vatStated: 305.40,
+    lines: [
+      { d: "Annual license renewal — analytics module", q: 1, u: 3075.00, gl: "6410", gn: "Software Subscriptions", cc: "CC-160 IT", tx: "TX8.25", cf: 95 },
+    ] },
+  { num: "INV-9284", vendor: "Bluepine Facilities", taxId: "US 52-9174630", conf: 98, status: "Approved", days: 36,
+    po: "PO-55377", gr: null, match: "2-way", terms: "Net 30", termDays: 30,
+    lines: [
+      { d: "Landscaping — Q3 contract", q: 1, u: 2400.00, gl: "6510", gn: "Repairs & Maintenance", cc: "CC-110 Facilities", tx: "TX8.25", cf: 98 },
+      { d: "Parking structure maintenance", q: 1, u: 2940.00, gl: "6510", gn: "Repairs & Maintenance", cc: "CC-110 Facilities", tx: "TX8.25", cf: 96 },
+    ] },
+  { num: "INV-1440", vendor: "Bavaria Print Werke GmbH", taxId: "DE 812 447 253", conf: 90, status: "Needs Review", days: 39,
+    po: "PO-55350", gr: null, match: "2-way", terms: "Net 30", termDays: 30, cur: "EUR", fx: 1.0842, vatStated: 0,
+    fails: ["validation"], failReasons: { validation: "Foreign-currency invoice (EUR, reverse-charge VAT) — confirm rate 1.0842 before posting. Flagged: currency review." },
+    lines: [
+      { d: "Trade-show brochures — A5 tri-fold", q: 2000, u: 0.21, gl: "6015", gn: "Printing & Stationery", cc: "CC-130 Marketing", tx: "RC", cf: 92 },
+      { d: "Plate setup & proofing", q: 1, u: 65.00, gl: "6015", gn: "Printing & Stationery", cc: "CC-130 Marketing", tx: "RC", cf: 90 },
+    ] },
+  { num: "INV-6077", vendor: "Northgate Catering", taxId: "US 27-5518907", conf: 93, status: "Missing PO", days: 42,
+    po: null, gr: null, match: "—", terms: "Net 15", termDays: 15, spendCat: "Employee events — T&E", approver: "Ops Manager (CC-110)",
+    lines: [
+      { d: "Executive lunch catering", q: 3, u: 420.00, gl: "6620", gn: "Staff Welfare & Events", cc: "CC-110 Facilities", tx: "TX8.25", cf: 89 },
+      { d: "Beverage service", q: 1, u: 180.00, gl: "6620", gn: "Staff Welfare & Events", cc: "CC-110 Facilities", tx: "TX8.25", cf: 87 },
+    ] },
+  { num: "INV-8896", vendor: "Quorum IT Services", taxId: "US 19-4456023", conf: 99, status: "Approved", days: 44,
+    po: "PO-55298", gr: null, match: "2-way", terms: "Net 30", termDays: 30,
+    lines: [
+      { d: "Network hardware installation", q: 1, u: 9600.00, gl: "6420", gn: "IT Services", cc: "CC-160 IT", tx: "TX8.25", cf: 99 },
+      { d: "Structured cabling — floor 3", q: 1, u: 1650.00, gl: "6420", gn: "IT Services", cc: "CC-160 IT", tx: "TX8.25", cf: 97 },
+    ] },
+];
+
+/* Deterministic per-field confidence derived from base confidence */
+function fieldConfs(inv) {
+  const seed = inv.num.split("").reduce((a, c) => a + c.charCodeAt(0), 0);
+  const jig = (i) => Math.max(60, Math.min(100, inv.conf - ((seed * (i + 3)) % 4)));
+  const c = calc(inv);
+  let termsVal = inv.terms;
+  if (inv.disc && c.discOpen) {
+    termsVal += " · " + money(c.disc, inv) + " discount if paid by " + dateAgo(inv.days - inv.disc.days);
+  }
+  return [
+    { lbl: "Vendor",         val: inv.vendor, conf: jig(1) },
+    { lbl: "Vendor tax ID",  val: inv.taxId, conf: jig(2) },
+    { lbl: "Invoice number", val: inv.num, conf: jig(3) },
+    { lbl: "Invoice date",   val: dateAgo(inv.days), conf: jig(4) },
+    { lbl: "Due date",       val: dateAgo(inv.days - inv.termDays), conf: jig(5) },
+    { lbl: "Terms",          val: termsVal, conf: jig(6) },
+    { lbl: "Currency",       val: inv.cur === "EUR" ? "EUR · currency review" : "USD", conf: inv.cur === "EUR" ? 82 : jig(7) },
+    { lbl: "PO reference",   val: inv.po || "— not found", conf: inv.po ? jig(8) : 0 },
+  ];
+}
+/* ---------- Helpers ---------- */
+const $ = (sel) => document.querySelector(sel);
+function pill(status) {
+  return '<span class="pill ' + STATUS[status].cls + '"><span class="sdot"></span>' + status + "</span>";
+}
+function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;"); }
+function toast(msg) {
+  const t = document.createElement("div");
+  t.className = "toast";
+  t.innerHTML = '<svg class="ic" width="14" height="14" aria-hidden="true"><use href="#i-check"/></svg>' + esc(msg);
+  $("#toasts").appendChild(t);
+  setTimeout(() => { t.classList.add("bye"); setTimeout(() => t.remove(), 350); }, 2800);
+}
+
+/* ---------- Waitlist modal ---------- */
+const wlScrim = $("#waitlist-scrim");
+let wlSource = "";
+function openWaitlist(source) {
+  wlSource = source;
+  $("#wl-form-wrap").classList.remove("hidden");
+  $("#wl-success").classList.add("hidden");
+  wlScrim.classList.add("open");
+  document.body.style.overflow = "hidden";
+  setTimeout(() => $("#wl-email").focus(), 200);
+}
+function closeModals() {
+  wlScrim.classList.remove("open");
+  $("#privacy-scrim").classList.remove("open");
+  document.body.style.overflow = "";
+}
+document.querySelectorAll("[data-cta]").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    track("cta_click", { cta: btn.dataset.cta });
+    if (btn.id === "hero-watch") {
+      /* Watch the 7-invoice match → pipeline at beat 1 (same cta source, no modal) */
+      const b1 = document.querySelector('#pipe-steps [data-step-btn="1"]');
+      if (document.documentElement.classList.contains("pipe-scrub")) {
+        if (b1) b1.click(); /* pinned mode: stepper handles scroll position */
+      } else {
+        const pipe = document.getElementById("pipeline");
+        if (pipe) pipe.scrollIntoView({ behavior: REDUCED ? "auto" : "smooth" });
+        if (b1) b1.click();
+      }
+      return;
+    }
+    openWaitlist(btn.dataset.cta);
+  });
+});
+[wlScrim, $("#privacy-scrim")].forEach((sc) => {
+  sc.addEventListener("click", (e) => { if (e.target === sc) closeModals(); });
+});
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") { closeModals(); closeDrawer(); } });
+$("#pv-close").addEventListener("click", closeModals);
+const PV_CONTENT = {
+  privacy: {
+    title: "Privacy",
+    body: "ClearAP is in early access. The demo runs in your browser; we never read or upload your files. We store only the email you submit, solely for early-access contact.",
+  },
+  dpa: {
+    title: "Data processing",
+    body: "Invoices are processed per-customer, encrypted in transit and at rest, and never used to train shared models. DPA and subprocessor list are part of the vendor-diligence pack.",
+  },
+  terms: {
+    title: "Terms",
+    body: "Early access runs month-to-month at founding rates: no implementation fee, no annual lock-in, cancel anytime. Full terms of service ship with general availability; early-access agreements are countersigned by email.",
+  },
+  about: {
+    title: "About ClearAP",
+    body: "ClearAP is a bootstrapped, founder-run company building 3-way matching alongside AP teams processing 500–5,000 invoices a month. The person who answers email is the person who wrote the matching engine.",
+  },
+};
+function openPrivacy(kind) {
+  const c = PV_CONTENT[kind] || PV_CONTENT.privacy;
+  $("#pv-title").textContent = c.title;
+  $("#pv-body").textContent = c.body;
+  $("#privacy-scrim").classList.add("open");
+}
+document.querySelectorAll("[data-pv]").forEach((b) =>
+  b.addEventListener("click", () => openPrivacy(b.dataset.pv)));
+
+$("#wl-form").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const email = $("#wl-email").value.trim();
+  const ok = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+  $("#wl-err").style.display = ok ? "none" : "block";
+  if (!ok) return;
+  track("signup", { email, role: $("#wl-role").value || null, source: wlSource });
+  $("#wl-form-wrap").classList.add("hidden");
+  $("#wl-success").classList.remove("hidden");
+});
+$("#wl-try-demo").addEventListener("click", () => {
+  closeModals();
+  document.getElementById("demo").scrollIntoView({ behavior: "smooth" });
+});
+
+/* ---------- Prototype: step 1 (upload) ---------- */
+const dz = $("#dropzone");
+let demoStarted = false;
+function startDemo(fileLabel) {
+  if (!demoStarted) { demoStarted = true; track("demo_start"); }
+  track("upload", { file: fileLabel });
+  $("#view-upload").classList.add("hidden");
+  $("#view-processing").classList.remove("hidden");
+  runProcessing(fileLabel);
+}
+["dragenter", "dragover"].forEach((ev) =>
+  dz.addEventListener(ev, (e) => { e.preventDefault(); dz.classList.add("drag"); }));
+["dragleave", "drop"].forEach((ev) =>
+  dz.addEventListener(ev, (e) => { e.preventDefault(); dz.classList.remove("drag"); }));
+dz.addEventListener("drop", (e) => {
+  // Simulation only — we never read the dropped files.
+  const n = (e.dataTransfer && e.dataTransfer.files) ? e.dataTransfer.files.length : 0;
+  startDemo(n > 1 ? n + " files dropped" : "1 file dropped");
+});
+document.querySelectorAll(".file-chip").forEach((chip) => {
+  chip.addEventListener("click", () => startDemo(chip.dataset.sample));
+});
+
+/* ---------- Prototype: step 2 (terminal processing) ---------- */
+function runProcessing(fileLabel) {
+  const body = $("#term-body");
+  const bar = $("#proc-bar");
+  body.innerHTML = "";
+  bar.style.width = "0%";
+
+  const approved = INVOICES.filter((i) => i.status === "Approved").length;
+  const nonPo = INVOICES.filter((i) => !i.po).length;
+  const LINES = [
+    { cls: "cmd",  html: "$ clearap ingest " + esc(fileLabel) + " --batch=" + INVOICES.length },
+    { cls: "dim",  html: '<span class="p-run">▸</span> Captured ' + INVOICES.length + " invoices from inbox" },
+    { cls: "",     html: '<span class="p-ok">[ok]</span> Matched ' + approved + " of " + INVOICES.length + " against PO + receipt" },
+    { cls: "",     html: '<span class="p-ok">[ok]</span> INV-8835 → PO-4471 L1 · cumulative 3,450/5,000 · split billing detected' },
+    { cls: "",     html: '<span class="p-ok">[ok]</span> tolerance 2.0% · INV-8871 passed +1.9%' },
+    { cls: "warn", html: '<span class="p-warn">[warn]</span> INV-8880 ✗ duplicate of INV-8834 — BLOCKED' },
+    { cls: "",     html: '<span class="p-ok">[ok]</span> GL coding suggested on ' + nonPo + " non-PO invoices" },
+    { cls: "dim",  html: '<span class="p-run">▸</span> ' + (INVOICES.length - approved) + " exceptions queued, sorted by payment-run deadline" },
+    { cls: "",     html: '<span class="p-done">[done]</span> ' + INVOICES.length + " invoices processed · " + approved + " touchless-ready" },
+  ];
+
+  const stepMs = 280;
+  const cursor = document.createElement("div");
+  cursor.className = "term-line";
+  cursor.innerHTML = '<span class="cursor"></span>';
+  body.appendChild(cursor);
+
+  LINES.forEach((line, i) => {
+    setTimeout(() => {
+      const el = document.createElement("div");
+      el.className = "term-line" + (line.cls ? " " + line.cls : "");
+      el.innerHTML = line.html;
+      body.insertBefore(el, cursor);
+      bar.style.width = Math.round(((i + 1) / LINES.length) * 100) + "%";
+    }, i * stepMs);
+  });
+  setTimeout(showDashboard, LINES.length * stepMs + 600);
+}
+
+/* ---------- Prototype: step 3 (dashboard — exception queue) ---------- */
+function showDashboard() {
+  const total = INVOICES.length;
+  const approved = INVOICES.filter((i) => i.status === "Approved").length;
+  const exceptions = total - approved;
+  const touchless = Math.round((approved / total) * 100);
+  const discAvail = r2(INVOICES.reduce((a, i) => { const c = calc(i); return a + (c.discOpen ? c.disc : 0); }, 0));
+
+  $("#kpis").innerHTML =
+    '<div class="kpi"><b class="tnum">' + touchless + '%</b><span>Touchless (week one, climbing)</span></div>' +
+    '<div class="kpi"><b class="tnum">87%</b><span>First-pass match</span></div>' +
+    '<div class="kpi"><b class="tnum">' + exceptions + '</b><span>Exceptions today</span></div>' +
+    '<div class="kpi"><b class="tnum">' + fmtUSD.format(discAvail) + '</b><span>Early-pay discounts open</span></div>';
+
+  /* Exception queue: sorted by payment-run urgency (most overdue / soonest due first) */
+  const order = INVOICES.map((inv, idx) => ({ inv, idx }))
+    .sort((a, b) => (a.inv.termDays - a.inv.days) - (b.inv.termDays - b.inv.days));
+
+  $("#inv-rows").innerHTML = order.map(({ inv, idx }) => {
+    const c = calc(inv);
+    const due = dueInfo(inv);
+    const mchip = inv.match === "—"
+      ? '<span class="mchip none">—</span>'
+      : '<span class="mchip">' + inv.match + "</span>";
+    let dueSub = '<span class="due-sub' + (due.late ? " late" : "") + '">' + due.label + (due.late ? " · arrived late" : "") + "</span>";
+    if (!due.late && c.discOpen) {
+      dueSub += '<span class="due-sub">' + inv.terms + " · discount expires in " + (inv.disc.days - inv.days) + "d</span>";
+    }
+    const holdSub = inv.bankHold
+      ? '<span class="due-sub late">HELD · bank detail change · verification task open</span>'
+      : "";
+    return '<tr data-idx="' + idx + '">' +
+      '<td class="num">' + inv.num + "</td>" +
+      "<td>" + esc(inv.vendor) + "</td>" +
+      '<td class="num" style="font-family:var(--mono);font-size:12px">' + (inv.po || "—") + "</td>" +
+      '<td><span class="tnum">' + due.date + "</span>" + dueSub + "</td>" +
+      '<td class="num">' + money(c.total, inv) + (inv.cur === "EUR" ? ' <span class="due-sub">EUR · currency review</span>' : "") + "</td>" +
+      "<td>" + mchip + "</td>" +
+      "<td>" + pill(inv.status) + holdSub + "</td>" +
+    "</tr>";
+  }).join("");
+
+  document.querySelectorAll("#inv-rows tr").forEach((tr) => {
+    tr.addEventListener("click", () => openDrawer(Number(tr.dataset.idx)));
+  });
+
+  $("#view-processing").classList.add("hidden");
+  $("#view-dash").classList.remove("hidden");
+  track("demo_complete");
+  toast(approved + " of " + total + " invoices ready for ERP posting");
+}
+
+$("#reset-demo").addEventListener("click", () => {
+  closeDrawer();
+  showInvTab();
+  $("#view-dash").classList.add("hidden");
+  $("#view-upload").classList.remove("hidden");
+});
+
+/* Accrual JE export — intent hook */
+$("#accrual-btn").addEventListener("click", () => {
+  track("accrual_export");
+  toast("Accrual export unlocks with early access");
+  setTimeout(() => openWaitlist("accrual_export"), 600);
+});
+
+/* ---------- PO matching view — PO-4471 reconciliation board ---------- */
+const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
+let poAnimated = false;
+
+function showInvTab() {
+  $("#tab-inv").classList.add("active");
+  $("#tab-inv").setAttribute("aria-selected", "true");
+  $("#tab-po").classList.remove("active");
+  $("#tab-po").setAttribute("aria-selected", "false");
+  $("#inv-panel").classList.remove("hidden");
+  $("#po-panel").classList.add("hidden");
+}
+$("#tab-inv").addEventListener("click", showInvTab);
+$("#tab-po").addEventListener("click", () => {
+  $("#tab-po").classList.add("active");
+  $("#tab-po").setAttribute("aria-selected", "true");
+  $("#tab-inv").classList.remove("active");
+  $("#tab-inv").setAttribute("aria-selected", "false");
+  $("#po-panel").classList.remove("hidden");
+  $("#inv-panel").classList.add("hidden");
+  track("po_view");
+  if (!poAnimated) { poAnimated = true; runPoAllocation(); }
+  else fillPoBar();
+});
+
+function fillPoBar() {
+  document.querySelectorAll("#po-panel .po-bar i").forEach((seg) => {
+    seg.style.width = seg.dataset.w + "%";
+  });
+}
+
+/* Rollup states after each allocation step: [unitsText, amtText] */
+const PO_STEPS = [
+  { log: '<span class="p-run">▸</span> allocating 7 invoices against PO-4471…', cls: "dim" },
+  { log: '<span class="p-ok">[ok]</span> INV-8801 → PO-4471 L1 · GR-2210 · cumulative 1,800/5,000', seg: "s8801", units: "1,800 / 5,000 units", amt: "$17,604.00" },
+  { log: '<span class="p-ok">[ok]</span> INV-8834 → PO-4471 L1 · GR-2287 partial · cumulative 2,700/5,000', seg: "s8834", units: "2,700 / 5,000 units", amt: "$26,406.00" },
+  { log: '<span class="p-ok">[ok]</span> INV-8835 → PO-4471 L1 · GR-2287 remainder · split billing detected · cumulative 3,450/5,000', seg: "s8835", units: "3,450 / 5,000 units", amt: "$33,741.00" },
+  { log: '<span class="p-ok">[ok]</span> tolerance 2.0% · INV-8871 passed +1.9% ($290.70 over) · cumulative 4,980/5,000', seg: "s8871", units: "4,980 / 5,000 units", amt: "$48,704.40", cls: "" },
+  { log: '<span class="p-warn">[warn]</span> INV-8880 ✗ duplicate of INV-8834 — BLOCKED', cls: "warn" },
+  { log: '<span class="p-warn">[warn]</span> INV-8892 over-billing · 20 units remain on PO · held', cls: "warn" },
+  { log: '<span class="p-ok">[ok]</span> CM-0412 −200 @ 9.78 applied to INV-8892 · hold released', cls: "" },
+  { log: '<span class="p-warn">[warn]</span> INV-8858 freight $312.50 not on PO · routed to approver', cls: "warn" },
+  { log: '<span class="p-done">[done]</span> PO-4471 · 4,980/5,000 units · $48,704.40 at PO price · 3 exceptions surfaced' },
+];
+
+function runPoAllocation() {
+  const body = $("#po-log-body");
+  body.innerHTML = "";
+  if (REDUCED) {
+    PO_STEPS.forEach((st) => {
+      const el = document.createElement("div");
+      el.className = "term-line" + (st.cls ? " " + st.cls : "");
+      el.innerHTML = st.log;
+      body.appendChild(el);
+    });
+    fillPoBar();
+    return;
+  }
+  /* Start empty, fill as the terminal allocates */
+  document.querySelectorAll("#po-panel .po-bar i").forEach((seg) => { seg.style.width = "0%"; });
+  $("#ru-units").textContent = "0 / 5,000 units";
+  $("#ru-amt").textContent = "$0.00";
+  const stepMs = 420;
+  let prevUnits = 0, prevAmt = 0, unitsTw = null, amtTw = null;
+  PO_STEPS.forEach((st, i) => {
+    setTimeout(() => {
+      const el = document.createElement("div");
+      el.className = "term-line" + (st.cls ? " " + st.cls : "");
+      el.innerHTML = st.log;
+      body.appendChild(el);
+      if (st.seg) {
+        const seg = document.querySelector('#po-panel .po-bar i[data-seg="' + st.seg + '"]');
+        if (seg) seg.style.width = seg.dataset.w + "%";
+      }
+      /* Stage-2: rollup figures count between allocation states (3D-SPEC scene grammar) */
+      if (st.units) {
+        const u = parseFloat(st.units.replace(/,/g, ""));
+        if (unitsTw) unitsTw.cancel();
+        unitsTw = countTo($("#ru-units"), { from: prevUnits, target: u, decimals: 0, suffix: " / 5,000 units", dur: 340 });
+        prevUnits = u;
+      }
+      if (st.amt) {
+        const a = parseFloat(st.amt.replace(/[$,]/g, ""));
+        if (amtTw) amtTw.cancel();
+        amtTw = countTo($("#ru-amt"), { from: prevAmt, target: a, decimals: 2, prefix: "$", dur: 340 });
+        prevAmt = a;
+      }
+      if (i === PO_STEPS.length - 1) {
+        if (unitsTw) unitsTw.cancel();
+        if (amtTw) amtTw.cancel();
+        $("#ru-units").textContent = "4,980 / 5,000 units";
+        $("#ru-amt").textContent = "$48,704.40";
+      }
+    }, i * stepMs);
+  });
+}
+
+/* Pile row click → highlight its allocation (bar segment + goods receipt) */
+document.querySelectorAll(".po-row").forEach((row) => {
+  row.addEventListener("click", () => {
+    document.querySelectorAll(".po-row.sel").forEach((r) => r.classList.remove("sel"));
+    document.querySelectorAll("#po-panel .po-bar i.hl, .gr-chip.hl").forEach((el) => el.classList.remove("hl"));
+    row.classList.add("sel");
+    if (row.dataset.seg) {
+      const seg = document.querySelector('#po-panel .po-bar i[data-seg="' + row.dataset.seg + '"]');
+      if (seg) seg.classList.add("hl");
+    }
+    if (row.dataset.gr) {
+      const chip = document.querySelector('[data-gr-chip="' + row.dataset.gr + '"]');
+      if (chip) chip.classList.add("hl");
+    }
+  });
+});
+/* ---------- Detail drawer — AP workbench ---------- */
+const drawer = $("#drawer");
+const drawerScrim = $("#drawer-scrim");
+const fmtNum = new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+function buildTotals(inv) {
+  const c = calc(inv);
+  let rows =
+    "<tr><td>Subtotal</td><td class=\"r\">" + money(c.sub, inv) + "</td></tr>" +
+    "<tr><td>" + (inv.cur === "EUR" ? "VAT (reverse charge)" : (inv.vatStated != null ? "Sales tax 8.25% TX (as stated)" : "Sales tax 8.25% (TX)")) + "</td><td class=\"r\">" + money(c.vat, inv) + "</td></tr>";
+  if (inv.vatStated != null && inv.cur !== "EUR") {
+    rows += "<tr><td style=\"color:var(--danger)\">Sales tax recalculated (8.25%)</td><td class=\"r\" style=\"color:var(--danger)\">" + money(c.vatCalc, inv) + "</td></tr>";
+  }
+  rows += "<tr class=\"grand\"><td>Total</td><td class=\"r\">" + money(c.total, inv) + "</td></tr>";
+  if (c.wht > 0) {
+    rows += "<tr><td>WHT " + inv.wht + "% withheld at payment</td><td class=\"r\">−" + money(c.wht, inv) + "</td></tr>";
+  }
+  return "<table class=\"tot-tbl\"><tbody>" + rows + "</tbody></table>";
+}
+
+function buildMatch(inv) {
+  if (!inv.po) {
+    return '<div class="npo">No PO reference found — this invoice takes the <b>non-PO path</b>.' +
+      '<span class="cat">Suggested spend category: ' + esc(inv.spendCat) + "</span>" +
+      "Routes to " + esc(inv.approver) + " under your delegation-of-authority matrix; GL coding below is pre-filled from vendor history.</div>";
+  }
+  const grHead = inv.gr ? esc(inv.gr) : "GR";
+  const rows = inv.lines.map((l) => {
+    const ext = r2(l.q * l.u);
+    const bad = l.gq != null && l.gq !== l.q;
+    const mark = bad ? '<span class="mk mk-no">✗</span>' : '<span class="mk mk-yes">✓</span>';
+    const grCell = inv.gr ? (l.gq != null ? l.gq : l.q) + " rcvd" : "n/a";
+    return "<tr>" +
+      '<td class="d">' + esc(l.d) + (bad ? '<span class="var-note">' + esc(l.vn) + "</span>" : "") + "</td>" +
+      '<td class="r">' + l.q + " × " + fmtNum.format(l.u) + " = " + fmtNum.format(ext) + "</td>" +
+      '<td class="r">' + l.q + " × " + fmtNum.format(l.u) + "</td>" +
+      '<td class="r">' + grCell + "</td>" +
+      "<td>" + mark + "</td>" +
+    "</tr>";
+  }).join("");
+  return '<div class="mini-wrap"><table class="mini"><thead><tr>' +
+    "<th>Line</th><th style=\"text-align:right\">Invoice</th><th style=\"text-align:right\">" + esc(inv.po) + "</th><th style=\"text-align:right\">" + grHead + "</th><th></th>" +
+    "</tr></thead><tbody>" + rows + "</tbody></table></div>" +
+    (inv.gr ? "" : '<p class="exc-note" style="text-align:left;margin-top:8px">2-way match: service PO, no goods receipt expected.</p>');
+}
+
+function buildGL(inv) {
+  const rows = inv.lines.map((l, li) => {
+    const low = l.cf < 75;
+    return "<tr>" +
+      '<td class="d">' + esc(l.d) + "</td>" +
+      "<td>" + l.gl + " · " + esc(l.gn) + "</td>" +
+      "<td>" + esc(l.cc) + "</td>" +
+      "<td>" + esc(l.tx) + "</td>" +
+      '<td class="r"' + (low ? ' style="color:var(--warn)"' : "") + ">" + l.cf + "%" +
+        (low ? ' <button class="edit-btn" data-gl-edit="' + li + '">Edit</button>' : "") +
+      "</td>" +
+    "</tr>";
+  }).join("");
+  return '<div class="mini-wrap"><table class="mini"><thead><tr>' +
+    "<th>Line</th><th>GL account</th><th>Cost center</th><th>Tax</th><th style=\"text-align:right\">Conf</th>" +
+    "</tr></thead><tbody>" + rows + "</tbody></table></div>";
+}
+
+function buildJE(inv, jeNum) {
+  const c = calc(inv);
+  const fx = inv.cur === "EUR" ? inv.fx : 1;
+  const conv = (v) => r2(v * fx);
+  const byGl = [];
+  inv.lines.forEach((l) => {
+    const amt = r2(l.q * l.u);
+    const hit = byGl.find((g) => g.gl === l.gl);
+    if (hit) hit.amt = r2(hit.amt + amt); else byGl.push({ gl: l.gl, gn: l.gn, amt });
+  });
+  const rows = byGl.map((g) => ({ acct: g.gl + " · " + g.gn, dr: conv(g.amt), cr: 0 }));
+  if (c.vat > 0) rows.push({ acct: "6890 · Sales & Use Tax", dr: conv(c.vat), cr: 0 });
+  rows.push({ acct: "2100 · Accounts Payable", dr: 0, cr: conv(c.ap) });
+  if (c.wht > 0) rows.push({ acct: "2130 · WHT Payable — Services", dr: 0, cr: conv(c.wht) });
+  const drT = r2(rows.reduce((a, r) => a + r.dr, 0));
+  const crT = r2(rows.reduce((a, r) => a + r.cr, 0));
+  const body = rows.map((r) =>
+    "<tr><td class=\"d\">" + esc(r.acct) + "</td>" +
+    '<td class="r">' + (r.dr ? fmtNum.format(r.dr) : "") + "</td>" +
+    '<td class="r">' + (r.cr ? fmtNum.format(r.cr) : "") + "</td></tr>"
+  ).join("");
+  return '<div class="mini-wrap"><table class="mini"><thead><tr>' +
+    "<th>" + jeNum + (inv.cur === "EUR" ? " · USD" : "") + "</th><th style=\"text-align:right\">Dr</th><th style=\"text-align:right\">Cr</th>" +
+    "</tr></thead><tbody>" + body +
+    '<tr class="je-tot"><td class="d">Totals</td><td class="r">' + fmtNum.format(drT) + '</td><td class="r">' + fmtNum.format(crT) + "</td></tr>" +
+    "</tbody></table></div>" +
+    '<div class="je-chips"><span class="mchip">Posting date: ' + dateAgo(0) + '</span><span class="mchip">Period: JUL-2026 · OPEN</span>' +
+    (inv.cur === "EUR" ? '<span class="mchip">EUR ' + fmtNum.format(c.total) + " @ " + inv.fx.toFixed(4) + "</span>" : "") +
+    "</div>";
+}
+
+/* ---------- Schematic invoice document (CSS-drawn, no images) ---------- */
+/* 3D stage-2 mount: #dr-doc[data-scan-target] is the scan-line sweep target;
+   .match-panel[data-match-panel] hosts the self-drawing 3-way match connectors. */
+function buildDoc(inv) {
+  const c = calc(inv);
+  const docLines = inv.lines.map((l) =>
+    '<div class="doc-line"><span>' + esc(l.d) + '</span><span>' + l.q + " × " + fmtNum.format(l.u) + "</span></div>"
+  ).join("");
+  return '<div class="inv-doc" id="dr-doc" data-scan-target aria-label="Schematic of the source invoice">' +
+    '<div class="doc-top"><div><span class="doc-region" data-region="vendor">' + esc(inv.vendor) + '</span><br>' +
+    '<span class="doc-region" data-region="taxid">Tax ID ' + esc(inv.taxId) + "</span></div>" +
+    '<div class="r"><span class="doc-region" data-region="num">' + inv.num + '</span><br>' +
+    '<span class="doc-region" data-region="date">' + dateAgo(inv.days) + "</span></div></div>" +
+    '<div class="doc-lines">' + docLines + "</div>" +
+    '<div class="doc-foot"><span><span class="doc-region" data-region="terms">' + esc(inv.terms) + "</span>" +
+    (inv.po ? ' · <span class="doc-region" data-region="po">Ref ' + esc(inv.po) + "</span>" : "") + "</span>" +
+    '<span class="r doc-region" data-region="total">TOTAL ' + money(c.total, inv) + "</span></div>" +
+  "</div>";
+}
+/* field index → region on the schematic document (mirrors fieldConfs order) */
+const REGION_MAP = ["vendor", "taxid", "num", "date", "terms", "terms", "total", "po"];
+
+function openDrawer(idx) {
+  const inv = INVOICES[idx];
+  const c = calc(inv);
+  const jeNum = "JE-" + (7400 + idx);
+  const fails = inv.fails || STATUS[inv.status].fails;
+  $("#dr-title").textContent = inv.num;
+  $("#dr-sub").innerHTML = esc(inv.vendor) + " · " + money(c.total, inv) + " " + pill(inv.status);
+
+  const fields = fieldConfs(inv).map((f, fi) =>
+    '<div class="field linked" data-field="' + (REGION_MAP[fi] || "") + '" title="Click to locate on the document">' +
+      '<div class="field-top"><span class="lbl">' + f.lbl + '</span><span class="val">' + esc(f.val) + "</span></div>" +
+      '<div class="field-bar"><span class="conf-bar"><i style="width:' + f.conf + '%"></i></span><span>' + f.conf + "%</span></div>" +
+    "</div>"
+  ).join("");
+
+  const checks = CHECKS.map((ch) => {
+    const failed = fails.includes(ch.key);
+    const mark = failed ? '<span class="mk mk-no">✗</span>' : '<span class="mk mk-yes">✓</span>';
+    const reason = failed
+      ? ((inv.failReasons && inv.failReasons[ch.key]) || FAIL_REASONS[ch.key](inv))
+      : "";
+    const why = failed ? '<span class="why">' + reason + "</span>" : "";
+    return "<li>" + mark + "<span>" + ch.label + why + "</span></li>";
+  }).join("");
+
+  const doa = c.total > 10000 || (inv.cur === "EUR" && c.total * inv.fx > 10000)
+    ? '<span class="doa-chip">DoA: &gt; $10k → Controller approval</span>'
+    : '<span class="doa-chip" style="color:var(--ok);border-color:rgba(45,216,130,.3);background:rgba(45,216,130,.07)">DoA: &le; $10k → AP Manager</span>';
+  const chain = '<p class="exc-note" style="text-align:left;margin:0 0 10px">AP review → M. Chen → auto-post · reminder after 48h, escalates to backup approver</p>';
+
+  $("#dr-body").innerHTML =
+    '<p class="drawer-sec">Source document</p>' + buildDoc(inv) +
+    '<p class="doc-hint">click an extracted field below to locate it on the document</p>' +
+    '<p class="drawer-sec">Extracted header</p>' + fields + buildTotals(inv) +
+    '<p class="drawer-sec">' + (inv.po ? (inv.gr ? "3-way match · invoice / " + esc(inv.po) + " / " + esc(inv.gr) : "2-way match · invoice / " + esc(inv.po)) : "PO match · non-PO invoice") + "</p>" +
+    '<div class="match-panel" data-match-panel>' + buildMatch(inv) + "</div>" +
+    '<p class="drawer-sec">GL coding (suggested)</p>' + buildGL(inv) +
+    '<p class="drawer-sec">Journal entry preview</p>' + buildJE(inv, jeNum) +
+    '<p class="drawer-sec">Approval &amp; posting</p>' + doa + chain +
+    '<ul class="vlist">' + checks + "</ul>";
+
+  /* Field to document-region linking */
+  document.querySelectorAll("#dr-body .field.linked").forEach((f) => {
+    f.addEventListener("click", () => {
+      document.querySelectorAll("#dr-doc .doc-region.hl").forEach((r) => r.classList.remove("hl"));
+      const region = document.querySelector('#dr-doc .doc-region[data-region="' + f.dataset.field + '"]');
+      if (region) {
+        region.classList.add("hl");
+        drawLeader(f, region); /* Stage-2: 300 ms dash-draw leader line (3D-SPEC scene 4.3) */
+        $("#dr-doc").scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block: "nearest" });
+      }
+    });
+  });
+
+  document.querySelectorAll("[data-gl-edit]").forEach((b) => {
+    b.addEventListener("click", () => toast("GL editing is part of early access. Join the list."));
+  });
+
+  const foot = $("#dr-foot");
+  const overDoa = c.total > 10000 || (inv.cur === "EUR" && c.total * inv.fx > 10000);
+  if (inv.status === "Approved" && overDoa) {
+    /* The demo obeys its own DoA: > $10k never posts without Controller approval */
+    foot.innerHTML =
+      '<button class="btn btn-secondary" id="req-approve">Request approval — ' + money(c.ap, inv) + "</button>" +
+      '<p class="exc-note">DoA: over $10,000 — posting is locked until the Controller (M. Chen) approves. The demo enforces the same control it sells.</p>';
+    foot.querySelector("#req-approve").addEventListener("click", function () {
+      toast(inv.num + " routed for Controller approval");
+      this.textContent = "Awaiting Controller approval — M. Chen";
+      this.disabled = true;
+    });
+  } else if (inv.status === "Approved") {
+    foot.innerHTML =
+      '<button class="btn btn-primary" id="erp-post">Export voucher — ' + money(c.ap, inv) + "</button>" +
+      '<p class="exc-note" style="text-align:left">Creates the vendor open item in your AP subledger — invoice #, terms, due date, discount date — not a bare JE, so payment proposals and discount capture keep working in your ERP.</p>';
+    foot.querySelector("#erp-post").addEventListener("click", function () {
+      track("erp_post", { invoice: inv.num, amount: c.total });
+      toast("Voucher exported · " + jeNum + " · audit log updated");
+      this.textContent = "Exported ✓ " + jeNum;
+      this.disabled = true;
+    });
+  } else if (inv.status === "Missing PO") {
+    foot.innerHTML =
+      '<button class="btn btn-secondary" id="route-approver"><svg class="ic" width="14" height="14"><use href="#i-route"/></svg>Route to approver</button>' +
+      '<p class="exc-note">Non-PO path: ' + esc(inv.spendCat) + " → " + esc(inv.approver) + "</p>";
+    foot.querySelector("#route-approver").addEventListener("click", function () {
+      toast(inv.num + " routed to " + inv.approver);
+      this.textContent = "Routed ✓";
+      this.disabled = true;
+    });
+  } else {
+    foot.innerHTML =
+      '<button class="btn btn-secondary" id="mark-reviewed">Mark as reviewed</button>' +
+      '<p class="exc-note" style="text-align:left">' + (inv.bankHold
+        ? "Excluded from the payment-proposal export until the verification task is closed. Verification = a call-back on the number already on the vendor master, performed by someone outside the payment-approval chain, logged with caller, number dialed and timestamp."
+        : "Exception held in the queue with full context — nothing posts until resolved.") + "</p>";
+    foot.querySelector("#mark-reviewed").addEventListener("click", function () {
+      toast(inv.num + " marked as reviewed");
+      this.textContent = "Reviewed ✓";
+      this.disabled = true;
+    });
+  }
+
+  /* Stage-2: extraction sweep + self-drawing match connectors (3D-SPEC scenes 4.1 / 4.2) */
+  runExtractionFx(inv);
+
+  drawer.classList.add("open");
+  drawerScrim.classList.add("open");
+}
+function closeDrawer() {
+  drawer.classList.remove("open");
+  drawerScrim.classList.remove("open");
+}
+$("#drawer-close").addEventListener("click", closeDrawer);
+drawerScrim.addEventListener("click", closeDrawer);
+
+/* ---------- ROI calculator (illustrative constants, labeled on-page) ---------- */
+(function () {
+  const vol = $("#roi-vol"), team = $("#roi-team");
+  if (!vol || !team) return;
+  const fmt0 = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
+  const COST_MANUAL = 9.40, MIN_PER_INV_MANUAL = 12, HOURLY_LOADED = 28;
+  const EXC_RATE_WITH = 0.20, MIN_PER_EXC = 6;
+  const DISC_ELIGIBLE = 0.08, AVG_INV_VALUE = 1900, DISC = 0.02;
+  const CAPTURE_WITH = 0.85, CAPTURE_MANUAL = 0.20;
+  function fee(v) { return v <= 400 ? 149 : v <= 1500 ? 449 : v * 0.25; }
+  let fired = false;
+
+  function update() {
+    const v = +vol.value, t = +team.value;
+    $("#roi-vol-val").textContent = fmt0.format(v);
+    $("#roi-team-val").textContent = t.toFixed(1);
+    const hoursToday = Math.min(v * MIN_PER_INV_MANUAL / 60, t * 140);
+    const costToday = Math.min(v * COST_MANUAL, t * 140 * HOURLY_LOADED + v * 0.9);
+    const hoursWith = v * EXC_RATE_WITH * MIN_PER_EXC / 60;
+    const costWith = fee(v) + hoursWith * HOURLY_LOADED;
+    const hoursSaved = Math.max(hoursToday - hoursWith, 0);
+    const discountGain = v * DISC_ELIGIBLE * AVG_INV_VALUE * DISC * (CAPTURE_WITH - CAPTURE_MANUAL);
+    const monthlySavings = Math.max(costToday - costWith, 0) + discountGain;
+    const annualSavings = monthlySavings * 12;
+    $("#roi-cost-today").textContent = "$" + fmt0.format(Math.round(costToday));
+    $("#roi-cost-with").textContent = "$" + fmt0.format(Math.round(costWith));
+    $("#roi-hours").textContent = fmt0.format(Math.round(hoursSaved)) + " h";
+    $("#roi-disc").textContent = "$" + fmt0.format(Math.round(discountGain * 12));
+    const paybackDays = monthlySavings > 0 ? Math.max(1, Math.round(fee(v) / (monthlySavings / 30))) : null;
+    $("#roi-summary").textContent = "≈ $" + fmt0.format(Math.round(annualSavings)) + " annual savings" +
+      (paybackDays !== null && monthlySavings > fee(v) ? " — payback at your inputs: ~" + paybackDays + (paybackDays === 1 ? " day" : " days") : "");
+  }
+  function onInput() {
+    if (!fired) { fired = true; track("roi_calc", { vol: +vol.value, team: +team.value }); }
+    update();
+  }
+  vol.addEventListener("input", onInput);
+  team.addEventListener("input", onInput);
+  update();
+})();
+/* ==================================================================
+   Stage-2 motion layer — 3D-SPEC scenes 2, 4, 5, 7, 8 (DOM/SVG only;
+   the WebGL hero scene lives in the module bootstrap at the end of
+   <body>). One easing family: expo/cubic ease-out. Every effect is
+   skipped or rendered in its final state under prefers-reduced-motion;
+   with no JS the markup already carries the final values.
+   ================================================================== */
+const EASE_EXPO = (t) => (t >= 1 ? 1 : 1 - Math.pow(2, -10 * t));
+
+/* Shared rAF counter: counts el's number from o.from (default 0) to o.target.
+   Returns a handle with cancel(); on natural completion writes the exact
+   formatted target so rest-state text is always server-truth. */
+function countTo(el, o) {
+  const fmt = new Intl.NumberFormat("en-US", {
+    minimumFractionDigits: o.decimals || 0, maximumFractionDigits: o.decimals || 0,
+  });
+  const from = o.from || 0, pre = o.prefix || "", suf = o.suffix || "";
+  const final = pre + fmt.format(o.target) + suf;
+  if (REDUCED) { el.textContent = final; return { cancel() {} }; }
+  let raf = null, t0 = null, delayId = null, cancelled = false;
+  function frame(now) {
+    if (cancelled) return;
+    if (t0 === null) t0 = now;
+    const p = Math.min((now - t0) / (o.dur || 1000), 1);
+    el.textContent = pre + fmt.format(from + (o.target - from) * EASE_EXPO(p)) + suf;
+    if (p < 1) raf = requestAnimationFrame(frame);
+    else el.textContent = final;
+  }
+  const start = () => { if (!cancelled) raf = requestAnimationFrame(frame); };
+  if (o.delay) delayId = setTimeout(start, o.delay); else start();
+  return {
+    cancel() {
+      cancelled = true;
+      if (raf) cancelAnimationFrame(raf);
+      if (delayId) clearTimeout(delayId);
+    },
+  };
+}
+
+/* Scene 2 — problem-section benchmark counters: once, ever (threshold .4) */
+(function () {
+  const els = document.querySelectorAll("#problem [data-count]");
+  if (!els.length || REDUCED || !("IntersectionObserver" in window)) return;
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((en) => {
+      if (!en.isIntersecting) return;
+      io.unobserve(en.target);
+      const el = en.target, raw = el.dataset.count;
+      countTo(el, {
+        target: parseFloat(raw),
+        decimals: (raw.split(".")[1] || "").length,
+        prefix: el.dataset.prefix || "",
+        suffix: el.dataset.suffix || "",
+        dur: 1100,
+      });
+    });
+  }, { threshold: 0.4 });
+  els.forEach((el) => io.observe(el));
+})();
+
+/* Scene 5 — ROI outputs count once on first reveal ("With ClearAP" lands last,
+   after a 120 ms beat); any slider input from then on is instrument-instant. */
+(function () {
+  const grid = document.querySelector("#roi .roi-grid");
+  if (!grid || REDUCED || !("IntersectionObserver" in window)) return;
+  let done = false;
+  const tweens = [];
+  const num = (el) => parseFloat(el.textContent.replace(/[^0-9.]/g, "")) || 0;
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((en) => {
+      if (!en.isIntersecting || done) return;
+      done = true; io.disconnect();
+      [["roi-cost-today", "$", "", 0],
+       ["roi-hours", "", " h", 0],
+       ["roi-disc", "$", "", 0],
+       ["roi-cost-with", "$", "", 120]].forEach(([id, pre, suf, delay]) => {
+        const el = document.getElementById(id);
+        if (el) tweens.push(countTo(el, { target: num(el), prefix: pre, suffix: suf, dur: 900, delay }));
+      });
+    });
+  }, { threshold: 0.4 });
+  io.observe(grid);
+  ["roi-vol", "roi-team"].forEach((id) => {
+    const s = document.getElementById(id);
+    if (s) s.addEventListener("input", () => {
+      done = true; io.disconnect();
+      tweens.forEach((tw) => tw.cancel());
+      tweens.length = 0;
+    });
+  });
+})();
+
+/* Scene 4.1 + 4.2 — drawer extraction sweep, then self-drawing match lines */
+let fxTimers = [];
+function clearFxTimers() { fxTimers.forEach(clearTimeout); fxTimers = []; }
+
+function runExtractionFx(inv) {
+  clearFxTimers();
+  const doc = $("#dr-doc");
+  if (doc) {
+    if (REDUCED) {
+      doc.classList.add("scanned");
+    } else {
+      const s = document.createElement("div");
+      s.className = "scan-line";
+      s.setAttribute("aria-hidden", "true");
+      doc.appendChild(s);
+      const settle = () => { if (s.isConnected) { doc.classList.add("scanned"); s.remove(); } };
+      s.addEventListener("animationend", settle);
+      fxTimers.push(setTimeout(settle, 1100)); /* safety net if animation is suppressed */
+    }
+  }
+  drawMatchConnectors(inv);
+}
+
+function drawMatchConnectors(inv) {
+  const panel = document.querySelector("#dr-body .match-panel");
+  if (!panel || !inv.po) return;
+  const wrap = panel.querySelector(".mini-wrap");
+  const table = panel.querySelector("table.mini");
+  if (!wrap || !table || !table.tBodies.length) return;
+
+  /* Verdict chip appears only after the last connector lands */
+  const bad = inv.lines.some((l) => l.gq != null && l.gq !== l.q);
+  const chip = document.createElement("span");
+  chip.className = "match-verdict" + (bad ? " bad" : "");
+  chip.textContent = bad ? "✗ outside tolerance — held" : "✓ within tolerance";
+  panel.appendChild(chip);
+
+  const ns = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(ns, "svg");
+  svg.setAttribute("aria-hidden", "true");
+  svg.style.cssText = "position:absolute;left:0;top:0;pointer-events:none;overflow:visible";
+  const wRect = wrap.getBoundingClientRect();
+  svg.setAttribute("width", table.offsetWidth);
+  svg.setAttribute("height", wrap.scrollHeight);
+  wrap.appendChild(svg);
+
+  const segs = [];
+  Array.from(table.tBodies[0].rows).forEach((row) => {
+    if (row.cells.length < 5) return;
+    const pt = (cell) => {
+      const r = cell.getBoundingClientRect();
+      return [r.left - wRect.left + wrap.scrollLeft + r.width / 2, r.bottom - wRect.top - 5];
+    };
+    const a = pt(row.cells[1]), b = pt(row.cells[2]);
+    segs.push([a, b]);
+    if (inv.gr) segs.push([b, pt(row.cells[3])]);
+  });
+
+  segs.forEach(([a, b], i) => {
+    const line = document.createElementNS(ns, "line");
+    line.setAttribute("class", "mline");
+    line.setAttribute("x1", a[0]); line.setAttribute("y1", a[1]);
+    line.setAttribute("x2", b[0]); line.setAttribute("y2", b[1]);
+    line.setAttribute("stroke", "#4d8dff");
+    line.setAttribute("stroke-opacity", "0.6");
+    line.setAttribute("stroke-width", "1");
+    const len = Math.hypot(b[0] - a[0], b[1] - a[1]);
+    line.setAttribute("stroke-dasharray", len);
+    line.setAttribute("stroke-dashoffset", REDUCED ? 0 : len);
+    svg.appendChild(line);
+    const dot = document.createElementNS(ns, "circle");
+    dot.setAttribute("class", "mline-dot");
+    dot.setAttribute("cx", b[0]); dot.setAttribute("cy", b[1]);
+    dot.setAttribute("r", "2.2");
+    dot.setAttribute("fill", "#4d8dff");
+    dot.setAttribute("fill-opacity", "0.7");
+    svg.appendChild(dot);
+    if (REDUCED) { dot.classList.add("pulse"); return; }
+    /* sequential 300 ms draws, starting after the scan sweep passes (~800 ms) */
+    fxTimers.push(setTimeout(() => { line.style.strokeDashoffset = "0"; }, 800 + i * 300));
+    fxTimers.push(setTimeout(() => { dot.classList.add("pulse"); }, 1100 + i * 300));
+  });
+
+  if (REDUCED) chip.classList.add("in");
+  else fxTimers.push(setTimeout(() => chip.classList.add("in"), 860 + segs.length * 300));
+}
+
+/* Scene 4.3 — field → document-region leader line (same 300 ms dash grammar) */
+function drawLeader(field, region) {
+  if (REDUCED) return;
+  const body = $("#dr-body");
+  const old = body.querySelector(".leader-svg");
+  if (old) old.remove();
+  const ns = "http://www.w3.org/2000/svg";
+  const bRect = body.getBoundingClientRect();
+  const fr = field.getBoundingClientRect(), rr = region.getBoundingClientRect();
+  const sx = fr.left - bRect.left + body.scrollLeft + 2;
+  const sy = fr.top - bRect.top + body.scrollTop + fr.height / 2;
+  const ex = rr.left - bRect.left + body.scrollLeft - 4;
+  const ey = rr.bottom - bRect.top + body.scrollTop + 2;
+  const svg = document.createElementNS(ns, "svg");
+  svg.setAttribute("class", "leader-svg");
+  svg.setAttribute("aria-hidden", "true");
+  svg.setAttribute("width", body.clientWidth);
+  svg.setAttribute("height", body.scrollHeight);
+  const path = document.createElementNS(ns, "path");
+  const bow = Math.min(26, Math.max(14, Math.abs(sy - ey) * 0.08));
+  path.setAttribute("d", "M" + sx + " " + sy + " C " + (sx - bow * 1.6) + " " + sy + ", " + (ex - bow * 1.6) + " " + ey + ", " + ex + " " + ey);
+  path.setAttribute("fill", "none");
+  path.setAttribute("stroke", "#4d8dff");
+  path.setAttribute("stroke-opacity", "0.6");
+  path.setAttribute("stroke-width", "1");
+  svg.appendChild(path);
+  const dot = document.createElementNS(ns, "circle");
+  dot.setAttribute("class", "mline-dot");
+  dot.setAttribute("cx", ex); dot.setAttribute("cy", ey);
+  dot.setAttribute("r", "2.2");
+  dot.setAttribute("fill", "#4d8dff");
+  dot.setAttribute("fill-opacity", "0.7");
+  svg.appendChild(dot);
+  body.appendChild(svg);
+  const len = path.getTotalLength();
+  path.style.strokeDasharray = len;
+  path.style.strokeDashoffset = len;
+  path.style.transition = "stroke-dashoffset .3s cubic-bezier(.22,.61,.36,1)";
+  requestAnimationFrame(() => requestAnimationFrame(() => { path.style.strokeDashoffset = "0"; }));
+  setTimeout(() => dot.classList.add("pulse"), 300);
+  setTimeout(() => { svg.style.opacity = "0"; }, 1300);
+  setTimeout(() => svg.remove(), 1650);
+}
+
+/* Scene 8a — app-frame tilt (hero mock + demo frame), max 4°, damped, no overshoot */
+(function () {
+  if (REDUCED || !matchMedia("(hover:hover) and (pointer:fine)").matches) return;
+  document.querySelectorAll("#hero-visual .frame, .demo-frame").forEach((el) => {
+    let tx = 0, ty = 0, cx = 0, cy = 0, raf = null;
+    function loop() {
+      cx += (tx - cx) * 0.08;
+      cy += (ty - cy) * 0.08;
+      if (Math.abs(cx - tx) < 0.01 && Math.abs(cy - ty) < 0.01) { cx = tx; cy = ty; }
+      el.style.transform = (cx || cy)
+        ? "perspective(1200px) rotateX(" + cy.toFixed(3) + "deg) rotateY(" + cx.toFixed(3) + "deg)"
+        : "";
+      raf = (cx === tx && cy === ty) ? null : requestAnimationFrame(loop);
+    }
+    const kick = () => { if (!raf) raf = requestAnimationFrame(loop); };
+    el.addEventListener("pointermove", (e) => {
+      if (el.classList.contains("demo-frame") && drawer.classList.contains("open")) { tx = 0; ty = 0; kick(); return; }
+      const r = el.getBoundingClientRect();
+      tx = ((e.clientX - r.left) / r.width - 0.5) * 8;   /* ±4° */
+      ty = -((e.clientY - r.top) / r.height - 0.5) * 8;
+      kick();
+    });
+    el.addEventListener("pointerleave", () => { tx = 0; ty = 0; kick(); });
+  });
+})();
+
+/* Scene 8b — magnetic primary CTAs: hero + final band only, max 3 px, damped */
+(function () {
+  if (REDUCED || !matchMedia("(hover:hover) and (pointer:fine)").matches) return;
+  ['[data-cta="hero_get_access"]', '[data-cta="final_get_access"]'].forEach((sel) => {
+    const btn = document.querySelector(sel);
+    if (!btn || !btn.parentElement) return;
+    let tx = 0, ty = 0, cx = 0, cy = 0, raf = null;
+    function loop() {
+      cx += (tx - cx) * 0.15;
+      cy += (ty - cy) * 0.15;
+      if (Math.abs(cx - tx) < 0.05 && Math.abs(cy - ty) < 0.05) { cx = tx; cy = ty; }
+      btn.style.transform = (cx || cy) ? "translate(" + cx.toFixed(2) + "px," + cy.toFixed(2) + "px)" : "";
+      raf = (cx === tx && cy === ty) ? null : requestAnimationFrame(loop);
+    }
+    const kick = () => { if (!raf) raf = requestAnimationFrame(loop); };
+    btn.parentElement.addEventListener("pointermove", (e) => {
+      const r = btn.getBoundingClientRect();
+      const inZone = e.clientX > r.left - 48 && e.clientX < r.right + 48 &&
+                     e.clientY > r.top - 48 && e.clientY < r.bottom + 48;
+      if (inZone) {
+        tx = Math.max(-3, Math.min(3, (e.clientX - (r.left + r.width / 2)) * 0.06));
+        ty = Math.max(-3, Math.min(3, (e.clientY - (r.top + r.height / 2)) * 0.12));
+      } else { tx = 0; ty = 0; }
+      kick();
+    }, { passive: true });
+    btn.parentElement.addEventListener("pointerleave", () => { tx = 0; ty = 0; kick(); });
+  });
+})();
+
+/* ---------- Reveal on scroll ---------- */
+(function () {
+  const els = document.querySelectorAll(".reveal");
+  els.forEach((el) => {
+    const sibs = Array.from(el.parentElement.querySelectorAll(":scope > .reveal"));
+    const i = sibs.indexOf(el);
+    if (i > 0) el.style.transitionDelay = (i * 50) + "ms";
+  });
+  if (!("IntersectionObserver" in window)) { els.forEach((el) => el.classList.add("in")); return; }
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((en) => {
+      if (en.isIntersecting) { en.target.classList.add("in"); io.unobserve(en.target); }
+    });
+  }, { threshold: 0.1 });
+  els.forEach((el) => io.observe(el));
+})();
+
+/* ---------- Pricing view tracking ---------- */
+(function () {
+  const el = document.getElementById("pricing");
+  if (!el || !("IntersectionObserver" in window)) return;
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((en) => {
+      if (en.isIntersecting) { track("pricing_view"); io.disconnect(); }
+    });
+  }, { threshold: 0.25 });
+  io.observe(el);
+})();
+
+/* ==================================================================
+   Pipeline — 5-beat signature animation controller (STORYBOARD.md).
+   States live in CSS ([data-step]); this only advances the step:
+   - desktop + motion: pinned stage, scroll-driven via 5 sentinels
+   - mobile / no-pin: autoplay loop (5 x 2.8 s = ~14 s), paused off-screen
+   - reduced motion: static final composition (markup default, step 5)
+   Beat stepper is clickable in every mode.
+   ================================================================== */
+(function () {
+  const stage = document.getElementById("pipe-stage");
+  const outer = document.getElementById("pipe-outer");
+  if (!stage || !outer) return;
+  const btns = Array.from(document.querySelectorAll("#pipe-steps [data-step-btn]"));
+  const uEl = document.getElementById("pipe-po-units");
+  const aEl = document.getElementById("pipe-po-amt");
+  const sEl = document.getElementById("pipe-sum");
+  /* Σ invoiced — derived from the seven rendered Amount cells (single source of
+     truth; the static tfoot value only serves no-JS) */
+  const SHEET_SUM = Array.from(stage.querySelectorAll(".pipe-sheet tbody td.amt"))
+    .reduce((t, td) => t + (parseFloat(td.textContent.replace(/,/g, "")) || 0), 0);
+  const SHEET_SUM_TXT = SHEET_SUM.toLocaleString("en-US", {
+    minimumFractionDigits: 2, maximumFractionDigits: 2,
+  });
+  let step = 5, tweens = [], timer = null, seen = false, stageVisible = false;
+
+  function setStep(n, force) {
+    n = Math.max(1, Math.min(5, n));
+    const prev = step;
+    if (n === prev && !force) return;
+    step = n;
+    stage.dataset.step = String(n);
+    btns.forEach((b) => b.classList.toggle("on", +b.dataset.stepBtn === n));
+    tweens.forEach((t) => t.cancel());
+    tweens = [];
+    if (!REDUCED && n === 3 && prev === 2) flipTotal();
+    if (n === 4 && prev < 4) {
+      tweens.push(countTo(uEl, { target: 4980, dur: 900, delay: 200 }));
+      tweens.push(countTo(aEl, { target: 48704.40, decimals: 2, prefix: "$", dur: 900, delay: 200 }));
+      /* Σ row — target computed above from the Amount column (60,065.60) */
+      tweens.push(countTo(sEl, { target: SHEET_SUM, decimals: 2, dur: 900, delay: 200 }));
+    } else {
+      uEl.textContent = "4,980";
+      aEl.textContent = "$48,704.40";
+      sEl.textContent = SHEET_SUM_TXT;
+    }
+  }
+
+  /* FLIP — the hero TOTAL chip flies into its Amount cell (beat 2 -> 3) */
+  function flipTotal() {
+    try {
+      const chip = stage.querySelector(".pchip-hero");
+      const cell = stage.querySelector(".pr-new td.amt");
+      if (!chip || !cell || !chip.animate) return;
+      const a = chip.getBoundingClientRect(), b = cell.getBoundingClientRect();
+      if (!a.width || !b.width) return;
+      const ghost = chip.cloneNode(true);
+      ghost.style.cssText = "position:fixed;top:" + a.top + "px;left:" + a.left +
+        "px;margin:0;z-index:80;pointer-events:none;opacity:1;transform:none;transition:none";
+      document.body.appendChild(ghost);
+      const anim = ghost.animate(
+        [{ transform: "translate(0,0)", opacity: 1 },
+         { transform: "translate(" + (b.right - a.right) + "px," +
+           (b.top + b.height / 2 - a.top - a.height / 2) + "px)", opacity: 0.15 }],
+        { duration: 460, easing: "cubic-bezier(.22,1,.36,1)" });
+      const bye = () => { if (ghost.isConnected) ghost.remove(); };
+      if (anim.finished) anim.finished.then(bye).catch(bye);
+      setTimeout(bye, 700);
+    } catch (e) { /* decorative only */ }
+  }
+
+  /* Autoplay loop (non-pinned mode) */
+  let autoplayMode = false;
+  function startLoop() { stopLoop(); timer = setInterval(() => setStep(step % 5 + 1), 2800); }
+  function stopLoop() { if (timer) { clearInterval(timer); timer = null; } }
+
+  /* One observer: pipeline_view tracking + off-screen pause */
+  if ("IntersectionObserver" in window) {
+    const vio = new IntersectionObserver((entries) => {
+      entries.forEach((en) => {
+        stageVisible = en.isIntersecting;
+        if (stageVisible && !seen) { seen = true; track("pipeline_view"); }
+      });
+      if (autoplayMode) { if (stageVisible && !document.hidden) startLoop(); else stopLoop(); }
+    }, { threshold: 0.25 });
+    vio.observe(stage);
+  } else if (!seen) { seen = true; track("pipeline_view"); }
+  document.addEventListener("visibilitychange", () => {
+    if (!autoplayMode) return;
+    if (document.hidden) stopLoop(); else if (stageVisible) startLoop();
+  });
+
+  if (REDUCED) {
+    /* Static final composition; stepper still switches states (instantly). */
+    btns.forEach((b) => b.addEventListener("click", () => setStep(+b.dataset.stepBtn)));
+    return;
+  }
+
+  document.documentElement.classList.add("pipe-live");
+  const pinned = matchMedia("(min-width:960px)").matches && "IntersectionObserver" in window;
+
+  if (pinned) {
+    document.documentElement.classList.add("pipe-scrub");
+    setStep(1, true);
+    const sio = new IntersectionObserver((entries) => {
+      entries.forEach((en) => { if (en.isIntersecting) setStep(+en.target.dataset.sent); });
+    }, { threshold: 0.5 });
+    outer.querySelectorAll(".pipe-sents div").forEach((s) => sio.observe(s));
+    btns.forEach((b) => b.addEventListener("click", () => {
+      const n = +b.dataset.stepBtn;
+      const segH = outer.offsetHeight / 5;
+      const top = window.scrollY + outer.getBoundingClientRect().top;
+      setStep(n);
+      window.scrollTo({
+        top: Math.round(top + (n - 1) * segH + segH / 2 - window.innerHeight / 2),
+        behavior: "smooth",
+      });
+    }));
+  } else {
+    autoplayMode = true;
+    setStep(1, true);
+    startLoop();
+    btns.forEach((b) => b.addEventListener("click", () => {
+      setStep(+b.dataset.stepBtn);
+      startLoop(); /* replay from the chosen beat */
+    }));
+  }
+})();
+
+/* ---------- Stats peek (?stats=1 or ?debug — founder-only, never shown to visitors) ---------- */
+(function () {
+  const qs = new URLSearchParams(location.search);
+  if (!qs.has("stats") && !qs.has("debug")) return;
+  const all = JSON.parse(localStorage.getItem("val_events") || "[]")
+    .filter((r) => r.idea === CONFIG.idea);
+  const counts = {};
+  const emails = [];
+  all.forEach((r) => {
+    counts[r.event] = (counts[r.event] || 0) + 1;
+    if (r.event === "signup" && r.email) emails.push(r.email);
+  });
+  const panel = document.createElement("div");
+  panel.className = "stats-peek";
+  panel.innerHTML =
+    "<h4>ClearAP · events</h4><ul>" +
+    Object.keys(counts).sort().map((k) => "<li><span>" + k + "</span><b>" + counts[k] + "</b></li>").join("") +
+    "</ul>" +
+    (emails.length
+      ? '<h4 style="margin-top:10px">Emails (' + emails.length + ')</h4><ul>' +
+        emails.map((e) => "<li><span>" + esc(e) + "</span></li>").join("") + "</ul>"
+      : "");
+  document.body.appendChild(panel);
+})();
+</script>
+<!-- 3D bootstrap (3D-SPEC scene 1) — decorative hero layer only. Four hard gates;
+     every bail-out path leaves the DOM byte-identical to the no-canvas page.
+     Deleting this entire block must not affect any page function. -->
+<script type="module">
+(() => {
+  if (location.protocol === "file:") return;                          /* gate 1: no module fetch on file:// */
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return; /* gate 2: renderer never constructed */
+  const probe = document.createElement("canvas");
+  if (!(probe.getContext("webgl2") || probe.getContext("webgl"))) return; /* gate 3 */
+  requestAnimationFrame(() =>
+    ("requestIdleCallback" in window
+      ? requestIdleCallback(boot, { timeout: 2000 })
+      : setTimeout(boot, 350)));                                      /* gate 4: never compete with LCP */
+  async function boot() {
+    try {
+      const OGL = await import("./vendor/ogl.esm.js");
+      initHeroScene(OGL);
+    } catch (e) { /* fallback = existing CSS hero; swallow */ }
+  }
+
+  let ctxLosses = 0; /* persists across re-inits: second loss removes the canvas permanently */
+
+  function initHeroScene(OGL) {
+    const hero = document.getElementById("hero");
+    if (!hero || hero.querySelector(".hero-gl")) return;
+
+    /* ROUND-2: quieter background — fewer cards, lower opacity, so the
+       pipeline story never competes with it (STORYBOARD.md). */
+    const mobile = hero.clientWidth < 768;
+    const COUNT = mobile ? 40 : 96;
+    const COLS = mobile ? 8 : 8, ROWS = mobile ? 5 : 12;
+
+    const renderer = new OGL.Renderer({
+      dpr: mobile ? 1 : Math.min(window.devicePixelRatio || 1, 1.5),
+      alpha: false, depth: false, antialias: true,
+      powerPreference: "high-performance",
+    });
+    const gl = renderer.gl, canvas = gl.canvas;
+    canvas.className = "hero-gl";
+    canvas.setAttribute("aria-hidden", "true");
+
+    const camera = new OGL.Camera(gl, { fov: 35, near: 0.1, far: 40 });
+    camera.position.z = 11;
+    const scene = new OGL.Transform();
+    const group = new OGL.Transform();
+    group.setParent(scene);
+
+    /* --- Layer A: ambient fBm gradient, one fullscreen triangle --- */
+    const bgProg = new OGL.Program(gl, {
+      vertex:
+        "attribute vec2 position;attribute vec2 uv;varying vec2 vUv;" +
+        "void main(){vUv=uv;gl_Position=vec4(position,0.0,1.0);}",
+      fragment:
+        "precision highp float;varying vec2 vUv;" +
+        "uniform float uTime,uOrder,uOctaves,uAspect;" +
+        "float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}" +
+        "float vnoise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);" +
+        "return mix(mix(hash(i),hash(i+vec2(1.0,0.0)),f.x),mix(hash(i+vec2(0.0,1.0)),hash(i+vec2(1.0,1.0)),f.x),f.y);}" +
+        "float fbm(vec2 p){float v=0.0,a=0.5;" +
+        "for(int i=0;i<3;i++){if(float(i)>=uOctaves)break;v+=a*vnoise(p);p*=2.03;a*=0.5;}return v;}" +
+        "void main(){vec2 uv=vUv;uv.x*=uAspect;" +
+        "float amp=mix(1.0,0.35,uOrder);" +          /* order calms the background */
+        "vec2 drift=vec2(uTime*0.02,uTime*0.013);" + /* full cycle >= ~45 s */
+        "float n1=fbm(uv*1.4+drift);" +
+        "float n2=fbm(uv*1.9-drift.yx+3.7);" +
+        "vec3 col=vec3(0.0314,0.0353,0.0392);" +     /* #08090a — matches page bg exactly */
+        "col+=vec3(1.0)*smoothstep(0.45,0.85,n1)*0.028*amp;" + /* monochrome lift, cap ~3% */
+        "col+=vec3(1.0)*smoothstep(0.50,0.90,n2)*0.018*amp;" + /* second mono layer */
+        "gl_FragColor=vec4(col,1.0);}",
+      uniforms: {
+        uTime: { value: 0 }, uOrder: { value: 0 },
+        uOctaves: { value: mobile ? 2 : 3 }, uAspect: { value: 1 },
+      },
+      depthTest: false, depthWrite: false,
+    });
+    const bg = new OGL.Mesh(gl, { geometry: new OGL.Triangle(gl), program: bgProg });
+    bg.setParent(scene);
+
+    /* --- Layer B: instanced invoice cards, one draw call --- */
+    const chaosPos = new Float32Array(COUNT * 3);
+    const chaosRot = new Float32Array(COUNT * 3);
+    const orderPos = new Float32Array(COUNT * 3);
+    const seeds = new Float32Array(COUNT);
+    const slotOf = Array.from({ length: COUNT }, (_, i) => i);
+    for (let i = COUNT - 1; i > 0; i--) {
+      const j = (Math.random() * (i + 1)) | 0;
+      const t = slotOf[i]; slotOf[i] = slotOf[j]; slotOf[j] = t;
+    }
+    for (let i = 0; i < COUNT; i++) {
+      seeds[i] = Math.random();
+      chaosPos[i * 3] = (Math.random() * 2 - 1) * 5;      /* slab ±5 × ±3 × ±2 */
+      chaosPos[i * 3 + 1] = (Math.random() * 2 - 1) * 3;
+      chaosPos[i * 3 + 2] = (Math.random() * 2 - 1) * 2;
+      for (let k = 0; k < 3; k++) chaosRot[i * 3 + k] = (Math.random() * 2 - 1) * 0.61; /* <= ±35° */
+    }
+    function fillOrder() {
+      const aspect = Math.max(hero.clientWidth, 1) / Math.max(hero.clientHeight, 1);
+      const visH = 2 * camera.position.z * Math.tan((35 * Math.PI) / 360);
+      const visW = visH * aspect;
+      const gw = mobile ? visW * 0.92 : visW * 0.46; /* desktop grid: right half */
+      const gh = mobile ? visH : visH * 1.15;
+      const cx = mobile ? 0 : visW * 0.26;
+      for (let i = 0; i < COUNT; i++) {
+        const s = slotOf[i], col = s % COLS, row = (s - col) / COLS;
+        orderPos[i * 3] = cx + (col / (COLS - 1) - 0.5) * gw;
+        orderPos[i * 3 + 1] = (0.5 - row / (ROWS - 1)) * gh;
+        orderPos[i * 3 + 2] = (seeds[i] - 0.5) * 0.06;
+      }
+    }
+    fillOrder();
+    const geometry = new OGL.Geometry(gl, {
+      position: { size: 2, data: new Float32Array([-0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5]) },
+      uv: { size: 2, data: new Float32Array([0, 0, 1, 0, 1, 1, 0, 1]) },
+      index: { data: new Uint16Array([0, 1, 2, 0, 2, 3]) },
+      aChaosPos: { instanced: 1, size: 3, data: chaosPos },
+      aChaosRot: { instanced: 1, size: 3, data: chaosRot },
+      aOrderPos: { instanced: 1, size: 3, data: orderPos },
+      aSeed: { instanced: 1, size: 1, data: seeds },
+    });
+    const cardProg = new OGL.Program(gl, {
+      vertex:
+        "attribute vec2 position;attribute vec2 uv;" +
+        "attribute vec3 aChaosPos,aChaosRot,aOrderPos;attribute float aSeed;" +
+        "uniform mat4 modelViewMatrix,projectionMatrix;uniform float uTime,uOrder;" +
+        "varying vec2 vUv;varying float vExc,vFog,vSeed;" +
+        "mat3 rotM(vec3 a){float cx=cos(a.x),sx=sin(a.x),cy=cos(a.y),sy=sin(a.y),cz=cos(a.z),sz=sin(a.z);" +
+        "return mat3(cy*cz,-cy*sz,sy,cx*sz+sx*sy*cz,cx*cz-sx*sy*sz,-sx*cy,sx*sz-cx*sy*cz,sx*cz+cx*sy*sz,cx*cy);}" +
+        "void main(){vUv=uv;vSeed=aSeed;" +
+        "float stag=fract(aSeed*7.13);" +
+        "vExc=step(0.94,stag);" + /* ~6% exceptions; largest stagger => they snap in last */
+        "float q=clamp(uOrder*1.15-stag*0.15,0.0,1.0);" +
+        "q=1.0-pow(1.0-q,3.0);" + /* cubic ease-out, same family as the DOM */
+        "float free=1.0-q;" +
+        "vec3 drift=vec3(sin(uTime*0.33+aSeed*61.0),cos(uTime*0.27+aSeed*47.0),sin(uTime*0.21+aSeed*29.0))*0.22*free;" +
+        "vec3 rot=mix(aChaosRot+vec3(sin(uTime*0.20+aSeed*37.0),cos(uTime*0.16+aSeed*53.0),0.0)*0.08*free," +
+        "vec3(0.0,0.105,0.0),q);" + /* shared ~6° yaw at rest */
+        "vec3 local=rotM(rot)*vec3(position.x*0.55,position.y*0.72,0.0);" +
+        "vec3 world=mix(aChaosPos+drift,aOrderPos,q)+local;" +
+        "vec4 view=modelViewMatrix*vec4(world,1.0);" +
+        "vFog=1.0-smoothstep(9.0,14.5,length(view.xyz));" + /* depth fog toward #08090a */
+        "gl_Position=projectionMatrix*view;}",
+      fragment:
+        "precision highp float;varying vec2 vUv;varying float vExc,vFog,vSeed;" +
+        "uniform float uAlpha;" +
+        "float rrect(vec2 p,vec2 b,float r){vec2 q=abs(p)-b+r;return length(max(q,0.0))+min(max(q.x,q.y),0.0)-r;}" +
+        "void main(){" +
+        "vec2 p=(vUv-0.5)*vec2(0.55,0.72);" +
+        "float d=rrect(p,vec2(0.275,0.36),0.035);" +
+        "float aa=0.006;" +
+        "float inside=1.0-smoothstep(-aa,aa,d);" +
+        "if(inside<=0.001)discard;" +
+        "float edge=1.0-smoothstep(0.0,aa*1.6,abs(d+0.004));" +
+        "float bar=0.0;" +
+        "for(int i=0;i<3;i++){" + /* three faint text-line bars, never readable words */
+        "float by=0.66-float(i)*0.16;" +
+        "float wl=0.30+fract(vSeed*(5.9+float(i)*3.7))*0.30;" +
+        "bar=max(bar,smoothstep(0.035,0.014,abs(vUv.y-by))*step(0.14,vUv.x)*step(vUv.x,0.14+wl));}" +
+        "vec3 col=vec3(0.063,0.067,0.071);" +           /* #101112 fill */
+        "col=mix(col,vec3(1.0),bar*0.08);" +            /* white bars at 8% */
+        "vec3 edgeCol=mix(vec3(0.302,0.553,1.0),vec3(0.961,0.722,0.239),vExc);" + /* exceptions edge in warn amber */
+        "col=mix(col,edgeCol,edge*mix(0.25,0.40,vExc));" +
+        "col=mix(vec3(0.0314,0.0353,0.0392),col,vFog);" +
+        "gl_FragColor=vec4(col,0.85*inside*vFog*uAlpha);}",
+      uniforms: {
+        uTime: { value: 0 }, uOrder: { value: 0 },
+        uAlpha: { value: mobile ? 0.4 : 0.6 },
+      },
+      transparent: true, depthTest: false, depthWrite: false,
+    });
+    const cards = new OGL.Mesh(gl, { geometry, program: cardProg });
+    cards.setParent(group);
+
+    /* --- Inputs: scroll is the playhead; pointer parallax <= ~3° --- */
+    let scrollP = 0, uOrder = 0, time = 0;
+    const readScroll = () => {
+      scrollP = Math.min(Math.max(window.scrollY / ((hero.offsetHeight || 1) * 1.1), 0), 1);
+    };
+    window.addEventListener("scroll", readScroll, { passive: true });
+    readScroll();
+    let prx = 0, pry = 0, crx = 0, cry = 0;
+    const hoverFine = matchMedia("(hover:hover) and (pointer:fine)").matches;
+    const onPointer = (e) => {
+      prx = (e.clientY / window.innerHeight * 2 - 1) * 0.035;
+      pry = (e.clientX / window.innerWidth * 2 - 1) * 0.05;
+    };
+    if (hoverFine) window.addEventListener("pointermove", onPointer, { passive: true });
+
+    /* --- Sizing: from the hero, debounced, address-bar deltas ignored --- */
+    let rw = hero.clientWidth, rh = hero.clientHeight, rt = null;
+    function applySize() {
+      renderer.setSize(rw, rh);
+      camera.perspective({ aspect: rw / Math.max(rh, 1) });
+      bgProg.uniforms.uAspect.value = rw / Math.max(rh, 1);
+    }
+    function onResizeNow() {
+      const w = hero.clientWidth, h = hero.clientHeight;
+      if (w === rw && Math.abs(h - rh) < 120) return; /* mobile address-bar collapse */
+      rw = w; rh = h;
+      applySize();
+      fillOrder();
+      geometry.attributes.aOrderPos.needsUpdate = true;
+    }
+    const onResize = () => { clearTimeout(rt); rt = setTimeout(onResizeNow, 150); };
+    window.addEventListener("resize", onResize);
+    applySize();
+
+    /* --- Loop control: pause off-screen and on hidden tab --- */
+    let raf = null, last = 0, stopped = false, visible = true, ctxLost = false;
+    const io = new IntersectionObserver((en) => {
+      visible = en[0].intersectionRatio > 0.04; /* hero < 5% visible => stop */
+      syncLoop();
+    }, { threshold: [0, 0.05] });
+    const onVis = () => syncLoop();
+    document.addEventListener("visibilitychange", onVis);
+    function syncLoop() {
+      const want = visible && !document.hidden && !stopped && !ctxLost;
+      if (want && raf === null) { last = performance.now(); raf = requestAnimationFrame(frame); }
+      else if (!want && raf !== null) { cancelAnimationFrame(raf); raf = null; }
+    }
+    function teardown(removeForever) {
+      stopped = true;
+      if (raf !== null) { cancelAnimationFrame(raf); raf = null; }
+      window.removeEventListener("scroll", readScroll);
+      window.removeEventListener("pointermove", onPointer);
+      window.removeEventListener("resize", onResize);
+      document.removeEventListener("visibilitychange", onVis);
+      io.disconnect();
+      canvas.remove();
+      if (removeForever) ctxLosses = 2;
+    }
+
+    /* --- Context loss: one restore attempt, then the CSS hero stands --- */
+    canvas.addEventListener("webglcontextlost", (e) => {
+      e.preventDefault();
+      ctxLost = true;
+      ctxLosses++;
+      if (ctxLosses >= 2) { teardown(true); return; }
+      syncLoop();
+    });
+    canvas.addEventListener("webglcontextrestored", () => {
+      teardown(false);
+      if (ctxLosses < 2) initHeroScene(OGL);
+    });
+
+    /* --- Adaptive ladder: octaves -> instances -> remove; one-way ratchet --- */
+    let perfAcc = 0, perfN = 0, tier = 0;
+
+    function frame(t) {
+      raf = requestAnimationFrame(frame);
+      const dt = Math.min((t - last) / 1000, 0.05);
+      last = t;
+      time += dt;
+      uOrder += (scrollP - uOrder) * Math.min(1, dt * 4); /* ~250 ms damped follow */
+      crx += (prx - crx) * 0.06;
+      cry += (pry - cry) * 0.06;
+      group.rotation.x = crx;
+      group.rotation.y = cry;
+      bgProg.uniforms.uTime.value = time;
+      bgProg.uniforms.uOrder.value = uOrder;
+      cardProg.uniforms.uTime.value = time;
+      cardProg.uniforms.uOrder.value = uOrder;
+      renderer.render({ scene, camera });
+      perfAcc += dt; perfN++;
+      if (perfAcc >= 2) {
+        const avg = (perfAcc / perfN) * 1000;
+        perfAcc = 0; perfN = 0;
+        if (tier === 0 && avg > 33) { bgProg.uniforms.uOctaves.value = 2; tier = 1; }
+        else if (tier === 1 && avg > 33) { geometry.instancedCount = COUNT >> 1; tier = 2; }
+        else if (tier === 2 && avg > 40) { teardown(true); }
+      }
+    }
+
+    /* First frame before insertion so no black flash; loop starts via observers */
+    renderer.render({ scene, camera });
+    hero.insertBefore(canvas, hero.firstChild);
+    io.observe(canvas);
+    syncLoop();
+  }
+})();
+</script>
+</body>
+</html>

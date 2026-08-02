@@ -1,0 +1,1502 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BoardBrief — Turn Excel into Executive Reports in Minutes</title>
+<meta name="description" content="BoardBrief turns your financial Excel workbooks into board-ready dashboards, AI-written commentary, and presentation slides — automatically. Join the early-access list.">
+<script>document.documentElement.classList.add("js");</script>
+<style>
+/* =============================================================
+   BoardBrief — dark tech system (Design Brief v2)
+   ============================================================= */
+:root{
+  color-scheme: dark;
+  --bg:#08090d;
+  --bg-2:#0b0d13;
+  --panel:#10131a;
+  --panel-2:#151926;
+  --border:rgba(255,255,255,.07);
+  --border-strong:rgba(255,255,255,.14);
+  --ink:#eef1f7;
+  --ink-2:#a3aab8;
+  --ink-3:#656e80;
+  --accent:#4d8dff;
+  --accent-2:#7c5cff;
+  --grad:linear-gradient(120deg,#4d8dff,#7c5cff);
+  --wash:rgba(77,141,255,.10);
+  --ok:#2dd882; --warn:#f5b83d; --danger:#ff5c5c;
+  --radius:12px;
+  --mono:ui-monospace,"SF Mono",Menlo,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  background:var(--bg);color:var(--ink);line-height:1.6;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;
+}
+::selection{background:rgba(77,141,255,.35)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+img,svg{max-width:100%}
+a{color:var(--ink-2);text-decoration:none}
+button{font-family:inherit}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+section{padding:76px 0;position:relative}
+@media(min-width:960px){section{padding:104px 0}}
+.alt{background:var(--bg-2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+h1,h2,h3{letter-spacing:-.03em;line-height:1.12}
+h2{font-size:clamp(28px,4vw,40px);font-weight:700}
+.center{text-align:center}
+.tnum{font-variant-numeric:tabular-nums}
+.mlabel{
+  font-family:var(--mono);font-size:12px;text-transform:uppercase;
+  letter-spacing:.14em;color:var(--ink-3);display:inline-block;
+}
+.section-sub{color:var(--ink-2);max-width:640px;margin:14px auto 0;font-size:16.5px}
+.ic{flex:none;display:inline-block;vertical-align:middle}
+
+/* ---------- dot grid + glows ---------- */
+.dotgrid::before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background-image:radial-gradient(circle at 1px 1px, rgba(255,255,255,.05) 1px, transparent 0);
+  background-size:26px 26px;
+  -webkit-mask-image:radial-gradient(ellipse 90% 75% at 50% 0%, #000 25%, transparent 78%);
+  mask-image:radial-gradient(ellipse 90% 75% at 50% 0%, #000 25%, transparent 78%);
+}
+.glow{position:absolute;border-radius:50%;pointer-events:none;filter:blur(110px)}
+.glow-a{width:560px;height:560px;background:rgba(77,141,255,.13)}
+.glow-b{width:420px;height:420px;background:rgba(124,92,255,.10)}
+
+/* ---------- buttons ---------- */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  border-radius:9px;padding:12px 22px;font-size:14.5px;font-weight:600;
+  cursor:pointer;border:1px solid transparent;white-space:nowrap;color:var(--ink);
+  transition:filter .18s,box-shadow .18s,border-color .18s,background .18s,color .18s;
+}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{filter:brightness(1.12);box-shadow:0 0 24px rgba(77,141,255,.35)}
+.btn-secondary{background:transparent;border-color:var(--border-strong);color:var(--ink)}
+.btn-secondary:hover{border-color:var(--accent)}
+.btn-sm{padding:8px 14px;font-size:13px}
+
+/* ---------- nav ---------- */
+.nav{
+  position:sticky;top:0;z-index:60;
+  background:rgba(8,9,13,.7);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--border);
+}
+.nav-inner{display:flex;align-items:center;gap:26px;height:60px}
+.logo{display:flex;align-items:center;gap:9px;font-weight:700;font-size:16px;color:var(--ink);letter-spacing:-.02em}
+.nav-links{display:none;gap:24px;margin-left:6px}
+.nav-links a{color:var(--ink-2);font-size:13.5px;font-weight:500}
+.nav-links a:hover{color:var(--ink)}
+.nav-cta{margin-left:auto}
+@media(min-width:960px){.nav-links{display:flex}}
+
+/* ---------- hero ---------- */
+.hero{position:relative;padding:84px 0 96px;overflow:hidden}
+.hero .glow-a{top:-180px;right:-120px}
+.hero .glow-b{bottom:-160px;left:-140px}
+.hero-grid{display:grid;gap:52px;align-items:center;position:relative}
+@media(min-width:960px){.hero-grid{grid-template-columns:1.02fr .98fr}}
+.hero h1{font-size:clamp(38px,6.5vw,68px);font-weight:750;margin:20px 0 18px}
+.grad-text{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero-sub{font-size:17px;color:var(--ink-2);max-width:540px}
+.hero-sub strong{color:var(--ink);font-weight:600}
+.hero-ctas{display:flex;gap:12px;margin-top:28px;flex-wrap:wrap}
+.hero-note{margin-top:18px;font-size:11px}
+
+/* ---------- app frame ---------- */
+.frame{
+  background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
+  overflow:hidden;box-shadow:0 40px 90px -40px rgba(0,0,0,.65);
+}
+.frame-bar{display:flex;align-items:center;gap:7px;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--bg-2)}
+.fdot{width:10px;height:10px;border-radius:50%;background:var(--ink-3);opacity:.45;flex:none}
+.frame-url{
+  flex:1;min-width:0;margin:0 8px;font-family:var(--mono);font-size:11px;color:var(--ink-3);
+  background:var(--panel-2);border:1px solid var(--border);border-radius:7px;padding:4px 10px;
+  text-align:center;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.chip{
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-2);border:1px solid var(--border-strong);border-radius:6px;padding:3px 9px;
+  white-space:nowrap;display:inline-flex;align-items:center;gap:6px;flex:none;
+}
+.cdot{width:6px;height:6px;border-radius:50%;display:inline-block;flex:none}
+.cdot-warn{background:var(--warn)}
+.cdot-ok{background:var(--ok)}
+
+/* ---------- hero mock ---------- */
+.mock-body{padding:18px}
+.mock-title{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}
+.mock-title .t{font-size:13px;font-weight:600;color:var(--ink)}
+.mock-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.mock-kpi{background:var(--panel-2);border:1px solid var(--border);border-radius:9px;padding:10px 12px;min-width:0}
+.mock-kpi .k{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mock-kpi .v{font-size:17px;font-weight:700;margin-top:3px;letter-spacing:-.01em}
+.mock-kpi .d{font-size:10.5px;font-weight:600;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ok{color:var(--ok)} .danger{color:var(--danger)}
+.mock-chart{display:flex;align-items:flex-end;gap:8px;height:98px;margin-top:16px;padding:0 4px;border-bottom:1px solid var(--border-strong)}
+.mpair{flex:1;display:flex;align-items:flex-end;gap:3px;height:100%}
+.mbar{flex:1;border-radius:3px 3px 0 0}
+.mbar.a{background:#3987e5}
+.mbar.b{background:#d95926}
+.mock-legend{display:flex;gap:14px;margin-top:10px;font-size:11px;color:var(--ink-2);align-items:center;flex-wrap:wrap}
+.lg{display:inline-flex;align-items:center;gap:6px}
+.sw{width:9px;height:9px;border-radius:2px;display:inline-block;flex:none}
+
+/* ---------- wordmarks ---------- */
+.logos{padding:34px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--bg-2)}
+.logo-row{display:flex;flex-wrap:wrap;justify-content:center;gap:14px 36px;margin-top:16px}
+.wordmark{font-family:var(--mono);font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);opacity:.35;white-space:nowrap}
+
+/* ---------- cards / grids ---------- */
+.grid{display:grid;gap:16px;margin-top:44px}
+.grid-3{grid-template-columns:1fr}
+.grid-4{grid-template-columns:1fr}
+@media(min-width:640px){.grid-3{grid-template-columns:repeat(2,1fr)}.grid-4{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:960px){.grid-3{grid-template-columns:repeat(3,1fr)}.grid-4{grid-template-columns:repeat(4,1fr)}}
+.card{
+  position:relative;background:var(--panel);border:1px solid var(--border);
+  border-radius:var(--radius);padding:24px;text-align:left;transition:border-color .2s;
+}
+.card::before{
+  content:"";position:absolute;top:-1px;left:8%;right:8%;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(77,141,255,.5),transparent);
+  opacity:0;transition:opacity .25s;
+}
+.card:hover{border-color:var(--border-strong)}
+.card:hover::before{opacity:1}
+.card h3{font-size:16px;font-weight:650;margin:14px 0 8px}
+.card p{font-size:14px;color:var(--ink-2)}
+.icon-badge{
+  width:38px;height:38px;border-radius:9px;background:var(--wash);
+  border:1px solid rgba(77,141,255,.22);color:var(--accent);
+  display:flex;align-items:center;justify-content:center;
+}
+
+/* ---------- before / after ---------- */
+.ba{display:grid;gap:16px;margin-top:44px;text-align:left}
+@media(min-width:960px){.ba{grid-template-columns:1fr 1fr}}
+.ba-col{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:26px}
+.ba-col.after{
+  border-color:rgba(77,141,255,.35);
+  background:linear-gradient(180deg,rgba(77,141,255,.06),transparent 60%),var(--panel);
+}
+.ba-col.after .ba-tag{color:var(--accent)}
+.ba-col h3{font-size:18px;margin:10px 0 12px}
+.ba-col ul{list-style:none}
+.ba-col li{display:flex;gap:10px;padding:7px 0;font-size:14px;color:var(--ink-2)}
+.ba-col li .ic{margin-top:3px}
+.li-x{color:var(--danger)}
+.li-ok{color:var(--ok)}
+
+/* ---------- prototype ---------- */
+.demo-window{margin-top:46px}
+.demo-body{padding:22px;min-height:460px}
+@media(min-width:640px){.demo-body{padding:30px}}
+.dropzone{
+  border:1px dashed var(--border-strong);border-radius:12px;background:var(--bg-2);
+  padding:48px 24px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;
+}
+.dropzone.drag{border-color:var(--accent);background:rgba(77,141,255,.08)}
+.dz-icon{
+  width:50px;height:50px;border-radius:12px;background:var(--wash);color:var(--accent);
+  display:flex;align-items:center;justify-content:center;margin:0 auto 14px;
+  border:1px solid rgba(77,141,255,.22);
+}
+.dropzone h3{font-size:17px;font-weight:650}
+.dropzone p{font-size:13.5px;color:var(--ink-2);margin-top:4px}
+.or{
+  display:flex;align-items:center;gap:12px;margin:18px auto;max-width:300px;
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);
+}
+.or::before,.or::after{content:"";flex:1;height:1px;background:var(--border)}
+.file-chip{
+  display:inline-flex;align-items:center;gap:9px;background:var(--panel-2);
+  border:1px solid var(--border-strong);border-radius:8px;padding:9px 16px;
+  font-family:var(--mono);font-size:12.5px;color:var(--ink);cursor:pointer;
+  transition:border-color .18s;
+}
+.file-chip:hover{border-color:var(--accent)}
+.file-chip .ic{color:var(--ok)}
+.privacy-note{
+  margin-top:16px;text-align:center;font-family:var(--mono);font-size:10.5px;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);
+}
+
+/* step 2 · terminal analysis */
+.term{max-width:580px;margin:26px auto;background:#07080c;border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.term-bar{
+  display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--border);
+  background:var(--bg-2);font-family:var(--mono);font-size:10.5px;color:var(--ink-3);
+  letter-spacing:.1em;text-transform:uppercase;
+}
+.term-body{padding:16px 16px 18px;font-family:var(--mono);font-size:12.5px;line-height:2.1}
+.term-file{display:flex;align-items:center;gap:8px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.term-file .ic{color:var(--accent)}
+.progress{height:2px;background:var(--panel-2);border-radius:2px;overflow:hidden;margin:12px 0 14px}
+.progress i{display:block;height:100%;width:0;background:var(--grad);transition:width .5s ease}
+.tline{display:flex;gap:10px;color:var(--ink-3);opacity:.3;transition:opacity .3s,color .3s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tline .pre{flex:none;min-width:4ch}
+.tline.on{opacity:1;color:var(--ink-2)}
+.tline.on .pre{color:var(--accent)}
+.tline.done{opacity:1;color:var(--ink-2)}
+.tline.done .pre{color:var(--ok)}
+
+/* step 3 · report */
+.report-head{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start;justify-content:space-between;margin-bottom:18px}
+.report-head h3{font-size:17px;font-weight:650}
+.report-head .meta{font-family:var(--mono);font-size:11px;color:var(--ink-3);margin-top:5px;letter-spacing:.04em}
+.tabs{
+  display:flex;gap:2px;border:1px solid var(--border);background:var(--bg-2);border-radius:9px;
+  padding:3px;width:max-content;max-width:100%;overflow-x:auto;margin-bottom:22px;
+}
+.tab{
+  border:0;background:transparent;border-radius:7px;padding:8px 16px;font-size:13.5px;font-weight:550;
+  color:var(--ink-2);cursor:pointer;white-space:nowrap;transition:background .15s,color .15s;
+}
+.tab:hover{color:var(--ink)}
+.tab.active{background:var(--panel-2);color:var(--ink);box-shadow:inset 0 0 0 1px var(--border-strong)}
+.tabpane{display:none}
+.tabpane.active{display:block;animation:fadein .3s ease}
+@keyframes fadein{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+/* dashboard */
+.kpis{display:grid;gap:12px;grid-template-columns:repeat(2,1fr)}
+@media(min-width:960px){.kpis{grid-template-columns:repeat(4,1fr)}}
+.kpi{background:var(--panel-2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;min-width:0}
+.kpi .k{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpi .v{font-size:clamp(20px,2.4vw,25px);font-weight:700;margin-top:5px;letter-spacing:-.01em}
+.kpi .d{font-size:12px;font-weight:600;margin-top:4px}
+.kpi .d small{font-weight:400;color:var(--ink-3)}
+.charts{display:grid;gap:14px;margin-top:14px}
+@media(min-width:960px){.charts{grid-template-columns:1fr 1fr}}
+.chart-card{background:var(--bg-2);border:1px solid var(--border);border-radius:10px;padding:16px 16px 12px}
+.chart-card h4{font-size:13.5px;font-weight:650}
+.chart-card .sub{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-top:4px}
+.legend{display:flex;gap:14px;margin:12px 0 4px;font-size:12px;color:var(--ink-2);flex-wrap:wrap}
+.chart-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.chart-scroll svg{min-width:520px;width:100%;height:auto;display:block}
+#varChart svg{min-width:440px}
+.bar{transition:opacity .15s}
+.bar:hover{opacity:.8}
+.vrow .vbg{fill:transparent}
+.vrow:hover .vbg{fill:rgba(255,255,255,.03)}
+
+/* commentary */
+.commentary{max-width:720px}
+.ai-tag{
+  display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:10.5px;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--accent);background:var(--wash);
+  border:1px solid rgba(77,141,255,.3);border-radius:6px;padding:4px 10px;margin-bottom:16px;
+}
+.commentary p{font-size:14.5px;color:var(--ink-2);margin-bottom:14px}
+.commentary p strong{color:var(--ink);font-weight:600}
+.callouts{margin-top:8px;background:var(--bg-2);border:1px solid var(--border);border-radius:10px;padding:18px 20px}
+.callouts h4{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin-bottom:10px;font-weight:600}
+.callouts ul{list-style:none}
+.callouts li{display:flex;gap:10px;font-size:13.5px;color:var(--ink-2);padding:6px 0}
+.callouts li strong{color:var(--ink);font-weight:600}
+.callouts .g{flex:none;font-size:11px;font-weight:700;margin-top:2px;width:14px}
+
+/* slides */
+.slide-stage{background:var(--bg-2);border:1px solid var(--border);border-radius:12px;padding:14px}
+.slide-viewport{overflow:hidden;border-radius:9px}
+.slide-track{display:flex;transition:transform .4s cubic-bezier(.22,.8,.3,1)}
+.slide{
+  flex:0 0 100%;background:#0d1017;border:1px solid var(--border);border-radius:9px;
+  aspect-ratio:16/9;padding:clamp(14px,3.4vw,38px) clamp(16px,4vw,44px);
+  display:flex;flex-direction:column;overflow:hidden;position:relative;
+}
+.slide.s-title{background:radial-gradient(80% 130% at 18% 0%,rgba(77,141,255,.18),transparent 60%),#0d1017}
+.slide .s-eyebrow{font-family:var(--mono);font-size:clamp(8px,1.2vw,11px);letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+.slide h5{font-size:clamp(15px,2.6vw,26px);font-weight:700;letter-spacing:-.02em;margin-top:6px;color:var(--ink)}
+.slide .s-sub{font-size:clamp(10px,1.5vw,13.5px);color:var(--ink-2);margin-top:6px}
+.slide-title-body{margin:auto 0}
+.s-foot{
+  margin-top:auto;display:flex;justify-content:space-between;gap:10px;
+  font-family:var(--mono);font-size:clamp(7px,1vw,9.5px);letter-spacing:.12em;text-transform:uppercase;
+  color:var(--ink-3);padding-top:clamp(6px,1vw,10px);border-top:1px solid var(--border);
+}
+.s-legend{display:flex;gap:clamp(8px,1.6vw,16px);margin-top:clamp(4px,.8vw,8px);font-size:clamp(8.5px,1.2vw,11.5px);color:var(--ink-2)}
+.s-kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:clamp(8px,1.4vw,14px);margin:auto 0}
+.s-kpi{background:var(--panel-2);border:1px solid var(--border);border-radius:8px;padding:clamp(7px,1.5vw,15px);min-width:0}
+.s-kpi .k{font-family:var(--mono);font-size:clamp(7px,1vw,10px);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.s-kpi .v{font-size:clamp(14px,2.4vw,23px);font-weight:700;margin-top:2px}
+.s-kpi .d{font-size:clamp(8px,1.2vw,11.5px);font-weight:600;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.s-chart{flex:1;min-height:0;display:flex;align-items:center;margin-top:6px}
+.s-chart svg{width:100%;height:auto;max-height:100%}
+#slideVarChart svg{width:100%;height:auto;display:block}
+.s-split{display:flex;gap:clamp(10px,2vw,24px);flex:1;min-height:0;margin-top:6px;align-items:center}
+.s-split>div{flex:1;min-width:0}
+.s-bullets{list-style:none}
+.s-bullets li{display:flex;gap:8px;font-size:clamp(9px,1.4vw,12.5px);color:var(--ink-2);padding:clamp(2px,.5vw,5px) 0}
+.s-bullets .g{font-weight:700;font-size:clamp(7.5px,1.1vw,10.5px);margin-top:2px;flex:none}
+.slide-nav{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;flex-wrap:wrap}
+.slide-arrows{display:flex;align-items:center;gap:10px}
+.arrow{
+  width:34px;height:34px;border-radius:8px;border:1px solid var(--border-strong);background:transparent;
+  color:var(--ink-2);display:flex;align-items:center;justify-content:center;cursor:pointer;
+  transition:border-color .15s,color .15s;
+}
+.arrow:hover:not(:disabled){border-color:var(--accent);color:var(--ink)}
+.arrow:disabled{opacity:.35;cursor:default}
+.dots{display:flex;gap:6px}
+.sdot{width:6px;height:6px;border-radius:50%;background:var(--border-strong);transition:background .2s,transform .2s}
+.sdot.on{background:var(--accent);transform:scale(1.3)}
+.slide-count{font-family:var(--mono);font-size:11px;color:var(--ink-3);letter-spacing:.08em}
+.dl-btns{display:flex;gap:10px;flex-wrap:wrap}
+
+/* ---------- how it works ---------- */
+.steps{display:grid;gap:16px;margin-top:44px;text-align:left}
+@media(min-width:960px){.steps{grid-template-columns:repeat(3,1fr)}}
+.step{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:26px}
+.step-num{font-family:var(--mono);font-size:12px;letter-spacing:.14em;color:var(--accent);margin-bottom:14px}
+.step h3{font-size:16px;font-weight:650;margin-bottom:8px}
+.step p{font-size:14px;color:var(--ink-2)}
+
+/* ---------- pricing ---------- */
+.plans{display:grid;gap:16px;margin-top:44px;align-items:stretch;text-align:left}
+@media(min-width:960px){.plans{grid-template-columns:repeat(3,1fr)}}
+.plan{
+  background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
+  padding:28px;display:flex;flex-direction:column;position:relative;transition:border-color .2s;
+}
+.plan:hover{border-color:var(--border-strong)}
+.plan.popular{border-color:rgba(77,141,255,.4)}
+.plan.popular::before{
+  content:"";position:absolute;top:-1px;left:10%;right:10%;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(77,141,255,.8),transparent);
+}
+.pop-badge{
+  position:absolute;top:-11px;left:50%;transform:translateX(-50%);
+  font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+  color:#fff;background:var(--accent);border-radius:6px;padding:3px 10px;white-space:nowrap;
+}
+.plan h3{font-size:17px;font-weight:650}
+.plan .tagline{font-size:13px;color:var(--ink-3);margin-top:4px}
+.price{margin:16px 0 8px;font-size:36px;font-weight:700;letter-spacing:-.02em}
+.price small{font-size:13px;font-weight:400;color:var(--ink-3)}
+.ea-label{
+  font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--accent);background:var(--wash);border:1px solid rgba(77,141,255,.3);
+  border-radius:5px;padding:3px 8px;width:max-content;
+}
+.plan ul{list-style:none;margin:20px 0 24px;flex:1}
+.plan li{display:flex;gap:9px;font-size:13.5px;color:var(--ink-2);padding:6px 0}
+.plan li .ic{margin-top:3px;color:var(--accent)}
+
+/* ---------- FAQ ---------- */
+.faq{max-width:720px;margin:40px auto 0;text-align:left}
+.faq details{border:1px solid var(--border);border-radius:10px;background:var(--panel);margin-bottom:10px;overflow:hidden}
+.faq summary{
+  cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:14px;
+  padding:16px 18px;font-weight:550;font-size:14.5px;color:var(--ink);
+}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary .ic{color:var(--ink-3);transition:transform .25s}
+.faq details[open] summary .ic{transform:rotate(180deg)}
+.faq .a{padding:0 18px 16px;font-size:14px;color:var(--ink-2)}
+
+/* ---------- final CTA ---------- */
+.final{
+  position:relative;background:var(--panel);border:1px solid var(--border);border-radius:16px;
+  padding:clamp(40px,6vw,72px) 24px;text-align:center;overflow:hidden;
+}
+.final .glow-a{top:-220px;left:50%;transform:translateX(-50%)}
+.final>*{position:relative}
+.final p{color:var(--ink-2);max-width:520px;margin:14px auto 26px;font-size:15.5px}
+
+/* ---------- footer ---------- */
+footer{padding:34px 0 46px;border-top:1px solid var(--border);margin-top:80px}
+.foot{
+  display:flex;flex-wrap:wrap;gap:14px 28px;align-items:center;justify-content:space-between;
+  font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);
+}
+.foot a{color:var(--ink-3);cursor:pointer}
+.foot a:hover{color:var(--ink)}
+
+/* ---------- modal ---------- */
+.modal-back{
+  position:fixed;inset:0;background:rgba(4,5,8,.72);backdrop-filter:blur(4px);
+  display:none;align-items:center;justify-content:center;z-index:100;padding:20px;
+}
+.modal-back.open{display:flex}
+.modal{
+  background:var(--panel);border:1px solid var(--border-strong);border-radius:14px;
+  max-width:440px;width:100%;padding:30px;position:relative;
+  box-shadow:0 40px 100px -20px rgba(0,0,0,.7);
+  animation:pop .25s cubic-bezier(.22,.9,.35,1.2);
+}
+@keyframes pop{from{opacity:0;transform:scale(.96) translateY(8px)}to{opacity:1;transform:none}}
+.modal h3{font-size:20px;font-weight:650;margin-bottom:8px}
+.modal .m-sub{font-size:14px;color:var(--ink-2);margin-bottom:20px}
+.modal-x{
+  position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:8px;
+  border:1px solid var(--border);background:transparent;color:var(--ink-2);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:border-color .15s,color .15s;
+}
+.modal-x:hover{border-color:var(--border-strong);color:var(--ink)}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--ink)}
+.field input,.field select{
+  width:100%;border:1px solid var(--border-strong);border-radius:9px;padding:11px 14px;font-size:14.5px;
+  font-family:inherit;background:var(--panel-2);color:var(--ink);outline:none;
+  transition:border-color .15s,box-shadow .15s;
+}
+.field input:focus,.field select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(77,141,255,.2)}
+.field .err{display:none;font-size:12.5px;color:var(--danger);margin-top:5px}
+.field.invalid input{border-color:var(--danger)}
+.field.invalid .err{display:block}
+.modal .btn{width:100%}
+.modal-success{text-align:center;display:none}
+.modal-success .big{
+  width:54px;height:54px;border-radius:50%;background:rgba(45,216,130,.12);color:var(--ok);
+  display:flex;align-items:center;justify-content:center;margin:0 auto 16px;
+  border:1px solid rgba(45,216,130,.3);
+}
+.modal-fine{font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);text-align:center;margin-top:14px}
+
+/* ---------- toast ---------- */
+.toast{
+  position:fixed;bottom:26px;left:50%;transform:translate(-50%,20px);z-index:120;
+  background:var(--panel-2);border:1px solid var(--border-strong);color:var(--ink);
+  font-size:13.5px;font-weight:500;border-radius:10px;padding:12px 18px;
+  box-shadow:0 16px 40px -12px rgba(0,0,0,.6);opacity:0;pointer-events:none;
+  transition:opacity .25s,transform .25s;max-width:calc(100vw - 40px);text-align:center;
+}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* ---------- stats peek ---------- */
+.stats-peek{
+  position:fixed;right:14px;bottom:14px;z-index:90;background:var(--panel);
+  border:1px solid var(--border-strong);border-radius:10px;padding:14px 16px;
+  font-family:var(--mono);font-size:11px;max-width:280px;max-height:50vh;overflow:auto;
+  box-shadow:0 20px 50px -20px rgba(0,0,0,.7);
+}
+.stats-peek h4{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px;font-weight:600}
+.stats-peek td{padding:2px 8px 2px 0;color:var(--ink-2)}
+.stats-peek strong{color:var(--ink)}
+
+/* ---------- reveal (js-gated so no-js is never blank) ---------- */
+html.js .reveal{opacity:0;transform:translateY(14px);transition:opacity .35s ease,transform .35s ease}
+html.js .reveal.in{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;transition-duration:.01ms !important;scroll-behavior:auto !important}
+  html.js .reveal{opacity:1;transform:none}
+}
+</style>
+</head>
+<body>
+
+<!-- SVG symbol icon system (24×24, stroke=currentColor) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-upload" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+    <symbol id="i-zap" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></symbol>
+    <symbol id="i-terminal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m4 17 6-5-6-5"/><path d="M12 19h8"/></symbol>
+    <symbol id="i-layers" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m12 2 9 5-9 5-9-5 9-5z"/><path d="m3 12 9 5 9-5"/><path d="m3 17 9 5 9-5"/></symbol>
+    <symbol id="i-table" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></symbol>
+    <symbol id="i-present" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M12 16v4"/><path d="m8 20 4-2 4 2"/></symbol>
+    <symbol id="i-pen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></symbol>
+    <symbol id="i-trend" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m3 17 6-6 4 4 8-8"/><path d="M15 7h6v6"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 3v6h-6"/></symbol>
+    <symbol id="i-chev-d" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="i-chev-l" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></symbol>
+    <symbol id="i-chev-r" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></symbol>
+  </defs>
+</svg>
+
+<!-- 1 · NAV -->
+<nav class="nav">
+  <div class="wrap nav-inner">
+    <a href="#" class="logo" aria-label="BoardBrief home">
+      <svg width="24" height="24" viewBox="0 0 26 26" fill="none" aria-hidden="true">
+        <rect width="26" height="26" rx="7" fill="url(#lg)"/>
+        <path d="M7 17.5V12M13 17.5V8.5M19 17.5V11" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/>
+        <defs><linearGradient id="lg" x1="0" y1="0" x2="26" y2="26"><stop stop-color="#4d8dff"/><stop offset="1" stop-color="#7c5cff"/></linearGradient></defs>
+      </svg>
+      BoardBrief
+    </a>
+    <div class="nav-links">
+      <a href="#demo">Product</a>
+      <a href="#features">Features</a>
+      <a href="#how">How it works</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#faq">FAQ</a>
+    </div>
+    <div class="nav-cta">
+      <button class="btn btn-primary btn-sm" data-open-waitlist data-cta="nav">Generate My Report</button>
+    </div>
+  </div>
+</nav>
+
+<!-- 2 · HERO -->
+<header class="hero dotgrid">
+  <span class="glow glow-a" aria-hidden="true"></span>
+  <span class="glow glow-b" aria-hidden="true"></span>
+  <div class="wrap hero-grid">
+    <div>
+      <span class="mlabel">Early access · AI reporting for finance teams</span>
+      <h1>Turn Excel into Executive Reports in <span class="grad-text">Minutes</span></h1>
+      <p class="hero-sub"><strong>No formatting. No PowerPoint. Just upload.</strong> BoardBrief reads your workbook, finds the KPIs, computes variance, writes the commentary, and hands you a board-ready deck.</p>
+      <div class="hero-ctas">
+        <button class="btn btn-primary" data-open-waitlist data-cta="hero">Generate My Report</button>
+        <button class="btn btn-secondary" id="heroSecondary">See a sample report <svg class="ic" width="15" height="15" aria-hidden="true"><use href="#i-chev-d"/></svg></button>
+      </div>
+      <p class="hero-note mlabel">Free during early access · No credit card required</p>
+    </div>
+
+    <!-- hero visual: dark BI dashboard frame -->
+    <div class="frame" aria-hidden="true">
+      <div class="frame-bar">
+        <span class="fdot"></span><span class="fdot"></span><span class="fdot"></span>
+        <span class="frame-url">app.boardbrief.ai/reports/q2-2026</span>
+        <span class="chip"><span class="cdot cdot-warn"></span>Q2 2026 · Draft</span>
+      </div>
+      <div class="mock-body">
+        <div class="mock-title">
+          <span class="t">Executive Dashboard</span>
+          <span class="mlabel" style="font-size:10px">Commentary drafted</span>
+        </div>
+        <div class="mock-kpis tnum">
+          <div class="mock-kpi"><div class="k">Revenue</div><div class="v">$12.4M</div><div class="d ok">&#9650; +1.6% vs budget</div></div>
+          <div class="mock-kpi"><div class="k">Gross margin</div><div class="v">41.8%</div><div class="d ok">&#9650; +0.9 pts</div></div>
+          <div class="mock-kpi"><div class="k">EBITDA</div><div class="v">$2.10M</div><div class="d danger">&#9660; &minus;3.4% vs budget</div></div>
+        </div>
+        <div class="mock-chart">
+          <div class="mpair"><div class="mbar a" style="height:80%"></div><div class="mbar b" style="height:79%"></div></div>
+          <div class="mpair"><div class="mbar a" style="height:82%"></div><div class="mbar b" style="height:82%"></div></div>
+          <div class="mpair"><div class="mbar a" style="height:88%"></div><div class="mbar b" style="height:86%"></div></div>
+          <div class="mpair"><div class="mbar a" style="height:89%"></div><div class="mbar b" style="height:88%"></div></div>
+          <div class="mpair"><div class="mbar a" style="height:91%"></div><div class="mbar b" style="height:91%"></div></div>
+          <div class="mpair"><div class="mbar a" style="height:95%"></div><div class="mbar b" style="height:92%"></div></div>
+        </div>
+        <div class="mock-legend">
+          <span class="lg"><span class="sw" style="background:#3987e5"></span>Actual</span>
+          <span class="lg"><span class="sw" style="background:#d95926"></span>Budget</span>
+          <span class="mlabel" style="margin-left:auto;font-size:9.5px">Revenue · Jan&ndash;Jun · $M</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- 3 · SOCIAL PROOF -->
+<div class="logos">
+  <div class="wrap center">
+    <span class="mlabel">Built with finance teams at companies like</span>
+    <div class="logo-row reveal">
+      <span class="wordmark">Northwind Ops</span>
+      <span class="wordmark">Lumina Foods</span>
+      <span class="wordmark">Atlas Freight Co.</span>
+      <span class="wordmark">Copperline Retail</span>
+      <span class="wordmark">Verte Labs</span>
+      <span class="wordmark">Halewood Group</span>
+    </div>
+  </div>
+</div>
+
+<!-- 4 · PROBLEM -->
+<section id="problem">
+  <div class="wrap center">
+    <span class="mlabel reveal">01 &mdash; Problem</span>
+    <h2 class="reveal" style="margin-top:16px">Your numbers are done.<br>Your week isn't.</h2>
+    <p class="section-sub reveal">Finance teams lose hours every reporting cycle to work that isn't finance.</p>
+    <div class="grid grid-4">
+      <div class="card reveal">
+        <div class="icon-badge"><svg class="ic" width="18" height="18" aria-hidden="true"><use href="#i-table"/></svg></div>
+        <h3>Formatting Excel by hand</h3>
+        <p>Merged cells, conditional colors, print ranges &mdash; hours of polishing before anyone even reads a number.</p>
+      </div>
+      <div class="card reveal">
+        <div class="icon-badge"><svg class="ic" width="18" height="18" aria-hidden="true"><use href="#i-present"/></svg></div>
+        <h3>Rebuilding PowerPoint monthly</h3>
+        <p>The same board deck, re-created from scratch every cycle &mdash; copy, paste, resize, repeat.</p>
+      </div>
+      <div class="card reveal">
+        <div class="icon-badge"><svg class="ic" width="18" height="18" aria-hidden="true"><use href="#i-pen"/></svg></div>
+        <h3>Writing summaries at 11pm</h3>
+        <p>Executive commentary is the last thing standing between you and send &mdash; and it always takes longest.</p>
+      </div>
+      <div class="card reveal">
+        <div class="icon-badge"><svg class="ic" width="18" height="18" aria-hidden="true"><use href="#i-chart"/></svg></div>
+        <h3>Charts that break on refresh</h3>
+        <p>One new row in the source sheet and every linked chart, ratio, and reference quietly goes wrong.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 · SOLUTION -->
+<section class="alt" id="solution">
+  <div class="wrap center">
+    <span class="mlabel reveal">02 &mdash; Solution</span>
+    <h2 class="reveal" style="margin-top:16px">Upload the workbook. Present the report.</h2>
+    <p class="section-sub reveal">Everything between your spreadsheet and the boardroom, done automatically.</p>
+    <div class="ba">
+      <div class="ba-col reveal">
+        <span class="mlabel ba-tag">Before</span>
+        <h3>Reporting week, the old way</h3>
+        <ul>
+          <li><svg class="ic li-x" width="15" height="15" aria-hidden="true"><use href="#i-x"/></svg>Export, clean, and reformat trial-balance data by hand</li>
+          <li><svg class="ic li-x" width="15" height="15" aria-hidden="true"><use href="#i-x"/></svg>Rebuild variance tables and charts in a second file</li>
+          <li><svg class="ic li-x" width="15" height="15" aria-hidden="true"><use href="#i-x"/></svg>Paste screenshots into PowerPoint, fix alignment, twice</li>
+          <li><svg class="ic li-x" width="15" height="15" aria-hidden="true"><use href="#i-x"/></svg>Write the executive summary the night before the board call</li>
+        </ul>
+      </div>
+      <div class="ba-col after reveal">
+        <span class="mlabel ba-tag">After</span>
+        <h3>Reporting week, with BoardBrief</h3>
+        <ul>
+          <li><svg class="ic li-ok" width="15" height="15" aria-hidden="true"><use href="#i-check"/></svg>Upload your Excel &mdash; BoardBrief detects sheets, periods, and KPIs</li>
+          <li><svg class="ic li-ok" width="15" height="15" aria-hidden="true"><use href="#i-check"/></svg>Dashboard, variance analysis, and charts generated instantly</li>
+          <li><svg class="ic li-ok" width="15" height="15" aria-hidden="true"><use href="#i-check"/></svg>AI drafts executive commentary that matches the numbers</li>
+          <li><svg class="ic li-ok" width="15" height="15" aria-hidden="true"><use href="#i-check"/></svg>Export a branded PowerPoint and PDF in one click</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 · INTERACTIVE PROTOTYPE -->
+<section id="demo" class="dotgrid">
+  <div class="wrap">
+    <div class="center">
+      <span class="mlabel reveal">03 &mdash; Live preview</span>
+      <h2 class="reveal" style="margin-top:16px">Try it &mdash; from spreadsheet to boardroom</h2>
+      <p class="section-sub reveal">A live, clickable preview with sample data. Nothing you drop here is uploaded anywhere.</p>
+    </div>
+
+    <div class="frame demo-window reveal">
+      <div class="frame-bar">
+        <span class="fdot"></span><span class="fdot"></span><span class="fdot"></span>
+        <span class="frame-url">app.boardbrief.ai/new-report</span>
+        <span class="chip"><span class="cdot cdot-ok"></span>Sandbox</span>
+      </div>
+      <div class="demo-body">
+
+        <!-- STEP 1 · upload -->
+        <div id="demoStep1">
+          <div class="dropzone" id="dropzone" role="button" tabindex="0" aria-label="Upload an Excel file">
+            <div class="dz-icon"><svg class="ic" width="22" height="22" aria-hidden="true"><use href="#i-upload"/></svg></div>
+            <h3>Drag &amp; drop your Excel file</h3>
+            <p>.xlsx, .xls or .csv &mdash; or click to browse</p>
+          </div>
+          <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" hidden>
+          <div class="or">or try it with sample data</div>
+          <div class="center">
+            <button class="file-chip" id="sampleChip">
+              <svg class="ic" width="15" height="15" aria-hidden="true"><use href="#i-file"/></svg>
+              Q2-2026_financials.xlsx
+            </button>
+          </div>
+          <p class="privacy-note">Preview runs 100% in your browser &mdash; files are never read or uploaded</p>
+        </div>
+
+        <!-- STEP 2 · analysis (terminal log) -->
+        <div id="demoStep2" style="display:none">
+          <div class="term">
+            <div class="term-bar">
+              <svg class="ic" width="13" height="13" aria-hidden="true"><use href="#i-terminal"/></svg>
+              boardbrief analyze
+            </div>
+            <div class="term-body">
+              <div class="term-file">
+                <svg class="ic" width="14" height="14" aria-hidden="true"><use href="#i-file"/></svg>
+                <span id="analysisFile">Q2-2026_financials.xlsx</span>
+              </div>
+              <div class="progress"><i id="progressBar"></i></div>
+              <div class="tline" data-line data-run="Parsing sheets&hellip;" data-done="Parsing sheets &mdash; 4 found"><span class="pre"></span><span class="txt"></span></div>
+              <div class="tline" data-line data-run="Detecting KPIs&hellip;" data-done="Detecting KPIs &mdash; revenue, margin, EBITDA, YoY"><span class="pre"></span><span class="txt"></span></div>
+              <div class="tline" data-line data-run="Computing variance&hellip;" data-done="Computing variance &mdash; 6 line items vs budget"><span class="pre"></span><span class="txt"></span></div>
+              <div class="tline" data-line data-run="Writing commentary&hellip;" data-done="Writing commentary &mdash; 3 sections drafted"><span class="pre"></span><span class="txt"></span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 3 · report -->
+        <div id="demoStep3" style="display:none">
+          <div class="report-head">
+            <div>
+              <h3>Meridian Outdoor Supply &mdash; Q2 2026</h3>
+              <div class="meta">Generated from Q2-2026_financials.xlsx &middot; 4 sheets &middot; Apr&ndash;Jun 2026 (USD)</div>
+            </div>
+            <button class="btn btn-secondary btn-sm" id="regenBtn"><svg class="ic" width="14" height="14" aria-hidden="true"><use href="#i-refresh"/></svg> Start over</button>
+          </div>
+
+          <div class="tabs" role="tablist">
+            <button class="tab active" data-tab="dashboard" role="tab">Dashboard</button>
+            <button class="tab" data-tab="commentary" role="tab">Commentary</button>
+            <button class="tab" data-tab="slides" role="tab">Slides</button>
+          </div>
+
+          <!-- TAB a · dashboard -->
+          <div class="tabpane active" id="pane-dashboard">
+            <div class="kpis tnum">
+              <div class="kpi"><div class="k">Revenue (Q2)</div><div class="v">$12.4M</div><div class="d ok">&#9650; +1.6% <small>vs budget</small></div></div>
+              <div class="kpi"><div class="k">Gross margin</div><div class="v">41.8%</div><div class="d ok">&#9650; +0.9 pts <small>vs budget</small></div></div>
+              <div class="kpi"><div class="k">EBITDA</div><div class="v">$2.10M</div><div class="d danger">&#9660; &minus;3.4% <small>vs budget</small></div></div>
+              <div class="kpi"><div class="k">YoY growth</div><div class="v">+14.6%</div><div class="d ok">&#9650; <small>vs $10.8M in Q2 2025</small></div></div>
+            </div>
+            <div class="charts">
+              <div class="chart-card">
+                <h4>Monthly revenue &mdash; Actual vs Budget</h4>
+                <div class="sub">Jan&ndash;Jun 2026 &middot; $ millions</div>
+                <div class="legend">
+                  <span class="lg"><span class="sw" style="background:#3987e5"></span>Actual</span>
+                  <span class="lg"><span class="sw" style="background:#d95926"></span>Budget</span>
+                </div>
+                <div class="chart-scroll" id="revChart"></div>
+              </div>
+              <div class="chart-card">
+                <h4>Q2 variance by line item</h4>
+                <div class="sub">Actual vs budget &middot; $ thousands &middot; favorable &rarr; right</div>
+                <div class="legend">
+                  <span class="lg"><span class="sw" style="background:#3987e5"></span>Favorable</span>
+                  <span class="lg"><span class="sw" style="background:#ff5c5c"></span>Unfavorable</span>
+                </div>
+                <div class="chart-scroll" id="varChart"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB b · commentary -->
+          <div class="tabpane" id="pane-commentary">
+            <div class="commentary">
+              <span class="ai-tag"><svg class="ic" width="12" height="12" aria-hidden="true"><use href="#i-spark"/></svg>AI-drafted &middot; editable before export</span>
+              <p><strong>Q2 2026 revenue closed at $12.4M, $200K (+1.6%) ahead of budget and +14.6% year-over-year</strong> (Q2 2025: $10.8M). June was the strongest month of the half at $4.27M against a $4.15M budget, driven by continued wholesale expansion and a full quarter of the two regional distribution partners onboarded in March.</p>
+              <p><strong>Gross margin reached 41.8%, 0.9 points above the 40.9% plan.</strong> The renegotiated inbound freight contract (effective April) and a richer mix of direct-to-consumer orders more than offset input-cost inflation in apparel, adding $193K of gross profit versus budget.</p>
+              <p><strong>EBITDA finished at $2.10M, $74K (&minus;3.4%) below the $2.17M plan.</strong> The gross-profit beat was more than offset by operating spend: sales &amp; marketing ran $178K over budget as two trade shows were pulled forward from Q3 and paid-acquisition costs rose, while G&amp;A and R&amp;D ran $52K and $37K over, respectively. Full-year EBITDA guidance is unchanged, with the trade-show timing expected to reverse in Q3.</p>
+              <div class="callouts">
+                <h4>Variance callouts</h4>
+                <ul class="tnum">
+                  <li><span class="g ok">&#9650;</span><span><strong>Revenue +$200K vs budget (+1.6%).</strong> June at $4.27M vs $4.15M budget; all three Q2 months at or above plan.</span></li>
+                  <li><span class="g ok">&#9650;</span><span><strong>Gross profit +$193K.</strong> Margin 41.8% vs 40.9% plan on freight savings and DTC mix.</span></li>
+                  <li><span class="g danger">&#9660;</span><span><strong>Sales &amp; marketing &minus;$178K unfavorable.</strong> Trade-show timing plus higher CAC; recommend re-phasing Q3 event budget.</span></li>
+                  <li><span class="g danger">&#9660;</span><span><strong>EBITDA $2.10M vs $2.17M plan (&minus;3.4%).</strong> G&amp;A &minus;$52K and R&amp;D &minus;$37K also unfavorable; full-year guidance maintained.</span></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB c · slides -->
+          <div class="tabpane" id="pane-slides">
+            <div class="slide-stage">
+              <div class="slide-viewport">
+                <div class="slide-track" id="slideTrack">
+
+                  <!-- slide 1: title -->
+                  <div class="slide s-title">
+                    <div class="slide-title-body">
+                      <div class="s-eyebrow">Meridian Outdoor Supply</div>
+                      <h5>Q2 2026 Financial Review</h5>
+                      <div class="s-sub">Board of Directors &middot; July 2026</div>
+                    </div>
+                    <div class="s-foot"><span>Boardbrief &middot; Q2 2026 &middot; Confidential</span><span>1/4</span></div>
+                  </div>
+
+                  <!-- slide 2: KPI overview -->
+                  <div class="slide">
+                    <div class="s-eyebrow">Quarter at a glance</div>
+                    <h5>Q2 2026 headline KPIs</h5>
+                    <div class="s-kpis tnum">
+                      <div class="s-kpi"><div class="k">Revenue</div><div class="v">$12.4M</div><div class="d ok">&#9650; +1.6% vs budget</div></div>
+                      <div class="s-kpi"><div class="k">Gross margin</div><div class="v">41.8%</div><div class="d ok">&#9650; +0.9 pts vs budget</div></div>
+                      <div class="s-kpi"><div class="k">EBITDA</div><div class="v">$2.10M</div><div class="d danger">&#9660; &minus;3.4% vs budget</div></div>
+                      <div class="s-kpi"><div class="k">YoY growth</div><div class="v">+14.6%</div><div class="d ok">&#9650; vs $10.8M Q2 2025</div></div>
+                    </div>
+                    <div class="s-foot"><span>Boardbrief &middot; Q2 2026</span><span>2/4</span></div>
+                  </div>
+
+                  <!-- slide 3: revenue chart -->
+                  <div class="slide">
+                    <div class="s-eyebrow">Revenue</div>
+                    <h5>Monthly revenue vs budget &mdash; $200K ahead, +14.6% YoY</h5>
+                    <div class="s-legend tnum">
+                      <span class="lg"><span class="sw" style="background:#3987e5"></span>Actual</span>
+                      <span class="lg"><span class="sw" style="background:#d95926"></span>Budget</span>
+                    </div>
+                    <div class="s-chart" id="slideRevChart"></div>
+                    <div class="s-foot"><span>Boardbrief &middot; Q2 2026</span><span>3/4</span></div>
+                  </div>
+
+                  <!-- slide 4: variance + commentary -->
+                  <div class="slide">
+                    <div class="s-eyebrow">Variance &amp; outlook</div>
+                    <h5>Q2 variance vs budget</h5>
+                    <div class="s-split">
+                      <div id="slideVarChart"></div>
+                      <div>
+                        <ul class="s-bullets tnum">
+                          <li><span class="g ok">&#9650;</span>Revenue +$200K; gross profit +$193K on freight savings and DTC mix</li>
+                          <li><span class="g danger">&#9660;</span>S&amp;M &minus;$178K: trade-show timing pulled forward from Q3, higher CAC</li>
+                          <li><span class="g danger">&#9660;</span>EBITDA $2.10M vs $2.17M plan (&minus;3.4%)</li>
+                          <li><span class="g" style="color:var(--ink-3)">&minus;</span>Full-year guidance unchanged; timing reverses in Q3</li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div class="s-foot"><span>Boardbrief &middot; Q2 2026</span><span>4/4</span></div>
+                  </div>
+
+                </div>
+              </div>
+              <div class="slide-nav">
+                <div class="slide-arrows">
+                  <button class="arrow" id="slidePrev" aria-label="Previous slide"><svg class="ic" width="15" height="15" aria-hidden="true"><use href="#i-chev-l"/></svg></button>
+                  <button class="arrow" id="slideNext" aria-label="Next slide"><svg class="ic" width="15" height="15" aria-hidden="true"><use href="#i-chev-r"/></svg></button>
+                  <span class="dots" id="slideDots"></span>
+                  <span class="slide-count tnum" id="slideCount">1/4</span>
+                </div>
+                <div class="dl-btns">
+                  <button class="btn btn-primary btn-sm" data-dl="pptx"><svg class="ic" width="14" height="14" aria-hidden="true"><use href="#i-download"/></svg> Download PPT</button>
+                  <button class="btn btn-secondary btn-sm" data-dl="pdf"><svg class="ic" width="14" height="14" aria-hidden="true"><use href="#i-download"/></svg> Download PDF</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /step3 -->
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 7 · FEATURES -->
+<section class="alt" id="features">
+  <div class="wrap center">
+    <span class="mlabel reveal">04 &mdash; Features</span>
+    <h2 class="reveal" style="margin-top:16px">A finance analyst that never sleeps</h2>
+    <p class="section-sub reveal">Everything you need between the close and the board meeting.</p>
+    <div class="grid grid-3">
+      <div class="card reveal">
+        <div class="icon-badge"><svg class="ic" width="18" height="18" aria-hidden="true"><use href="#i-search"/></svg></div>
+        <h3>Automatic KPI detection</h3>
+        <p>BoardBrief recognizes revenue, margin, opex, and cash lines across messy multi-sheet workbooks &mdash; no template required.</p>
+      </div>
+      <div class="card reveal">
+        <div class="icon-badge"><svg class="ic" width="18" height="18" aria-hidden="true"><use href="#i-trend"/></svg></div>
+        <h3>Variance analysis, computed</h3>
+        <p>Actual vs budget vs prior year, at every line item &mdash; with drivers ranked so you see what actually moved the quarter.</p>
+      </div>
+      <div class="card reveal">
+        <div class="icon-badge"><svg class="ic" width="18" height="18" aria-hidden="true"><use href="#i-present"/></svg></div>
+        <h3>One-click board decks</h3>
+        <p>Export a fully-formatted PowerPoint or PDF in your template &mdash; titles, charts, and page numbers included.</p>
+      </div>
+      <div class="card reveal">
+        <div class="icon-badge"><svg class="ic" width="18" height="18" aria-hidden="true"><use href="#i-pen"/></svg></div>
+        <h3>AI executive commentary</h3>
+        <p>Fluent, CFO-grade narrative written from your actual numbers &mdash; every figure cited matches the dashboard.</p>
+      </div>
+      <div class="card reveal">
+        <div class="icon-badge"><svg class="ic" width="18" height="18" aria-hidden="true"><use href="#i-shield"/></svg></div>
+        <h3>Numbers that reconcile</h3>
+        <p>One source of truth: every KPI, chart, and sentence traces back to a cell in your workbook. No copy-paste drift.</p>
+      </div>
+      <div class="card reveal">
+        <div class="icon-badge"><svg class="ic" width="18" height="18" aria-hidden="true"><use href="#i-layers"/></svg></div>
+        <h3>Your templates &amp; branding</h3>
+        <p>Upload your deck template once &mdash; every report ships in your fonts, colors, and layout from then on.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 8 · HOW IT WORKS -->
+<section id="how">
+  <div class="wrap center">
+    <span class="mlabel reveal">05 &mdash; How it works</span>
+    <h2 class="reveal" style="margin-top:16px">Three steps. Minutes, not days.</h2>
+    <div class="steps">
+      <div class="step reveal">
+        <div class="step-num">01</div>
+        <h3>Upload your workbook</h3>
+        <p>Drop in the Excel file you already produce at close &mdash; P&amp;L, budget, prior year, whatever you have.</p>
+      </div>
+      <div class="step reveal">
+        <div class="step-num">02</div>
+        <h3>AI analyzes &amp; drafts</h3>
+        <p>BoardBrief maps your sheets, computes KPIs and variance, builds the charts, and writes the commentary.</p>
+      </div>
+      <div class="step reveal">
+        <div class="step-num">03</div>
+        <h3>Review &amp; export</h3>
+        <p>Adjust anything you like, then export the board deck as PowerPoint or PDF &mdash; or share a live dashboard link.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 9 · PRICING -->
+<section class="alt" id="pricing">
+  <div class="wrap center">
+    <span class="mlabel reveal">06 &mdash; Pricing</span>
+    <h2 class="reveal" style="margin-top:16px">Early-access pricing</h2>
+    <p class="section-sub reveal">Lock in founding rates. Cancel anytime.</p>
+    <div class="plans">
+      <div class="plan reveal">
+        <h3>Starter</h3>
+        <div class="tagline">For one finance owner</div>
+        <div class="price tnum">$49<small>/mo</small></div>
+        <span class="ea-label">Early-access pricing</span>
+        <ul>
+          <li><svg class="ic" width="15" height="15" aria-hidden="true"><use href="#i-check"/></svg>5 reports per month</li>
+          <li><svg class="ic" width="15" height="15" aria-hidden="true"><use href="#i-check"/></svg>KPI dashboard &amp; variance analysis</li>
+          <li><svg class="ic" width="15" height="15" aria-hidden="true"><use href="#i-check"/></svg>AI commentary</li>
+          <li><svg class="ic" width="15" height="15" aria-hidden="true"><use href="#i-check"/></svg>PDF export</li>
+        </ul>
+        <button class="btn btn-secondary" data-open-waitlist data-cta="pricing-starter">Join the waitlist</button>
+      </div>
+      <div class="plan popular reveal">
+        <span class="pop-badge">Most popular</span>
+        <h3>Pro</h3>
+        <div class="tagline">For finance teams</div>
+        <div class="price tnum">$149<small>/mo</small></div>
+        <span class="ea-label">Early-access pricing</span>
+        <ul>
+          <li><svg class="ic" width="15" height="15" aria-hidden="true"><use href="#i-check"/></svg>Unlimited reports &middot; 5 seats</li>
+          <li><svg class="ic" width="15" height="15" aria-hidden="true"><use href="#i-check"/></svg>PowerPoint + PDF export</li>
+          <li><svg class="ic" width="15" height="15" aria-hidden="true"><use href="#i-check"/></svg>Custom deck templates &amp; branding</li>
+          <li><svg class="ic" width="15" height="15" aria-hidden="true"><use href="#i-check"/></svg>Board-pack scheduling</li>
+          <li><svg class="ic" width="15" height="15" aria-hidden="true"><use href="#i-check"/></svg>Priority support</li>
+        </ul>
+        <button class="btn btn-primary" data-open-waitlist data-cta="pricing-pro">Join the waitlist</button>
+      </div>
+      <div class="plan reveal">
+        <h3>Enterprise</h3>
+        <div class="tagline">For controlled environments</div>
+        <div class="price">Let's talk</div>
+        <span class="ea-label">Early-access pricing</span>
+        <ul>
+          <li><svg class="ic" width="15" height="15" aria-hidden="true"><use href="#i-check"/></svg>Unlimited seats &amp; entities</li>
+          <li><svg class="ic" width="15" height="15" aria-hidden="true"><use href="#i-check"/></svg>SSO &amp; role-based access</li>
+          <li><svg class="ic" width="15" height="15" aria-hidden="true"><use href="#i-check"/></svg>ERP connectors (roadmap)</li>
+          <li><svg class="ic" width="15" height="15" aria-hidden="true"><use href="#i-check"/></svg>Security review &amp; DPA</li>
+        </ul>
+        <button class="btn btn-secondary" data-open-waitlist data-cta="pricing-enterprise">Talk to us</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 10 · FAQ -->
+<section id="faq">
+  <div class="wrap center">
+    <span class="mlabel reveal">07 &mdash; FAQ</span>
+    <h2 class="reveal" style="margin-top:16px">Questions finance people ask</h2>
+    <div class="faq">
+      <details class="reveal">
+        <summary>Is my financial data secure? <svg class="ic" width="16" height="16" aria-hidden="true"><use href="#i-chev-d"/></svg></summary>
+        <div class="a">Security is the product's first requirement: encryption in transit and at rest, region-pinned storage, and your data is never used to train models. Note: this page is an early-access preview &mdash; the demo above runs entirely in your browser and never uploads anything.</div>
+      </details>
+      <details class="reveal">
+        <summary>Which file formats are supported? <svg class="ic" width="16" height="16" aria-hidden="true"><use href="#i-chev-d"/></svg></summary>
+        <div class="a">.xlsx, .xls, and .csv &mdash; including multi-sheet workbooks with a P&amp;L, budget, and prior-year tabs. Google Sheets import is on the early-access roadmap.</div>
+      </details>
+      <details class="reveal">
+        <summary>What if my spreadsheet is messy? <svg class="ic" width="16" height="16" aria-hidden="true"><use href="#i-chev-d"/></svg></summary>
+        <div class="a">BoardBrief proposes a column and line-item mapping and shows you exactly what it detected before generating anything. You confirm or adjust the mapping once; it's remembered for next month's file.</div>
+      </details>
+      <details class="reveal">
+        <summary>Can I edit the generated commentary and slides? <svg class="ic" width="16" height="16" aria-hidden="true"><use href="#i-chev-d"/></svg></summary>
+        <div class="a">Yes. Commentary is fully editable before export, and the PowerPoint you download is a normal, editable .pptx in your own template &mdash; not a flattened image.</div>
+      </details>
+      <details class="reveal">
+        <summary>Does it connect to QuickBooks, Xero, or NetSuite? <svg class="ic" width="16" height="16" aria-hidden="true"><use href="#i-chev-d"/></svg></summary>
+        <div class="a">Direct connectors are on the roadmap and early-access members vote on the order. Today the workflow is upload-based, which also means it works with any ERP you can export from.</div>
+      </details>
+      <details class="reveal">
+        <summary>What does early access include? <svg class="ic" width="16" height="16" aria-hidden="true"><use href="#i-chev-d"/></svg></summary>
+        <div class="a">Founding pricing locked in for 12 months, weekly onboarding calls, and a direct line to the team building the product. We onboard new teams from the waitlist every week.</div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- 11 · FINAL CTA + FOOTER -->
+<section style="padding-top:0">
+  <div class="wrap">
+    <div class="final dotgrid reveal">
+      <span class="glow glow-a" aria-hidden="true"></span>
+      <span class="mlabel">Ready when your close is</span>
+      <h2 style="margin-top:14px">Your next board deck writes itself</h2>
+      <p>Join the early-access list and turn your Q3 close into an executive report in minutes.</p>
+      <button class="btn btn-primary" data-open-waitlist data-cta="final">Generate My Report</button>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot">
+    <span>&copy; 2026 BoardBrief</span>
+    <span style="display:flex;gap:22px">
+      <a id="privacyLink">Privacy</a>
+      <a id="contactLink">Contact</a>
+    </span>
+  </div>
+</footer>
+
+<!-- WAITLIST MODAL -->
+<div class="modal-back" id="waitlistBack" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="wlTitle">
+    <button class="modal-x" data-close-modal aria-label="Close"><svg class="ic" width="15" height="15" aria-hidden="true"><use href="#i-x"/></svg></button>
+    <div id="waitlistFormView">
+      <h3 id="wlTitle">Get early access</h3>
+      <p class="m-sub">We onboard new finance teams from the waitlist every week.</p>
+      <form id="waitlistForm" novalidate>
+        <div class="field" id="emailField">
+          <label for="wlEmail">Work email</label>
+          <input type="email" id="wlEmail" placeholder="you@company.com" autocomplete="email">
+          <div class="err">Please enter a valid email address.</div>
+        </div>
+        <div class="field">
+          <label for="wlRole">What best describes you?</label>
+          <select id="wlRole">
+            <option value="">Select a role (optional)</option>
+            <option>CFO</option>
+            <option>Finance Manager</option>
+            <option>Controller</option>
+            <option>FP&amp;A</option>
+            <option>Analyst</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Join the waitlist</button>
+      </form>
+      <p class="modal-fine">We only store your email to contact you about access. No spam.</p>
+    </div>
+    <div class="modal-success" id="waitlistSuccessView">
+      <div class="big"><svg class="ic" width="24" height="24" aria-hidden="true"><use href="#i-check"/></svg></div>
+      <h3>You're on the list!</h3>
+      <p class="m-sub">We onboard new teams weekly &mdash; keep an eye on your inbox.</p>
+      <button class="btn btn-secondary" id="successDemoBtn">Try the interactive demo</button>
+    </div>
+  </div>
+</div>
+
+<!-- PRIVACY / CONTACT MODAL -->
+<div class="modal-back" id="infoBack" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true">
+    <button class="modal-x" data-close-modal aria-label="Close"><svg class="ic" width="15" height="15" aria-hidden="true"><use href="#i-x"/></svg></button>
+    <h3 id="infoTitle">About this page</h3>
+    <p class="m-sub" id="infoBody">BoardBrief is in early access. We only store the email you submit, to contact you about access. Nothing else is collected, and demo files never leave your browser.</p>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* =============================================================
+   BoardBrief — validation page script (100% front-end mock)
+   ============================================================= */
+const CONFIG = {
+  endpoint: "",           // optional: URL that accepts POST JSON {email, source, event, idea, ts}
+  idea: "cfo-report-ai",
+};
+
+function track(event, extra = {}) {
+  const rec = { idea: CONFIG.idea, event, ts: Date.now(), ...extra };
+  try {
+    const all = JSON.parse(localStorage.getItem("val_events") || "[]");
+    all.push(rec);
+    localStorage.setItem("val_events", JSON.stringify(all));
+  } catch (e) { /* storage unavailable — ignore */ }
+  if (CONFIG.endpoint) {
+    fetch(CONFIG.endpoint.replace(/\/+$/, "") + "/" + CONFIG.idea, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(rec),
+    }).catch(() => {});
+  }
+}
+track("page_view");
+
+const $ = (sel) => document.querySelector(sel);
+const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+
+/* ---------- toast ---------- */
+let toastTimer = null;
+function toast(msg) {
+  const t = $("#toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove("show"), 2600);
+}
+
+/* =============================================================
+   Report data — single source of truth (fictional, USD)
+   Q2 actual 4.02+4.11+4.27 = 12.40M · budget 3.95+4.10+4.15 = 12.20M
+   Variance identity: +193 (GP) −178 (S&M) −52 (G&A) −37 (R&D) = −74 (EBITDA)
+   ============================================================= */
+const REPORT = {
+  company: "Meridian Outdoor Supply",
+  months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+  actual: [3.62, 3.71, 3.95, 4.02, 4.11, 4.27],   // $M
+  budget: [3.55, 3.70, 3.85, 3.95, 4.10, 4.15],   // $M
+  variance: [                                       // $K vs budget, P&L order
+    { label: "Revenue",           v:  200 },
+    { label: "Gross profit",      v:  193 },
+    { label: "Sales & marketing", v: -178 },
+    { label: "G&A",               v:  -52 },
+    { label: "R&D",               v:  -37 },
+    { label: "EBITDA",            v:  -74 },
+  ],
+};
+
+/* Dark chart palette — validated on --panel #10131a (design brief v2) */
+const COLORS = {
+  blue: "#3987e5",                 // series 1 / favorable
+  orange: "#d95926",               // series 2
+  red: "#ff5c5c",                  // unfavorable (diverging pole)
+  grid: "rgba(255,255,255,.06)",   // hairline gridlines
+  zero: "rgba(255,255,255,.25)",   // neutral zero line
+  base: "rgba(255,255,255,.18)",   // baseline
+  axis: "#656e80",                 // axis text (--ink-3)
+  label: "#a3aab8",                // category text (--ink-2)
+  ink: "#eef1f7",                  // direct value labels (--ink)
+};
+const MONO = "ui-monospace,'SF Mono',Menlo,monospace";
+
+/* ---------- SVG helpers ---------- */
+function topRoundedBar(x, y, w, h, fill) {
+  if (h <= 0) return "";
+  const r = Math.min(4, w / 2, h);
+  return `<path class="bar" d="M${x} ${y + h} V${y + r} Q${x} ${y} ${x + r} ${y} H${x + w - r} Q${x + w} ${y} ${x + w} ${y + r} V${y + h} Z" fill="${fill}"><title></title></path>`;
+}
+function rightRoundedBarH(x, y, w, h) {
+  const r = Math.min(4, h / 2, w);
+  return `M${x} ${y} H${x + w - r} A${r} ${r} 0 0 1 ${x + w} ${y + r} V${y + h - r} A${r} ${r} 0 0 1 ${x + w - r} ${y + h} H${x} Z`;
+}
+function leftRoundedBarH(x, y, w, h) {
+  const r = Math.min(4, h / 2, w);
+  return `M${x + w} ${y} H${x + r} A${r} ${r} 0 0 0 ${x} ${y + r} V${y + h - r} A${r} ${r} 0 0 0 ${x + r} ${y + h} H${x + w} Z`;
+}
+
+/* ---------- Chart 1: grouped bars, Actual vs Budget (dark) ---------- */
+function revenueChartSVG() {
+  const W = 640, H = 300, L = 48, R = 624, T = 20, B = 258;
+  const maxV = 4.5;
+  const y = (v) => B - (v / maxV) * (B - T);
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Grouped bar chart: monthly revenue actual versus budget, January to June 2026">`;
+
+  // hairline gridlines + mono y labels ($0M–$4M)
+  for (let v = 0; v <= 4; v++) {
+    const gy = y(v);
+    s += `<line x1="${L}" y1="${gy}" x2="${R}" y2="${gy}" stroke="${COLORS.grid}" stroke-width="1"/>`;
+    s += `<text x="${L - 8}" y="${gy + 4}" text-anchor="end" font-size="11" font-family="${MONO}" fill="${COLORS.axis}" style="font-variant-numeric:tabular-nums">$${v}M</text>`;
+  }
+
+  const gw = (R - L) / REPORT.months.length;
+  const barW = 16, gap = 5, pairW = barW * 2 + gap;
+  REPORT.months.forEach((m, i) => {
+    const x0 = L + i * gw + (gw - pairW) / 2;
+    const a = REPORT.actual[i], b = REPORT.budget[i];
+    s += topRoundedBar(x0, y(a), barW, B - y(a), COLORS.blue).replace("<title></title>", `<title>${m} actual $${a.toFixed(2)}M</title>`);
+    s += topRoundedBar(x0 + barW + gap, y(b), barW, B - y(b), COLORS.orange).replace("<title></title>", `<title>${m} budget $${b.toFixed(2)}M</title>`);
+    s += `<text x="${L + i * gw + gw / 2}" y="${B + 18}" text-anchor="middle" font-size="11" font-family="${MONO}" fill="${COLORS.label}">${m}</text>`;
+  });
+
+  // baseline
+  s += `<line x1="${L}" y1="${B}" x2="${R}" y2="${B}" stroke="${COLORS.base}" stroke-width="1"/>`;
+  s += "</svg>";
+  return s;
+}
+
+/* ---------- Chart 2: horizontal diverging variance bars (dark) ----------
+   Blue = favorable, red = unfavorable; every bar direct-labeled with a
+   signed value + delta glyph in ink — never color alone. */
+function varianceChartSVG() {
+  const W = 560, rowH = 38, top = 8;
+  const rows = REPORT.variance.length;
+  const H = top + rows * rowH + 26;
+  const plotL = 160, plotR = 480, dom = 300; // ±$300K domain leaves room for direct labels
+  const zero = plotL + ((plotR - plotL) * dom) / (2 * dom); // midpoint
+  const px = (kv) => ((plotR - plotL) / (2 * dom)) * Math.abs(kv);
+
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Diverging bar chart: Q2 variance versus budget by line item, in thousands of dollars">`;
+
+  // vertical hairline gridlines at ±100K, ±200K + mono scale labels
+  [-200, -100, 100, 200].forEach((v) => {
+    const gx = zero + ((plotR - plotL) / (2 * dom)) * v;
+    s += `<line x1="${gx}" y1="${top}" x2="${gx}" y2="${top + rows * rowH}" stroke="${COLORS.grid}" stroke-width="1"/>`;
+  });
+  [-200, -100, 0, 100, 200].forEach((v) => {
+    const gx = zero + ((plotR - plotL) / (2 * dom)) * v;
+    const lbl = v === 0 ? "$0" : (v > 0 ? "+$" + v + "K" : "−$" + Math.abs(v) + "K");
+    s += `<text x="${gx}" y="${H - 6}" text-anchor="middle" font-size="10" font-family="${MONO}" fill="${COLORS.axis}" style="font-variant-numeric:tabular-nums">${lbl}</text>`;
+  });
+
+  REPORT.variance.forEach((d, i) => {
+    const yTop = top + i * rowH, barH = 15, yBar = yTop + (rowH - barH) / 2;
+    const w = px(d.v);
+    const pos = d.v >= 0;
+    const fill = pos ? COLORS.blue : COLORS.red;
+    const glyph = pos ? "▲" : "▼";
+    const sign = pos ? "+" : "−";
+    const valTxt = `${glyph} ${sign}$${Math.abs(d.v)}K`;
+
+    s += `<g class="vrow">`;
+    s += `<rect class="vbg" x="0" y="${yTop}" width="${W}" height="${rowH}" rx="6"/>`;
+    s += `<text x="${plotL - 12}" y="${yTop + rowH / 2 + 4}" text-anchor="end" font-size="12.5" fill="${COLORS.label}">${d.label}</text>`;
+    if (pos) {
+      s += `<path class="bar" d="${rightRoundedBarH(zero, yBar, w, barH)}" fill="${fill}"><title>${d.label}: +$${d.v}K vs budget</title></path>`;
+      s += `<text x="${zero + w + 8}" y="${yBar + barH / 2 + 4}" text-anchor="start" font-size="11.5" font-weight="600" fill="${COLORS.ink}" style="font-variant-numeric:tabular-nums">${valTxt}</text>`;
+    } else {
+      s += `<path class="bar" d="${leftRoundedBarH(zero - w, yBar, w, barH)}" fill="${fill}"><title>${d.label}: −$${Math.abs(d.v)}K vs budget</title></path>`;
+      s += `<text x="${zero - w - 8}" y="${yBar + barH / 2 + 4}" text-anchor="end" font-size="11.5" font-weight="600" fill="${COLORS.ink}" style="font-variant-numeric:tabular-nums">${valTxt}</text>`;
+    }
+    s += `</g>`;
+  });
+
+  // neutral zero line on top of bars' edges
+  s += `<line x1="${zero}" y1="${top - 2}" x2="${zero}" y2="${top + rows * rowH + 2}" stroke="${COLORS.zero}" stroke-width="1.5"/>`;
+  s += "</svg>";
+  return s;
+}
+
+function renderCharts() {
+  $("#revChart").innerHTML = revenueChartSVG();
+  $("#varChart").innerHTML = varianceChartSVG();
+  $("#slideRevChart").innerHTML = revenueChartSVG();
+  $("#slideVarChart").innerHTML = varianceChartSVG();
+}
+
+/* =============================================================
+   Demo flow: upload -> analysis (terminal log) -> report
+   ============================================================= */
+const step1 = $("#demoStep1"), step2 = $("#demoStep2"), step3 = $("#demoStep3");
+let demoStarted = false;
+let demoRunning = false;
+let chartsRendered = false;
+
+function startAnalysis(source, filename) {
+  if (demoRunning) return;
+  demoRunning = true;
+  if (!demoStarted) { demoStarted = true; track("demo_start", { source }); }
+  track("upload", { source, filename });
+
+  $("#analysisFile").textContent = filename;
+  step1.style.display = "none";
+  step3.style.display = "none";
+  step2.style.display = "block";
+
+  const lines = $$("#demoStep2 [data-line]");
+  lines.forEach((l) => {
+    l.classList.remove("on", "done");
+    l.querySelector(".pre").textContent = "";
+    l.querySelector(".txt").textContent = l.dataset.run;
+  });
+  const bar = $("#progressBar");
+  bar.style.width = "4%";
+
+  const stepMs = 620; // 4 lines ≈ 2.5s total
+  lines.forEach((line, i) => {
+    setTimeout(() => {
+      line.classList.add("on");
+      line.querySelector(".pre").textContent = "▸";
+      bar.style.width = Math.round(((i + 0.6) / lines.length) * 100) + "%";
+    }, i * stepMs);
+    setTimeout(() => {
+      line.classList.remove("on");
+      line.classList.add("done");
+      line.querySelector(".pre").textContent = "[ok]";
+      line.querySelector(".txt").textContent = line.dataset.done;
+    }, (i + 1) * stepMs - 90);
+  });
+
+  setTimeout(() => {
+    bar.style.width = "100%";
+    setTimeout(showReport, 320);
+  }, lines.length * stepMs);
+}
+
+function showReport() {
+  demoRunning = false;
+  step2.style.display = "none";
+  step3.style.display = "block";
+  if (!chartsRendered) { renderCharts(); chartsRendered = true; }
+  switchTab("dashboard", false);
+  track("demo_complete");
+  track("tab_view", { tab: "dashboard" });
+  toast("Report generated — explore the Dashboard, Commentary, and Slides tabs");
+  step3.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+/* upload interactions (simulated only — files are never read) */
+const dropzone = $("#dropzone");
+const fileInput = $("#fileInput");
+dropzone.addEventListener("click", () => fileInput.click());
+dropzone.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fileInput.click(); } });
+["dragenter", "dragover"].forEach((ev) => dropzone.addEventListener(ev, (e) => { e.preventDefault(); dropzone.classList.add("drag"); }));
+["dragleave", "drop"].forEach((ev) => dropzone.addEventListener(ev, (e) => { e.preventDefault(); dropzone.classList.remove("drag"); }));
+dropzone.addEventListener("drop", (e) => {
+  const name = (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0] && e.dataTransfer.files[0].name) || "your-file.xlsx";
+  startAnalysis("drop", name);
+});
+fileInput.addEventListener("change", () => {
+  const name = (fileInput.files && fileInput.files[0] && fileInput.files[0].name) || "your-file.xlsx";
+  fileInput.value = "";
+  startAnalysis("picker", name);
+});
+$("#sampleChip").addEventListener("click", () => startAnalysis("sample", "Q2-2026_financials.xlsx"));
+$("#regenBtn").addEventListener("click", () => {
+  step3.style.display = "none";
+  step1.style.display = "block";
+});
+
+/* ---------- tabs ---------- */
+function switchTab(name, doTrack = true) {
+  $$(".tab").forEach((t) => t.classList.toggle("active", t.dataset.tab === name));
+  $$(".tabpane").forEach((p) => p.classList.toggle("active", p.id === "pane-" + name));
+  if (doTrack) track("tab_view", { tab: name });
+}
+$$(".tab").forEach((t) => t.addEventListener("click", () => switchTab(t.dataset.tab)));
+
+/* ---------- slides carousel ---------- */
+const SLIDE_COUNT = 4;
+let slideIdx = 0;
+const dotsWrap = $("#slideDots");
+for (let i = 0; i < SLIDE_COUNT; i++) {
+  const d = document.createElement("span");
+  d.className = "sdot" + (i === 0 ? " on" : "");
+  dotsWrap.appendChild(d);
+}
+function updateSlides() {
+  $("#slideTrack").style.transform = `translateX(-${slideIdx * 100}%)`;
+  $$("#slideDots .sdot").forEach((d, i) => d.classList.toggle("on", i === slideIdx));
+  $("#slideCount").textContent = (slideIdx + 1) + "/" + SLIDE_COUNT;
+  $("#slidePrev").disabled = slideIdx === 0;
+  $("#slideNext").disabled = slideIdx === SLIDE_COUNT - 1;
+}
+$("#slideNext").addEventListener("click", () => {
+  if (slideIdx < SLIDE_COUNT - 1) { slideIdx++; updateSlides(); track("slide_next", { to: slideIdx + 1, dir: "next" }); }
+});
+$("#slidePrev").addEventListener("click", () => {
+  if (slideIdx > 0) { slideIdx--; updateSlides(); track("slide_next", { to: slideIdx + 1, dir: "prev" }); }
+});
+updateSlides();
+
+/* downloads -> intent hook */
+$$("[data-dl]").forEach((btn) => btn.addEventListener("click", () => {
+  const format = btn.dataset.dl;
+  track("download_attempt", { format });
+  toast("Downloads unlock with early access");
+  setTimeout(() => openWaitlist("download-" + format), 750);
+}));
+
+/* =============================================================
+   Waitlist modal
+   ============================================================= */
+const waitlistBack = $("#waitlistBack");
+function openWaitlist(source) {
+  track("cta_click", { cta: source });
+  $("#waitlistFormView").style.display = "block";
+  $("#waitlistSuccessView").style.display = "none";
+  waitlistBack.classList.add("open");
+  waitlistBack.setAttribute("aria-hidden", "false");
+  setTimeout(() => $("#wlEmail").focus(), 60);
+}
+function closeModals() {
+  $$(".modal-back").forEach((m) => { m.classList.remove("open"); m.setAttribute("aria-hidden", "true"); });
+}
+$$("[data-open-waitlist]").forEach((btn) => btn.addEventListener("click", () => openWaitlist(btn.dataset.cta || "cta")));
+$$("[data-close-modal]").forEach((btn) => btn.addEventListener("click", closeModals));
+$$(".modal-back").forEach((back) => back.addEventListener("click", (e) => { if (e.target === back) closeModals(); }));
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeModals(); });
+
+$("#waitlistForm").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const emailField = $("#emailField");
+  const email = $("#wlEmail").value.trim();
+  const valid = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+  emailField.classList.toggle("invalid", !valid);
+  if (!valid) return;
+  const role = $("#wlRole").value || "unspecified";
+  track("signup", { email, role });
+  $("#waitlistFormView").style.display = "none";
+  $("#waitlistSuccessView").style.display = "block";
+});
+$("#successDemoBtn").addEventListener("click", () => {
+  closeModals();
+  $("#demo").scrollIntoView({ behavior: "smooth" });
+});
+
+/* hero secondary CTA -> scroll to prototype */
+$("#heroSecondary").addEventListener("click", () => {
+  track("cta_click", { cta: "hero-sample-report" });
+  $("#demo").scrollIntoView({ behavior: "smooth" });
+});
+
+/* privacy / contact honest modal */
+function openInfo(title, body) {
+  $("#infoTitle").textContent = title;
+  $("#infoBody").textContent = body;
+  $("#infoBack").classList.add("open");
+  $("#infoBack").setAttribute("aria-hidden", "false");
+}
+$("#privacyLink").addEventListener("click", () =>
+  openInfo("Privacy", "We're in early access. We only store the email you submit, to contact you about access. Demo files never leave your browser — nothing is uploaded or read."));
+$("#contactLink").addEventListener("click", () =>
+  openInfo("Contact", "We're in early access. Join the waitlist and we'll reach out from a real human inbox — we only store the email you submit, to contact you about access."));
+
+/* =============================================================
+   Scroll behaviors
+   ============================================================= */
+/* reveal on scroll — 350ms fade + 14px rise, 50ms sibling stagger */
+const revealEls = $$(".reveal");
+revealEls.forEach((el, i) => { el.style.transitionDelay = (i % 6) * 50 + "ms"; });
+const io = new IntersectionObserver((entries) => {
+  entries.forEach((en) => {
+    if (en.isIntersecting) { en.target.classList.add("in"); io.unobserve(en.target); }
+  });
+}, { threshold: 0.1 });
+revealEls.forEach((el) => io.observe(el));
+
+/* pricing_view once */
+let pricingSeen = false;
+const pio = new IntersectionObserver((entries) => {
+  entries.forEach((en) => {
+    if (en.isIntersecting && !pricingSeen) { pricingSeen = true; track("pricing_view"); pio.disconnect(); }
+  });
+}, { threshold: 0.25 });
+pio.observe($("#pricing"));
+
+/* =============================================================
+   Founder stats peek (?stats=1)
+   ============================================================= */
+if (new URLSearchParams(location.search).get("stats") === "1") {
+  let events = [];
+  try { events = JSON.parse(localStorage.getItem("val_events") || "[]"); } catch (e) {}
+  const mine = events.filter((r) => r.idea === CONFIG.idea);
+  const counts = {};
+  const emails = [];
+  mine.forEach((r) => {
+    counts[r.event] = (counts[r.event] || 0) + 1;
+    if (r.event === "signup" && r.email) emails.push(r.email + " (" + (r.role || "?") + ")");
+  });
+  const panel = document.createElement("div");
+  panel.className = "stats-peek tnum";
+  panel.innerHTML =
+    "<h4>" + CONFIG.idea + " — events</h4><table>" +
+    Object.keys(counts).sort().map((k) => "<tr><td>" + k + "</td><td><strong>" + counts[k] + "</strong></td></tr>").join("") +
+    "</table>" +
+    (emails.length ? "<h4 style='margin-top:10px'>Signups</h4><div style='color:var(--ink-2)'>" + emails.join("<br>") + "</div>" : "");
+  document.body.appendChild(panel);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,1805 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MenuBoost — Your AI Marketing Manager for Restaurants</title>
+<meta name="description" content="Upload your menu. Get 30 days of social media content in minutes. MenuBoost writes posts, reels, promos and holiday campaigns for restaurants, cafes and street food businesses.">
+<script>
+document.documentElement.classList.add("js");
+</script>
+<style>
+  :root{
+    color-scheme: dark;
+    --bg:#08090d;
+    --bg-2:#0b0d13;
+    --panel:#10131a;
+    --panel-2:#151926;
+    --border:rgba(255,255,255,.07);
+    --border-strong:rgba(255,255,255,.14);
+    --ink:#eef1f7;
+    --ink-2:#a3aab8;
+    --ink-3:#656e80;
+    --accent:#4d8dff;
+    --accent-2:#7c5cff;
+    --grad:linear-gradient(120deg,#4d8dff,#7c5cff);
+    --wash:rgba(77,141,255,.10);
+    --ok:#2dd882; --warn:#f5b83d; --danger:#ff5c5c;
+    --radius:12px;
+    --mono:ui-monospace,"SF Mono",Menlo,monospace;
+    /* food imagery — warm gradients as imagery on the dark ground */
+    --warm-1:linear-gradient(135deg,#8a3d20 0%,#c9762e 100%);   /* terracotta-amber */
+    --warm-2:linear-gradient(135deg,#6e2331 0%,#bf4e26 100%);   /* plum-red / burnt orange */
+    --warm-3:linear-gradient(135deg,#6e4a14 0%,#c49338 100%);   /* deep amber */
+    --warm-4:linear-gradient(135deg,#472b52 0%,#8f4463 100%);   /* plum */
+    --warm-5:linear-gradient(135deg,#7c3618 0%,#c96f33 100%);   /* burnt sienna */
+    --warm-6:linear-gradient(135deg,#4a2c18 0%,#96562b 100%);   /* umber */
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.55;
+    -webkit-font-smoothing:antialiased;overflow-x:hidden;
+  }
+  img,svg{max-width:100%}
+  a{color:var(--accent);text-decoration:none}
+  button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
+  input,select{font:inherit}
+  ::selection{background:rgba(77,141,255,.35)}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+  section{padding:80px 0;border-top:1px solid var(--border)}
+  @media(min-width:960px){section{padding:104px 0}}
+  .alt{background:var(--bg-2)}
+  h1,h2,h3{letter-spacing:-.03em;line-height:1.12}
+  h2{font-size:clamp(26px,4vw,40px);font-weight:700}
+
+  /* mono eyebrow layer — the signature */
+  .mono, .eyebrow, .idx{font-family:var(--mono)}
+  .eyebrow{
+    display:block;font-size:12px;text-transform:uppercase;letter-spacing:.14em;
+    color:var(--ink-3);margin-bottom:16px;font-weight:500;
+  }
+  .eyebrow .idx{color:var(--accent)}
+  .sec-sub{color:var(--ink-2);max-width:620px;margin-top:14px;font-size:16.5px}
+  .center{text-align:center}
+  .center .sec-sub{margin-left:auto;margin-right:auto}
+  .num{font-variant-numeric:tabular-nums}
+
+  /* icon plumbing */
+  .i{display:inline-block;vertical-align:middle;flex:none}
+
+  /* ---------- buttons ---------- */
+  .btn{
+    display:inline-flex;align-items:center;gap:8px;justify-content:center;
+    padding:11px 22px;border-radius:9px;font-weight:600;font-size:14.5px;
+    transition:box-shadow .18s ease,background .18s ease,border-color .18s ease,filter .18s ease;
+    white-space:nowrap;
+  }
+  .btn-primary{background:var(--accent);color:#071021}
+  .btn-primary:hover{filter:brightness(1.12);box-shadow:0 0 24px rgba(77,141,255,.35)}
+  .btn-secondary{background:transparent;color:var(--ink);border:1px solid var(--border-strong)}
+  .btn-secondary:hover{border-color:var(--accent)}
+  .btn-sm{padding:8px 16px;font-size:13.5px}
+  .btn[disabled]{opacity:.4;cursor:not-allowed;filter:none!important;box-shadow:none!important}
+
+  /* ---------- nav ---------- */
+  .nav{
+    position:sticky;top:0;z-index:60;
+    background:rgba(8,9,13,.7);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--border);
+  }
+  .nav-inner{display:flex;align-items:center;justify-content:space-between;height:60px}
+  .logo{display:flex;align-items:center;gap:9px;font-weight:700;font-size:16px;color:var(--ink);letter-spacing:-.02em}
+  .nav-links{display:none;gap:26px;align-items:center}
+  .nav-links a{color:var(--ink-2);font-size:13.5px;font-weight:500}
+  .nav-links a:hover{color:var(--ink)}
+  @media(min-width:960px){.nav-links{display:flex}}
+  .nav .btn{padding:8px 16px;font-size:13.5px}
+
+  /* ---------- hero ---------- */
+  .hero{
+    padding:80px 0 88px;position:relative;overflow:hidden;border-top:none;
+  }
+  @media(min-width:960px){.hero{padding:110px 0 120px}}
+  .hero::before{ /* dot grid */
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background-image:radial-gradient(circle at 1px 1px,rgba(255,255,255,.05) 1px,transparent 0);
+    background-size:26px 26px;
+    -webkit-mask-image:radial-gradient(ellipse 90% 70% at 50% 0%,#000 35%,transparent 78%);
+    mask-image:radial-gradient(ellipse 90% 70% at 50% 0%,#000 35%,transparent 78%);
+  }
+  .hero::after{ /* glow */
+    content:"";position:absolute;width:640px;height:520px;left:50%;top:-220px;
+    transform:translateX(-58%);border-radius:50%;pointer-events:none;
+    background:radial-gradient(circle,rgba(77,141,255,.13),transparent 65%);
+    filter:blur(90px);
+  }
+  .hero-grid{display:grid;gap:52px;align-items:center;position:relative;z-index:1}
+  @media(min-width:960px){.hero-grid{grid-template-columns:1.02fr .98fr}}
+  .hero h1{font-size:clamp(38px,6.5vw,68px);font-weight:750;letter-spacing:-.03em}
+  .hero h1 .gx{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero .sub{margin-top:20px;font-size:clamp(16px,2.1vw,18.5px);color:var(--ink-2);max-width:520px}
+  .hero-ctas{margin-top:32px;display:flex;gap:12px;flex-wrap:wrap}
+  .hero-note{margin-top:16px;font-size:12px;color:var(--ink-3);font-family:var(--mono);letter-spacing:.04em}
+
+  /* app frame (shared: hero mock + demo) */
+  .frame{
+    background:var(--panel);border:1px solid var(--border);border-radius:14px;overflow:hidden;
+    box-shadow:0 30px 80px -30px rgba(0,0,0,.7);
+  }
+  .frame-bar{
+    display:flex;align-items:center;gap:12px;padding:10px 14px;
+    background:var(--panel-2);border-bottom:1px solid var(--border);
+  }
+  .frame-dots{display:flex;gap:6px}
+  .frame-dots span{width:10px;height:10px;border-radius:50%;background:var(--ink-3);opacity:.5}
+  .frame-url{
+    flex:1;font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.03em;
+    display:flex;align-items:center;gap:7px;justify-content:center;min-width:0;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .frame-chip{
+    font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--ok);background:rgba(45,216,130,.09);border:1px solid rgba(45,216,130,.25);
+    padding:2px 8px;border-radius:99px;white-space:nowrap;
+  }
+
+  /* hero calendar mock */
+  .cal-mock{padding:16px}
+  .cal-mock-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:14px}
+  .cal-mock-title{font-weight:650;font-size:13.5px;letter-spacing:-.01em}
+  .cal-mock-title small{display:block;font-family:var(--mono);font-weight:400;color:var(--ink-3);font-size:10px;letter-spacing:.1em;text-transform:uppercase;margin-top:3px}
+  .cal-mock-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+  .cal-mock-grid .dow{font-family:var(--mono);font-size:9px;color:var(--ink-3);text-align:center;letter-spacing:.1em;padding-bottom:2px}
+  .mini-day{
+    border:1px solid var(--border);border-radius:8px;background:var(--bg-2);
+    padding:6px 5px 5px;display:flex;flex-direction:column;gap:4px;align-items:stretch;
+  }
+  .mini-day .n{font-family:var(--mono);font-size:8.5px;color:var(--ink-3)}
+  .mini-day .sw{height:14px;border-radius:4px;opacity:.85}
+  .mini-day .t{font-family:var(--mono);font-size:7px;letter-spacing:.08em;color:var(--ink-3);text-transform:uppercase;text-align:center}
+  .mini-day .t.hl{color:var(--accent)}
+  .mini-day .t.pr{color:var(--ok)}
+
+  /* ---------- social proof ---------- */
+  .proof{padding:34px 0 40px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--bg-2)}
+  .proof p{text-align:center;font-family:var(--mono);font-size:11px;color:var(--ink-3);letter-spacing:.14em;text-transform:uppercase;margin-bottom:18px}
+  .wordmarks{display:flex;flex-wrap:wrap;justify-content:center;gap:14px 40px;align-items:center;opacity:.35}
+  .wordmark{font-family:var(--mono);font-weight:600;font-size:13px;color:var(--ink-3);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+
+  /* ---------- cards ---------- */
+  .card-grid{display:grid;gap:16px;margin-top:44px}
+  @media(min-width:640px){.card-grid{grid-template-columns:repeat(2,1fr)}}
+  @media(min-width:960px){.card-grid.cols-4{grid-template-columns:repeat(4,1fr)}.card-grid.cols-3{grid-template-columns:repeat(3,1fr)}}
+  .card{
+    position:relative;background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
+    padding:24px;transition:border-color .2s ease;
+  }
+  .card::before{
+    content:"";position:absolute;top:-1px;left:8%;right:8%;height:1px;opacity:0;
+    background:linear-gradient(90deg,transparent,rgba(77,141,255,.5),transparent);
+    transition:opacity .25s ease;
+  }
+  .card:hover{border-color:var(--border-strong)}
+  .card:hover::before{opacity:1}
+  .card .ic{
+    width:38px;height:38px;border-radius:10px;background:var(--wash);color:var(--accent);
+    display:flex;align-items:center;justify-content:center;margin-bottom:16px;
+  }
+  .card h3{font-size:15.5px;font-weight:650;margin-bottom:8px;letter-spacing:-.01em}
+  .card p{font-size:14px;color:var(--ink-2)}
+
+  /* before / after */
+  .before-after{display:grid;gap:16px;margin-top:44px}
+  @media(min-width:960px){.before-after{grid-template-columns:1fr auto 1fr;align-items:stretch}}
+  .ba-col{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:26px}
+  .ba-col.after{border-color:rgba(77,141,255,.3);background:linear-gradient(180deg,rgba(77,141,255,.05),var(--panel) 55%)}
+  .ba-col h3{font-family:var(--mono);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.14em;margin-bottom:18px}
+  .ba-col.before h3{color:var(--ink-3)}
+  .ba-col.after h3{color:var(--accent)}
+  .ba-col ul{list-style:none}
+  .ba-col li{display:flex;gap:10px;padding:8px 0;font-size:14.5px;color:var(--ink-2);align-items:flex-start}
+  .ba-col li .i{margin-top:3px}
+  .ba-col.before li .i{color:var(--danger)}
+  .ba-col.after li .i{color:var(--ok)}
+  .ba-arrow{display:flex;align-items:center;justify-content:center;color:var(--ink-3);transform:rotate(90deg)}
+  @media(min-width:960px){.ba-arrow{transform:none;padding:0 6px}}
+
+  /* ---------- demo section ---------- */
+  #demo{position:relative}
+  #demo::before{
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background-image:radial-gradient(circle at 1px 1px,rgba(255,255,255,.05) 1px,transparent 0);
+    background-size:26px 26px;
+    -webkit-mask-image:radial-gradient(ellipse 80% 55% at 50% 8%,#000 30%,transparent 75%);
+    mask-image:radial-gradient(ellipse 80% 55% at 50% 8%,#000 30%,transparent 75%);
+  }
+  #demo .wrap{position:relative;z-index:1}
+  .app-window{margin-top:46px}
+  .app-body{padding:22px;min-height:480px}
+  @media(min-width:640px){.app-body{padding:30px}}
+
+  /* wizard steps */
+  .steps{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:30px;flex-wrap:wrap}
+  .step-pill{
+    display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;
+    letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);
+    padding:6px 13px;border-radius:99px;border:1px solid var(--border);background:var(--bg-2);
+  }
+  .step-pill .snum{color:var(--ink-3)}
+  .step-pill.active{color:var(--accent);border-color:rgba(77,141,255,.4);background:var(--wash)}
+  .step-pill.active .snum{color:var(--accent)}
+  .step-pill.done{color:var(--ok);border-color:rgba(45,216,130,.3);background:rgba(45,216,130,.07)}
+  .step-pill.done .snum{color:var(--ok)}
+  .step-sep{width:18px;height:1px;background:var(--border-strong)}
+
+  /* step 1 */
+  .proto-grid{display:grid;gap:24px}
+  @media(min-width:960px){.proto-grid{grid-template-columns:1fr 1fr}}
+  .proto-label{
+    font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--ink-3);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:10px;
+  }
+  .proto-label .hint{letter-spacing:.06em;text-transform:none;color:var(--ink-3);font-size:11px}
+  .drop-zone{
+    border:1px dashed var(--border-strong);border-radius:var(--radius);padding:32px 22px;text-align:center;
+    background:var(--bg-2);transition:border-color .2s,background .2s;cursor:pointer;
+  }
+  .drop-zone.drag{border-color:var(--accent);background:var(--wash)}
+  .drop-zone .dz-ic{color:var(--ink-3);margin-bottom:10px}
+  .drop-zone h4{font-size:14.5px;font-weight:650}
+  .drop-zone p{font-size:12.5px;color:var(--ink-3);margin-top:5px}
+  .sample-chip{
+    display:inline-flex;align-items:center;gap:8px;margin-top:16px;
+    background:var(--panel-2);border:1px solid var(--border-strong);border-radius:7px;
+    padding:7px 13px;font-family:var(--mono);font-size:12px;color:var(--ink-2);
+    box-shadow:0 2px 0 rgba(0,0,0,.35);
+    transition:border-color .15s,color .15s;
+  }
+  .sample-chip:hover{border-color:var(--accent);color:var(--ink)}
+  .drop-zone.uploaded{border-style:solid;border-color:rgba(45,216,130,.35);background:rgba(45,216,130,.05);cursor:default}
+  .file-ok{display:flex;align-items:center;justify-content:center;gap:9px;font-size:13.5px;font-weight:600;color:var(--ok)}
+  .file-ok .fname{font-family:var(--mono);font-weight:500}
+  .dz-meta{font-family:var(--mono);font-size:11px;color:var(--ink-3);margin-top:8px;letter-spacing:.04em}
+
+  .photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .photo-card{
+    position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;
+    border:1px solid var(--border);cursor:pointer;padding:0;
+    display:flex;align-items:center;justify-content:center;
+    transition:border-color .15s,box-shadow .15s;
+  }
+  .photo-card:hover{border-color:var(--border-strong)}
+  .photo-card.sel{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent),0 0 18px rgba(77,141,255,.25)}
+  .photo-card .mark{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;opacity:.14;pointer-events:none}
+  .photo-card .mark svg{width:56%;height:56%}
+  .photo-card .lbl{
+    position:absolute;left:8px;bottom:7px;font-family:var(--mono);font-size:9px;
+    letter-spacing:.14em;color:rgba(255,255,255,.85);text-transform:uppercase;
+  }
+  .photo-card .check{
+    position:absolute;top:7px;right:7px;width:20px;height:20px;border-radius:50%;
+    background:var(--accent);color:#071021;display:none;align-items:center;justify-content:center;
+  }
+  .photo-card.sel .check{display:flex}
+  .food-g{position:absolute;inset:0;pointer-events:none}
+  .food-g::after{content:"";position:absolute;inset:0;background:radial-gradient(120% 90% at 82% 0%,rgba(255,255,255,.14),transparent 55%)}
+  .g1 .food-g{background:var(--warm-1)}.g2 .food-g{background:var(--warm-2)}.g3 .food-g{background:var(--warm-3)}
+  .g4 .food-g{background:var(--warm-4)}.g5 .food-g{background:var(--warm-5)}.g6 .food-g{background:var(--warm-6)}
+
+  .biz-input{
+    width:100%;padding:11px 14px;border:1px solid var(--border-strong);border-radius:9px;
+    font-size:14.5px;background:var(--panel-2);color:var(--ink);
+  }
+  .biz-input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--wash)}
+  .proto-footer{margin-top:28px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .proto-footer .status{font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.04em}
+
+  /* step 2: terminal generation */
+  .gen-wrap{max-width:520px;margin:36px auto;padding-bottom:16px}
+  .gen-term{
+    background:var(--bg-2);border:1px solid var(--border);border-radius:10px;overflow:hidden;
+    font-family:var(--mono);
+  }
+  .gen-term-bar{
+    display:flex;align-items:center;justify-content:space-between;padding:9px 14px;
+    border-bottom:1px solid var(--border);background:var(--panel-2);
+    font-size:10.5px;color:var(--ink-3);letter-spacing:.1em;text-transform:uppercase;
+  }
+  .gen-lines{padding:18px 16px 8px;display:flex;flex-direction:column;gap:11px}
+  .gen-line{display:flex;gap:11px;font-size:12.5px;color:var(--ink-3);opacity:.45;transition:opacity .3s,color .3s;align-items:baseline}
+  .gen-line .gl-pre{flex:none;min-width:34px;color:var(--ink-3)}
+  .gen-line.on{opacity:1;color:var(--ink)}
+  .gen-line.on .gl-pre{color:var(--accent);animation:blink 1s steps(2) infinite}
+  .gen-line.ok{opacity:1;color:var(--ink-2)}
+  .gen-line.ok .gl-pre{color:var(--ok);animation:none}
+  @keyframes blink{50%{opacity:.35}}
+  .gen-bar{height:4px;background:var(--panel-2);margin:12px 16px 18px;border-radius:99px;overflow:hidden}
+  .gen-bar i{display:block;height:100%;width:0;background:var(--grad);border-radius:99px;transition:width .4s ease}
+
+  /* step 3: results */
+  .res-head{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:18px}
+  .res-head h4{font-size:18px;font-weight:700;letter-spacing:-.01em}
+  .res-head p{font-family:var(--mono);font-size:11px;color:var(--ink-3);letter-spacing:.05em;margin-top:5px}
+  .tabs{display:flex;gap:4px;border-bottom:1px solid var(--border);margin-bottom:24px;overflow-x:auto;scrollbar-width:none}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{
+    display:inline-flex;align-items:center;gap:7px;
+    padding:10px 14px;font-size:13px;font-weight:550;color:var(--ink-3);
+    border-bottom:2px solid transparent;white-space:nowrap;transition:color .15s;
+  }
+  .tab:hover{color:var(--ink)}
+  .tab.active{color:var(--ink);border-bottom-color:var(--accent)}
+  .tab .i{color:currentColor}
+  .tab-panel{display:none}
+  .tab-panel.active{display:block;animation:fadein .25s ease}
+  @keyframes fadein{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+  /* calendar tab */
+  .cal-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+  @media(min-width:640px){.cal-grid{grid-template-columns:repeat(3,1fr)}}
+  @media(min-width:960px){.cal-grid{grid-template-columns:repeat(5,1fr)}}
+  .day-card{
+    background:var(--panel-2);border:1px solid var(--border);border-radius:10px;overflow:hidden;
+    cursor:pointer;transition:border-color .15s;text-align:left;display:flex;flex-direction:column;padding:0;
+  }
+  .day-card:hover{border-color:var(--border-strong)}
+  .day-thumb{height:44px;position:relative;overflow:hidden}
+  .day-thumb .mark{position:absolute;right:6px;top:50%;transform:translateY(-50%);color:#fff;opacity:.15}
+  .day-thumb .mark svg{width:30px;height:30px}
+  .day-body{padding:10px 11px 11px;display:flex;flex-direction:column;gap:7px;flex:1}
+  .day-top{display:flex;align-items:center;justify-content:space-between;gap:6px}
+  .day-idx{font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--ink-3)}
+  .day-cap{font-size:12px;font-weight:500;color:var(--ink);line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .day-tags{font-family:var(--mono);font-size:9.5px;color:var(--ink-3);line-height:1.4;margin-top:auto;letter-spacing:.02em}
+  .type-chip{
+    font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
+    padding:2px 7px;border-radius:5px;border:1px solid;
+  }
+  .tc-post{color:var(--accent);border-color:rgba(77,141,255,.35);background:rgba(77,141,255,.08)}
+  .tc-reel{color:#ec835a;border-color:rgba(236,131,90,.35);background:rgba(236,131,90,.08)}
+  .tc-story{color:#a68bff;border-color:rgba(124,92,255,.4);background:rgba(124,92,255,.1)}
+  .tc-promo{color:var(--ok);border-color:rgba(45,216,130,.35);background:rgba(45,216,130,.08)}
+
+  /* IG tab */
+  .phone{
+    width:min(320px,100%);margin:0 auto;background:var(--bg-2);border:1px solid var(--border-strong);
+    border-radius:32px;padding:12px 12px 20px;box-shadow:0 24px 60px -24px rgba(0,0,0,.7);
+  }
+  .phone-notch{width:104px;height:20px;background:#000;border:1px solid var(--border);border-radius:99px;margin:2px auto 12px}
+  .ig-head{display:flex;align-items:center;gap:10px;padding:4px 6px 12px}
+  .ig-av{
+    width:40px;height:40px;border-radius:50%;position:relative;overflow:hidden;flex:none;
+    border:1px solid var(--border-strong);display:flex;align-items:center;justify-content:center;
+  }
+  .ig-av .mark{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;opacity:.5}
+  .ig-av .mark svg{width:20px;height:20px}
+  .ig-head b{font-size:13px;display:block;letter-spacing:-.01em}
+  .ig-head small{font-family:var(--mono);font-size:9.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+  .ig-stats{display:flex;gap:14px;padding:0 6px 12px;font-family:var(--mono);font-size:10.5px;color:var(--ink-3)}
+  .ig-stats b{color:var(--ink);font-weight:600}
+  .ig-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;border-radius:10px;overflow:hidden}
+  .ig-cell{aspect-ratio:1;position:relative;overflow:hidden}
+  .ig-cell .mark{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;opacity:.15}
+  .ig-cell .mark svg{width:44%;height:44%}
+  .ig-cell .lbl{
+    position:absolute;left:6px;bottom:5px;font-family:var(--mono);font-size:7.5px;
+    letter-spacing:.12em;color:rgba(255,255,255,.85);text-transform:uppercase;
+  }
+  .ig-cell .reel-badge{position:absolute;top:5px;right:5px;color:#fff;opacity:.9}
+  .tab-note{max-width:380px;margin:18px auto 0;font-family:var(--mono);font-size:11px;color:var(--ink-3);text-align:center;letter-spacing:.03em}
+
+  /* FB tab */
+  .fb-post{
+    max-width:480px;margin:0 auto;background:var(--panel-2);border:1px solid var(--border);
+    border-radius:var(--radius);overflow:hidden;
+  }
+  .fb-head{display:flex;align-items:center;gap:11px;padding:14px 16px 10px}
+  .fb-av{
+    width:40px;height:40px;border-radius:50%;position:relative;overflow:hidden;flex:none;
+    display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px;
+  }
+  .fb-av span{position:relative;z-index:1}
+  .fb-head b{font-size:14px;display:block;letter-spacing:-.01em}
+  .fb-head small{font-family:var(--mono);font-size:10px;color:var(--ink-3);display:flex;align-items:center;gap:5px;letter-spacing:.04em;margin-top:2px}
+  .fb-cap{padding:2px 16px 14px;font-size:13.5px;color:var(--ink-2);white-space:pre-line}
+  .fb-img{height:210px;position:relative;overflow:hidden}
+  .fb-img .mark{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;opacity:.14}
+  .fb-img .mark svg{width:96px;height:96px}
+  .fb-img .lbl{position:absolute;left:14px;bottom:12px;font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:rgba(255,255,255,.85);text-transform:uppercase}
+  .fb-counts{display:flex;justify-content:space-between;padding:10px 16px;font-family:var(--mono);font-size:10.5px;color:var(--ink-3);border-bottom:1px solid var(--border);letter-spacing:.04em}
+  .fb-actions{display:flex}
+  .fb-actions button{
+    flex:1;display:flex;align-items:center;justify-content:center;gap:7px;
+    padding:11px 0;font-size:13px;font-weight:550;color:var(--ink-3);transition:background .15s,color .15s;
+  }
+  .fb-actions button:hover{background:rgba(255,255,255,.03);color:var(--ink)}
+  .fb-actions button.liked{color:var(--accent)}
+
+  /* Reel tab */
+  .reel-card{max-width:560px;margin:0 auto;background:var(--panel-2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+  .reel-top{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
+  .reel-top .ric{width:36px;height:36px;border-radius:9px;background:var(--wash);color:var(--accent);display:flex;align-items:center;justify-content:center;flex:none}
+  .reel-top b{font-size:14.5px;display:block;letter-spacing:-.01em}
+  .reel-top small{font-family:var(--mono);font-size:10px;color:var(--ink-3);letter-spacing:.08em;text-transform:uppercase}
+  .beat{display:flex;gap:14px;padding:15px 20px;border-bottom:1px solid var(--border)}
+  .beat:last-of-type{border-bottom:none}
+  .beat-time{
+    flex:none;font-family:var(--mono);font-size:10px;font-weight:600;color:var(--accent);
+    background:var(--wash);border:1px solid rgba(77,141,255,.3);
+    border-radius:5px;padding:2px 8px;height:fit-content;font-variant-numeric:tabular-nums;letter-spacing:.06em;
+  }
+  .beat b{font-size:13px;display:block;margin-bottom:2px;letter-spacing:-.01em}
+  .beat p{font-size:13px;color:var(--ink-2)}
+  .reel-audio{margin:4px 20px 18px;background:var(--bg-2);border:1px solid var(--border);border-radius:9px;padding:11px 15px;display:flex;align-items:center;gap:11px;font-family:var(--mono);font-size:11px;color:var(--ink-2);letter-spacing:.02em}
+  .reel-audio .eq{display:flex;gap:2px;align-items:flex-end;height:14px;flex:none}
+  .reel-audio .eq i{width:3px;background:var(--accent);border-radius:2px;animation:eq 1s ease-in-out infinite}
+  .reel-audio .eq i:nth-child(2){animation-delay:.15s}.reel-audio .eq i:nth-child(3){animation-delay:.3s}.reel-audio .eq i:nth-child(4){animation-delay:.45s}
+  @keyframes eq{0%,100%{height:4px}50%{height:14px}}
+
+  /* Poster tab — typographic */
+  .poster{
+    width:min(340px,100%);margin:0 auto;aspect-ratio:4/5;border-radius:14px;overflow:hidden;
+    position:relative;display:flex;flex-direction:column;justify-content:space-between;
+    padding:26px;color:#fff;border:1px solid var(--border-strong);
+  }
+  .poster .food-g{z-index:0}
+  .poster>*{position:relative;z-index:1}
+  .poster .p-brand{font-family:var(--mono);font-size:10px;letter-spacing:.24em;text-transform:uppercase;opacity:.85}
+  .poster .p-head{
+    font-family:"Arial Narrow","Helvetica Neue",Arial,sans-serif;font-stretch:condensed;
+    font-size:64px;font-weight:800;line-height:.92;letter-spacing:-.01em;text-transform:uppercase;
+    margin:6px 0;
+  }
+  .poster .p-offer{
+    align-self:flex-start;font-family:var(--mono);font-size:15px;font-weight:700;letter-spacing:.06em;
+    border:1px solid rgba(255,255,255,.55);border-radius:7px;padding:7px 14px;
+    background:rgba(0,0,0,.22);
+  }
+  .poster .p-meta{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;opacity:.85;margin-top:12px}
+  .poster .p-sub{font-size:12px;opacity:.9;margin-top:6px;max-width:250px}
+
+  /* ---------- modals ---------- */
+  .overlay{
+    position:fixed;inset:0;background:rgba(4,5,8,.72);backdrop-filter:blur(4px);
+    display:none;align-items:center;justify-content:center;z-index:100;padding:18px;
+  }
+  .overlay.open{display:flex;animation:fadein .2s ease}
+  .modal{
+    background:var(--panel);border:1px solid var(--border-strong);border-radius:14px;
+    max-width:480px;width:100%;max-height:88vh;overflow:auto;position:relative;
+    box-shadow:0 40px 100px -30px rgba(0,0,0,.9);
+  }
+  .modal-x{
+    position:absolute;top:10px;right:10px;width:30px;height:30px;border-radius:8px;
+    background:rgba(8,9,13,.55);border:1px solid var(--border);
+    display:flex;align-items:center;justify-content:center;color:var(--ink-2);z-index:2;
+  }
+  .modal-x:hover{color:var(--ink);border-color:var(--border-strong)}
+  .dm-img{height:130px;position:relative;overflow:hidden}
+  .dm-img .mark{position:absolute;right:18px;top:50%;transform:translateY(-50%);color:#fff;opacity:.15}
+  .dm-img .mark svg{width:72px;height:72px}
+  .dm-img .lbl{position:absolute;left:18px;bottom:12px;font-family:var(--mono);font-size:10px;letter-spacing:.18em;color:rgba(255,255,255,.85);text-transform:uppercase}
+  .dm-body{padding:20px 22px 24px}
+  .dm-meta{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  .dm-meta .dday{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--ink-3);letter-spacing:.12em}
+  .dm-cap{font-size:14px;white-space:pre-line;color:var(--ink)}
+  .dm-cta{
+    margin-top:14px;background:var(--bg-2);border:1px solid var(--border);border-radius:9px;
+    padding:10px 13px;font-size:13px;color:var(--ink-2);display:flex;gap:9px;align-items:flex-start;
+  }
+  .dm-cta .i{color:var(--accent);margin-top:2px}
+  .dm-tags{margin-top:14px;display:flex;flex-wrap:wrap;gap:6px}
+  .tag-chip{
+    font-family:var(--mono);font-size:10.5px;color:var(--ink-2);letter-spacing:.03em;
+    background:var(--panel-2);border:1px solid var(--border);border-radius:6px;padding:3px 9px;
+  }
+  .dm-actions{margin-top:20px;display:flex;gap:10px;flex-wrap:wrap}
+
+  .wl-body{padding:28px 26px}
+  .wl-body h3{font-size:21px;font-weight:700;margin-bottom:8px;letter-spacing:-.02em}
+  .wl-body>p{font-size:14px;color:var(--ink-2);margin-bottom:20px}
+  .wl-field{margin-bottom:14px}
+  .wl-field label{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin-bottom:7px}
+  .wl-field input,.wl-field select{
+    width:100%;padding:11px 13px;border:1px solid var(--border-strong);border-radius:9px;
+    font-size:14.5px;background:var(--panel-2);color:var(--ink);
+  }
+  .wl-field input:focus,.wl-field select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--wash)}
+  .wl-err{color:var(--danger);font-size:12.5px;margin-top:6px;display:none}
+  .wl-fine{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);margin-top:13px;text-align:center;letter-spacing:.03em}
+  .wl-success{text-align:center;padding:14px 0 6px;display:none}
+  .wl-success .okring{
+    width:52px;height:52px;margin:0 auto 16px;border-radius:50%;
+    background:rgba(45,216,130,.1);border:1px solid rgba(45,216,130,.4);color:var(--ok);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .wl-success h4{font-size:18px;font-weight:700;margin-bottom:8px}
+  .wl-success p{font-size:13.5px;color:var(--ink-2);margin-bottom:20px}
+
+  /* toast */
+  .toast{
+    position:fixed;bottom:24px;left:50%;transform:translate(-50%,80px);
+    background:var(--panel-2);border:1px solid var(--border-strong);color:var(--ink);
+    font-size:13.5px;font-weight:550;padding:11px 18px;border-radius:10px;
+    box-shadow:0 16px 40px -10px rgba(0,0,0,.7);
+    z-index:200;opacity:0;transition:transform .3s ease,opacity .3s ease;pointer-events:none;
+    display:flex;align-items:center;gap:10px;max-width:90vw;
+  }
+  .toast .i{color:var(--accent)}
+  .toast.show{transform:translate(-50%,0);opacity:1}
+
+  /* features */
+  .feat-grid{display:grid;gap:16px;margin-top:44px}
+  @media(min-width:640px){.feat-grid{grid-template-columns:repeat(2,1fr)}}
+  @media(min-width:960px){.feat-grid{grid-template-columns:repeat(3,1fr)}}
+
+  /* how it works */
+  .hiw{display:grid;gap:16px;margin-top:48px}
+  @media(min-width:960px){.hiw{grid-template-columns:repeat(3,1fr)}}
+  .hiw-step{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:26px}
+  .hiw-num{font-family:var(--mono);font-size:12px;letter-spacing:.14em;color:var(--accent);display:block;margin-bottom:14px}
+  .hiw-step h3{font-size:16px;font-weight:650;margin-bottom:8px;letter-spacing:-.01em}
+  .hiw-step p{font-size:14px;color:var(--ink-2)}
+
+  /* pricing */
+  .price-grid{display:grid;gap:16px;margin-top:48px;align-items:stretch}
+  @media(min-width:960px){.price-grid{grid-template-columns:repeat(3,1fr)}}
+  .price-card{
+    background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:28px 26px;
+    display:flex;flex-direction:column;position:relative;transition:border-color .2s;
+  }
+  .price-card:hover{border-color:var(--border-strong)}
+  .price-card.popular{border-color:rgba(77,141,255,.35)}
+  .price-card.popular::before{
+    content:"";position:absolute;top:-1px;left:6%;right:6%;height:1px;
+    background:linear-gradient(90deg,transparent,rgba(77,141,255,.8),transparent);
+  }
+  .pop-badge{
+    position:absolute;top:-11px;left:50%;transform:translateX(-50%);
+    font-family:var(--mono);font-size:9.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--accent);background:var(--bg);border:1px solid rgba(77,141,255,.4);
+    padding:3px 12px;border-radius:99px;white-space:nowrap;
+  }
+  .price-card h3{font-size:16px;font-weight:650}
+  .price-card .who{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-top:5px}
+  .price-num{margin:18px 0 6px;font-size:38px;font-weight:750;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+  .price-num small{font-size:14px;font-weight:500;color:var(--ink-3);letter-spacing:0}
+  .early-tag{
+    display:inline-block;align-self:flex-start;font-family:var(--mono);font-size:9.5px;font-weight:600;
+    letter-spacing:.12em;text-transform:uppercase;color:var(--warn);
+    background:rgba(245,184,61,.08);border:1px solid rgba(245,184,61,.3);
+    padding:3px 9px;border-radius:5px;margin-bottom:16px;
+  }
+  .price-card ul{list-style:none;margin:4px 0 24px;flex:1}
+  .price-card li{display:flex;gap:9px;font-size:13.5px;color:var(--ink-2);padding:5px 0;align-items:flex-start}
+  .price-card li .i{color:var(--accent);margin-top:3px}
+
+  /* FAQ */
+  .faq{max-width:720px;margin:44px auto 0}
+  .faq details{border:1px solid var(--border);border-radius:10px;background:var(--panel);margin-bottom:10px;overflow:hidden}
+  .faq details:hover{border-color:var(--border-strong)}
+  .faq summary{
+    list-style:none;cursor:pointer;padding:16px 18px;font-weight:550;font-size:14.5px;
+    display:flex;justify-content:space-between;align-items:center;gap:12px;
+  }
+  .faq summary::-webkit-details-marker{display:none}
+  .faq summary .chev{color:var(--ink-3);transition:transform .2s;flex:none}
+  .faq details[open] summary .chev{transform:rotate(180deg)}
+  .faq .ans{padding:0 18px 17px;font-size:14px;color:var(--ink-2)}
+
+  /* final CTA + footer */
+  .final{
+    position:relative;border:1px solid var(--border);border-radius:18px;
+    background:var(--panel);padding:64px 26px;text-align:center;overflow:hidden;
+  }
+  .final::before{
+    content:"";position:absolute;width:520px;height:400px;left:50%;top:-160px;transform:translateX(-50%);
+    background:radial-gradient(circle,rgba(77,141,255,.14),transparent 65%);filter:blur(90px);pointer-events:none;
+  }
+  .final::after{
+    content:"";position:absolute;top:-1px;left:15%;right:15%;height:1px;
+    background:linear-gradient(90deg,transparent,rgba(77,141,255,.7),transparent);
+  }
+  .final>*{position:relative;z-index:1}
+  .final p{color:var(--ink-2);margin:14px auto 28px;max-width:460px;font-size:15.5px}
+  footer{padding:34px 0 44px;color:var(--ink-3);font-size:13px;border-top:1px solid var(--border)}
+  .foot-inner{display:flex;flex-wrap:wrap;gap:14px 26px;align-items:center;justify-content:space-between}
+  .foot-inner>span{font-family:var(--mono);font-size:11.5px;letter-spacing:.04em}
+  .foot-links{display:flex;gap:20px}
+  .foot-links button{color:var(--ink-3);font-size:13px}
+  .foot-links button:hover{color:var(--ink)}
+
+  /* reveal on scroll — only when JS is present, so content is never invisible */
+  html.js .rv{opacity:0;transform:translateY(14px);transition:opacity .35s ease,transform .35s ease}
+  html.js .rv.in{opacity:1;transform:none}
+
+  /* stats peek */
+  .stats-peek{
+    position:fixed;bottom:16px;left:16px;z-index:90;background:var(--panel);
+    border:1px solid var(--border-strong);border-radius:10px;padding:14px 16px;
+    font-family:var(--mono);font-size:11px;max-width:280px;max-height:50vh;overflow:auto;
+    box-shadow:0 20px 50px -20px rgba(0,0,0,.8);
+  }
+  .stats-peek h5{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px}
+  .stats-peek div{display:flex;justify-content:space-between;gap:14px;padding:2px 0;font-variant-numeric:tabular-nums;color:var(--ink-2)}
+  .stats-peek b{color:var(--ink)}
+
+  @media(prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+    html.js .rv{opacity:1;transform:none}
+    html{scroll-behavior:auto}
+  }
+</style>
+</head>
+<body>
+
+<!-- SVG symbol library — the icon system (replaces all emoji) -->
+<svg style="display:none" aria-hidden="true">
+  <defs>
+    <symbol id="i-upload" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></symbol>
+    <symbol id="i-zap" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></symbol>
+    <symbol id="i-message" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+    <symbol id="i-arrow-r" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></symbol>
+    <symbol id="i-layers" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m12 2 9 5-9 5-9-5 9-5z"/><path d="m3 12 9 5 9-5"/><path d="m3 17 9 5 9-5"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
+    <symbol id="i-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m8 5 11 7-11 7z"/></symbol>
+    <symbol id="i-video" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="13" height="12" rx="2"/><path d="m15 10 7-4v12l-7-4"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l8.8 8.8 8.8-8.8a5.5 5.5 0 0 0 0-7.8z"/></symbol>
+    <symbol id="i-share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c-4 4.5-4 13.5 0 18 4-4.5 4-13.5 0-18z"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 15.4l-4.8 2.5.9-5.4L4.2 8.7l5.4-.8L12 3z"/></symbol>
+    <symbol id="i-percent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M19 5 5 19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></symbol>
+    <symbol id="i-image" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-4.5-4.5L6 21"/></symbol>
+    <symbol id="i-target" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></symbol>
+    <!-- food marks, same stroke style -->
+    <symbol id="i-bowl" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11h16"/><path d="M4 11a8 8 0 0 0 16 0"/><path d="M9 20h6"/></symbol>
+    <symbol id="i-noodles" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16"/><path d="M4 12a8 8 0 0 0 16 0"/><path d="M5.5 8c2 1.4 4-1.4 6 0s4-1.4 6 0"/><path d="M5.5 4.5c2 1.4 4-1.4 6 0s4-1.4 6 0"/></symbol>
+    <symbol id="i-drink" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="6" width="10" height="15" rx="2.5"/><path d="M7 12h10"/><path d="m13.5 6 4-4"/></symbol>
+    <symbol id="i-dessert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 21 20H3z"/><path d="M8.2 12.5h7.6"/><path d="M6 16.5h12"/></symbol>
+    <symbol id="i-skewer" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><circle cx="12" cy="6" r="2.2"/><circle cx="12" cy="11.5" r="2.2"/><circle cx="12" cy="17" r="2.2"/></symbol>
+    <symbol id="i-curry" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16"/><path d="M4 12a8 8 0 0 0 16 0"/><path d="M9.5 3c-1 1.6 1 2.4 0 4.5"/><path d="M14.5 3c-1 1.6 1 2.4 0 4.5"/></symbol>
+    <symbol id="i-salad" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16"/><path d="M4 12a8 8 0 0 0 16 0"/><path d="m8 3 4.5 6"/><path d="M17 2.5 11.5 9"/></symbol>
+    <symbol id="i-flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.1-2.1-.2-4.1 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.2.4-2.3 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></symbol>
+  </defs>
+</svg>
+
+<!-- 1 · Sticky nav -->
+<nav class="nav">
+  <div class="wrap nav-inner">
+    <a href="#top" class="logo" aria-label="MenuBoost home">
+      <svg width="24" height="24" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+        <rect width="28" height="28" rx="7" fill="url(#lg)"/>
+        <path d="M8 19V9.5L14 14l6-4.5V19" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <defs><linearGradient id="lg" x1="0" y1="0" x2="28" y2="28"><stop stop-color="#4d8dff"/><stop offset="1" stop-color="#7c5cff"/></linearGradient></defs>
+      </svg>
+      MenuBoost
+    </a>
+    <div class="nav-links">
+      <a href="#demo">Live demo</a>
+      <a href="#features">Features</a>
+      <a href="#how">How it works</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#faq">FAQ</a>
+    </div>
+    <button class="btn btn-primary" data-cta="nav">Generate 7 Posts Free</button>
+  </div>
+</nav>
+
+<!-- 2 · Hero -->
+<header class="hero" id="top">
+  <div class="wrap hero-grid">
+    <div>
+      <span class="eyebrow"><span class="idx">EARLY ACCESS</span> — BUILT FOR FOOD BUSINESSES</span>
+      <h1>Your AI <span class="gx">Marketing</span> Manager for Restaurants</h1>
+      <p class="sub">Upload your menu. Get 30 days of social media content in minutes — posts, reels, promos and holiday campaigns, written in your restaurant's voice.</p>
+      <div class="hero-ctas">
+        <button class="btn btn-primary" data-cta="hero">Generate 7 Posts Free</button>
+        <button class="btn btn-secondary" id="see-sample">See a sample month
+          <svg class="i" width="15" height="15" aria-hidden="true"><use href="#i-arrow-r"/></svg>
+        </button>
+      </div>
+      <p class="hero-note">NO CREDIT CARD · NO DESIGN SKILLS · MENU + A FEW PHOTOS IS ENOUGH</p>
+    </div>
+    <div class="rv">
+      <div class="frame" aria-hidden="true">
+        <div class="frame-bar">
+          <div class="frame-dots"><span></span><span></span><span></span></div>
+          <div class="frame-url">app.menuboost.ai/calendar</div>
+          <span class="frame-chip">30 posts ready</span>
+        </div>
+        <div class="cal-mock">
+          <div class="cal-mock-head">
+            <div class="cal-mock-title">Baan Siam Kitchen<small>Content calendar · Next 4 weeks</small></div>
+          </div>
+          <div class="cal-mock-grid">
+            <span class="dow">M</span><span class="dow">T</span><span class="dow">W</span><span class="dow">T</span><span class="dow">F</span><span class="dow">S</span><span class="dow">S</span>
+            <div class="mini-day"><span class="n">D01</span><span class="sw" style="background:var(--warm-1)"></span><span class="t">Post</span></div>
+            <div class="mini-day"><span class="n">D02</span><span class="sw" style="background:var(--warm-2)"></span><span class="t hl">Reel</span></div>
+            <div class="mini-day"><span class="n">D03</span><span class="sw" style="background:var(--warm-2)"></span><span class="t">Post</span></div>
+            <div class="mini-day"><span class="n">D04</span><span class="sw" style="background:var(--warm-6)"></span><span class="t">Story</span></div>
+            <div class="mini-day"><span class="n">D05</span><span class="sw" style="background:var(--warm-3)"></span><span class="t pr">Promo</span></div>
+            <div class="mini-day"><span class="n">D06</span><span class="sw" style="background:var(--warm-3)"></span><span class="t">Post</span></div>
+            <div class="mini-day"><span class="n">D07</span><span class="sw" style="background:var(--warm-4)"></span><span class="t hl">Reel</span></div>
+            <div class="mini-day"><span class="n">D08</span><span class="sw" style="background:var(--warm-5)"></span><span class="t">Post</span></div>
+            <div class="mini-day"><span class="n">D09</span><span class="sw" style="background:var(--warm-6)"></span><span class="t">Post</span></div>
+            <div class="mini-day"><span class="n">D10</span><span class="sw" style="background:var(--warm-1)"></span><span class="t">Story</span></div>
+            <div class="mini-day"><span class="n">D11</span><span class="sw" style="background:var(--warm-5)"></span><span class="t pr">Promo</span></div>
+            <div class="mini-day"><span class="n">D12</span><span class="sw" style="background:var(--warm-4)"></span><span class="t">Post</span></div>
+            <div class="mini-day"><span class="n">D13</span><span class="sw" style="background:var(--warm-1)"></span><span class="t pr">Promo</span></div>
+            <div class="mini-day"><span class="n">D14</span><span class="sw" style="background:var(--warm-2)"></span><span class="t">Post</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- 3 · Social proof (fictional wordmarks) -->
+<div class="proof">
+  <div class="wrap">
+    <p>Built with independent food businesses like</p>
+    <div class="wordmarks" aria-label="Fictional example customers">
+      <span class="wordmark">Lotus &amp; Lime</span>
+      <span class="wordmark">Sabai Hospitality</span>
+      <span class="wordmark">street.feast.co</span>
+      <span class="wordmark">Mango Grove Cafes</span>
+      <span class="wordmark">Amber Wok Group</span>
+      <span class="wordmark">Northwind Eats</span>
+    </div>
+  </div>
+</div>
+
+<!-- 4 · Problem -->
+<section id="problem" style="border-top:none">
+  <div class="wrap">
+    <div class="center rv">
+      <span class="eyebrow"><span class="idx">01</span> — PROBLEM</span>
+      <h2>You cook. Marketing shouldn't be a second full-time job.</h2>
+      <p class="sec-sub">Most owners know social media brings customers in — but between prep, service and closing, it never gets done well.</p>
+    </div>
+    <div class="card-grid cols-4">
+      <div class="card rv">
+        <div class="ic"><svg class="i" width="19" height="19" aria-hidden="true"><use href="#i-message"/></svg></div>
+        <h3>"What do I even post?"</h3>
+        <p>Staring at a blank caption box at 11pm after closing is nobody's idea of marketing strategy.</p>
+      </div>
+      <div class="card rv">
+        <div class="ic"><svg class="i" width="19" height="19" aria-hidden="true"><use href="#i-calendar"/></svg></div>
+        <h3>No time, no consistency</h3>
+        <p>You post three times one week, then go silent for a month. The algorithm — and your regulars — forget you.</p>
+      </div>
+      <div class="card rv">
+        <div class="ic"><svg class="i" width="19" height="19" aria-hidden="true"><use href="#i-video"/></svg></div>
+        <h3>Design &amp; reels feel impossible</h3>
+        <p>Posters, hashtags, trending reels, story polls — every format needs different skills you never signed up for.</p>
+      </div>
+      <div class="card rv">
+        <div class="ic"><svg class="i" width="19" height="19" aria-hidden="true"><use href="#i-chart"/></svg></div>
+        <h3>Agencies cost too much</h3>
+        <p>A retainer can run more than a part-time cook's salary — for content that doesn't sound like your kitchen.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 · Solution -->
+<section class="alt" id="solution">
+  <div class="wrap">
+    <div class="center rv">
+      <span class="eyebrow"><span class="idx">02</span> — SOLUTION</span>
+      <h2>From menu to a month of marketing — automatically</h2>
+      <p class="sec-sub">MenuBoost reads your menu and photos, learns your dishes and tone, and plans a full month of content you can post as-is.</p>
+    </div>
+    <div class="before-after">
+      <div class="ba-col before rv">
+        <h3>Before MenuBoost</h3>
+        <ul>
+          <li><svg class="i" width="15" height="15" aria-hidden="true"><use href="#i-x"/></svg>Hours lost writing captions after closing</li>
+          <li><svg class="i" width="15" height="15" aria-hidden="true"><use href="#i-x"/></svg>Random posts, no plan, long silent gaps</li>
+          <li><svg class="i" width="15" height="15" aria-hidden="true"><use href="#i-x"/></svg>Holidays and promos remembered too late</li>
+          <li><svg class="i" width="15" height="15" aria-hidden="true"><use href="#i-x"/></svg>Reels never made — too complicated</li>
+        </ul>
+      </div>
+      <div class="ba-arrow rv" aria-hidden="true">
+        <svg class="i" width="30" height="30"><use href="#i-arrow-r"/></svg>
+      </div>
+      <div class="ba-col after rv">
+        <h3>With MenuBoost</h3>
+        <ul>
+          <li><svg class="i" width="15" height="15" aria-hidden="true"><use href="#i-check"/></svg>30 days of posts generated in minutes</li>
+          <li><svg class="i" width="15" height="15" aria-hidden="true"><use href="#i-check"/></svg>Captions, hashtags &amp; CTAs in your voice</li>
+          <li><svg class="i" width="15" height="15" aria-hidden="true"><use href="#i-check"/></svg>Holiday campaigns planned ahead — Songkran included</li>
+          <li><svg class="i" width="15" height="15" aria-hidden="true"><use href="#i-check"/></svg>Reel scripts &amp; promo posters ready to use</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 · Interactive prototype -->
+<section id="demo">
+  <div class="wrap">
+    <div class="center rv">
+      <span class="eyebrow"><span class="idx">03</span> — LIVE DEMO</span>
+      <h2>Watch a month of content build itself</h2>
+      <p class="sec-sub">This is a live product preview with sample data. Drop in a menu (or use ours), pick a few photos, and generate.</p>
+    </div>
+
+    <div class="frame app-window rv">
+      <div class="frame-bar">
+        <div class="frame-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+        <div class="frame-url">
+          <svg class="i" width="11" height="11" aria-hidden="true"><use href="#i-lock"/></svg>
+          app.menuboost.ai/onboarding
+        </div>
+        <span class="frame-chip">demo · local only</span>
+      </div>
+      <div class="app-body">
+
+        <div class="steps" aria-hidden="true">
+          <span class="step-pill active" id="pill-1"><span class="snum">01</span>Upload</span>
+          <span class="step-sep"></span>
+          <span class="step-pill" id="pill-2"><span class="snum">02</span>Generate</span>
+          <span class="step-sep"></span>
+          <span class="step-pill" id="pill-3"><span class="snum">03</span>Your month</span>
+        </div>
+
+        <!-- STEP 1 -->
+        <div id="step-1">
+          <div class="proto-grid">
+            <div>
+              <div class="proto-label">Your menu <span class="hint">PDF, photo or spreadsheet</span></div>
+              <div class="drop-zone" id="drop-zone" role="button" tabindex="0" aria-label="Upload your menu">
+                <div id="dz-empty">
+                  <div class="dz-ic"><svg class="i" width="26" height="26" aria-hidden="true"><use href="#i-upload"/></svg></div>
+                  <h4>Drag &amp; drop your menu here</h4>
+                  <p>Nothing is uploaded in this demo — files are only simulated.</p>
+                  <button class="sample-chip" id="sample-menu" type="button">
+                    <svg class="i" width="13" height="13" aria-hidden="true"><use href="#i-file"/></svg>
+                    thai-kitchen-menu.pdf
+                  </button>
+                </div>
+                <div id="dz-done" style="display:none">
+                  <div class="file-ok">
+                    <svg class="i" width="16" height="16" aria-hidden="true"><use href="#i-check"/></svg>
+                    <span class="fname" id="dz-filename">thai-kitchen-menu.pdf</span>
+                  </div>
+                  <p class="dz-meta">[ok] menu parsed — 24 dishes · 6 categories</p>
+                </div>
+              </div>
+
+              <div class="proto-label" style="margin-top:22px">Business name</div>
+              <input class="biz-input" id="biz-name" value="Baan Siam Kitchen" aria-label="Business name">
+            </div>
+
+            <div>
+              <div class="proto-label">Food photos <span class="hint" id="photo-hint">PICK 3 OF 6 · 0 SELECTED</span></div>
+              <div class="photo-grid" id="photo-grid">
+                <button class="photo-card g1" data-photo="Pad Thai" type="button" aria-label="Pad Thai photo">
+                  <span class="food-g"></span>
+                  <span class="mark"><svg aria-hidden="true"><use href="#i-noodles"/></svg></span>
+                  <span class="lbl">Pad Thai</span>
+                  <span class="check"><svg class="i" width="12" height="12" aria-hidden="true"><use href="#i-check"/></svg></span>
+                </button>
+                <button class="photo-card g2" data-photo="Tom Yum" type="button" aria-label="Tom Yum photo">
+                  <span class="food-g"></span>
+                  <span class="mark"><svg aria-hidden="true"><use href="#i-bowl"/></svg></span>
+                  <span class="lbl">Tom Yum</span>
+                  <span class="check"><svg class="i" width="12" height="12" aria-hidden="true"><use href="#i-check"/></svg></span>
+                </button>
+                <button class="photo-card g3" data-photo="Green Curry" type="button" aria-label="Green Curry photo">
+                  <span class="food-g"></span>
+                  <span class="mark"><svg aria-hidden="true"><use href="#i-curry"/></svg></span>
+                  <span class="lbl">Green Curry</span>
+                  <span class="check"><svg class="i" width="12" height="12" aria-hidden="true"><use href="#i-check"/></svg></span>
+                </button>
+                <button class="photo-card g4" data-photo="Mango Sticky Rice" type="button" aria-label="Mango Sticky Rice photo">
+                  <span class="food-g"></span>
+                  <span class="mark"><svg aria-hidden="true"><use href="#i-dessert"/></svg></span>
+                  <span class="lbl">Mango Rice</span>
+                  <span class="check"><svg class="i" width="12" height="12" aria-hidden="true"><use href="#i-check"/></svg></span>
+                </button>
+                <button class="photo-card g5" data-photo="Satay" type="button" aria-label="Satay photo">
+                  <span class="food-g"></span>
+                  <span class="mark"><svg aria-hidden="true"><use href="#i-skewer"/></svg></span>
+                  <span class="lbl">Satay</span>
+                  <span class="check"><svg class="i" width="12" height="12" aria-hidden="true"><use href="#i-check"/></svg></span>
+                </button>
+                <button class="photo-card g6" data-photo="Som Tum" type="button" aria-label="Som Tum photo">
+                  <span class="food-g"></span>
+                  <span class="mark"><svg aria-hidden="true"><use href="#i-salad"/></svg></span>
+                  <span class="lbl">Som Tum</span>
+                  <span class="check"><svg class="i" width="12" height="12" aria-hidden="true"><use href="#i-check"/></svg></span>
+                </button>
+              </div>
+              <p class="dz-meta" style="margin-top:10px">Tip: real product accepts your own photos — these are demo samples.</p>
+            </div>
+          </div>
+
+          <div class="proto-footer">
+            <span class="status" id="step1-status">Add a menu and pick 3 photos to continue</span>
+            <button class="btn btn-primary" id="btn-generate" disabled>
+              <svg class="i" width="15" height="15" aria-hidden="true"><use href="#i-zap"/></svg>
+              Generate my month
+            </button>
+          </div>
+        </div>
+
+        <!-- STEP 2 -->
+        <div id="step-2" style="display:none">
+          <div class="gen-wrap">
+            <div class="gen-term">
+              <div class="gen-term-bar"><span>menuboost · generate</span><span>v0.9-demo</span></div>
+              <div class="gen-lines">
+                <div class="gen-line" id="gl-1"><span class="gl-pre">&#9656;</span><span>Reading menu — extracting dishes, prices, categories</span></div>
+                <div class="gen-line" id="gl-2"><span class="gl-pre">&#9656;</span><span>Learning your brand voice from name + photos</span></div>
+                <div class="gen-line" id="gl-3"><span class="gl-pre">&#9656;</span><span>Writing 30 days of posts, reels and promos</span></div>
+              </div>
+              <div class="gen-bar"><i id="gen-bar-fill"></i></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 3 -->
+        <div id="step-3" style="display:none">
+          <div class="res-head">
+            <div>
+              <h4 id="res-title">Your month is ready, Baan Siam Kitchen</h4>
+              <p>30 POSTS · 6 REELS · 5 PROMOS · 1 HOLIDAY CAMPAIGN — CLICK ANY DAY FOR THE FULL POST</p>
+            </div>
+            <button class="btn btn-primary btn-sm" data-cta="results">Get my real calendar</button>
+          </div>
+
+          <div class="tabs" role="tablist">
+            <button class="tab active" data-tab="calendar" role="tab"><svg class="i" width="14" height="14" aria-hidden="true"><use href="#i-calendar"/></svg>30-Day Calendar</button>
+            <button class="tab" data-tab="ig" role="tab"><svg class="i" width="14" height="14" aria-hidden="true"><use href="#i-image"/></svg>Instagram Feed</button>
+            <button class="tab" data-tab="fb" role="tab"><svg class="i" width="14" height="14" aria-hidden="true"><use href="#i-message"/></svg>Facebook Post</button>
+            <button class="tab" data-tab="reel" role="tab"><svg class="i" width="14" height="14" aria-hidden="true"><use href="#i-video"/></svg>Reel Script</button>
+            <button class="tab" data-tab="poster" role="tab"><svg class="i" width="14" height="14" aria-hidden="true"><use href="#i-percent"/></svg>Promo Poster</button>
+          </div>
+
+          <div class="tab-panel active" id="tab-calendar"><div class="cal-grid" id="cal-grid"></div></div>
+
+          <div class="tab-panel" id="tab-ig">
+            <div class="phone">
+              <div class="phone-notch" aria-hidden="true"></div>
+              <div class="ig-head">
+                <div class="ig-av g2"><span class="food-g"></span><span class="mark"><svg aria-hidden="true"><use href="#i-noodles"/></svg></span></div>
+                <div><b id="ig-handle">baansiamkitchen</b><small>Thai restaurant · Bangkok</small></div>
+              </div>
+              <div class="ig-stats"><span><b>30</b> posts</span><span><b>&#8722;</b> followers</span><span><b>&#8722;</b> following</span></div>
+              <div class="ig-grid" id="ig-grid"></div>
+            </div>
+            <p class="tab-note">Preview of how week 1&#8211;3 posts will look on your grid.</p>
+          </div>
+
+          <div class="tab-panel" id="tab-fb">
+            <div class="fb-post">
+              <div class="fb-head">
+                <div class="fb-av g2"><span class="food-g"></span><span id="fb-av">B</span></div>
+                <div><b id="fb-name">Baan Siam Kitchen</b><small>Suggested · Tuesday 6:00 PM · <svg class="i" width="11" height="11" aria-hidden="true"><use href="#i-globe"/></svg></small></div>
+              </div>
+              <div class="fb-cap" id="fb-cap"></div>
+              <div class="fb-img g2" id="fb-img">
+                <span class="food-g"></span>
+                <span class="mark"><svg aria-hidden="true"><use href="#i-bowl"/></svg></span>
+                <span class="lbl" id="fb-img-lbl">Tom Yum</span>
+              </div>
+              <div class="fb-counts"><span>demo preview</span><span>comments · shares</span></div>
+              <div class="fb-actions">
+                <button id="fb-like"><svg class="i" width="15" height="15" aria-hidden="true"><use href="#i-heart"/></svg>Like</button>
+                <button id="fb-comment"><svg class="i" width="15" height="15" aria-hidden="true"><use href="#i-message"/></svg>Comment</button>
+                <button id="fb-share"><svg class="i" width="15" height="15" aria-hidden="true"><use href="#i-share"/></svg>Share</button>
+              </div>
+            </div>
+            <p class="tab-note">One of 12 Facebook posts in your month — scheduled for peak dinner-decision time.</p>
+          </div>
+
+          <div class="tab-panel" id="tab-reel">
+            <div class="reel-card">
+              <div class="reel-top">
+                <div class="ric"><svg class="i" width="17" height="17" aria-hidden="true"><use href="#i-video"/></svg></div>
+                <div><b>Reel · "Wok Fire Friday"</b><small>Day 02 · 22 seconds · film on any phone</small></div>
+              </div>
+              <div class="beat"><span class="beat-time">0&#8211;3s</span><div><b>Hook</b><p>Close-up: flames leap around the wok. Text overlay: "POV: it's Friday and you didn't cook."</p></div></div>
+              <div class="beat"><span class="beat-time">3&#8211;9s</span><div><b>Scene 1</b><p>Chef tosses Pad Thai — noodles catch the light. Quick cut to sauce hitting the pan.</p></div></div>
+              <div class="beat"><span class="beat-time">9&#8211;15s</span><div><b>Scene 2</b><p>Plating shot: lime wedge pressed, peanuts scattered in slow motion.</p></div></div>
+              <div class="beat"><span class="beat-time">15&#8211;20s</span><div><b>Scene 3</b><p>First chopstick pull-up of noodles, steam rising toward the camera.</p></div></div>
+              <div class="beat"><span class="beat-time">20&#8211;22s</span><div><b>CTA</b><p>Text overlay: "Table for two? Link in bio" + storefront shot.</p></div></div>
+              <div class="reel-audio"><span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>audio: upbeat street-market rhythm · ~120 BPM · royalty-free</div>
+            </div>
+          </div>
+
+          <div class="tab-panel" id="tab-poster">
+            <div class="poster">
+              <span class="food-g g-poster" style="position:absolute;inset:0;background:var(--warm-2)"></span>
+              <span class="p-brand" id="poster-brand">Baan Siam Kitchen</span>
+              <div>
+                <h3 class="p-head">Weekday<br>Lunch<br>Sets</h3>
+                <div class="p-offer">FROM &#3647;129</div>
+                <p class="p-meta">Mon&#8211;Fri · 11:00&#8211;14:00</p>
+                <p class="p-sub">Green curry · Pad krapow · Tom yum — with jasmine rice &amp; Thai iced tea</p>
+              </div>
+            </div>
+            <p class="tab-note">Auto-designed from your menu prices. Export sizes for print, stories and feed in the full product.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 7 · Features -->
+<section class="alt" id="features">
+  <div class="wrap">
+    <div class="center rv">
+      <span class="eyebrow"><span class="idx">04</span> — FEATURES</span>
+      <h2>Everything an agency does — minus the retainer</h2>
+      <p class="sec-sub">One upload powers every format your restaurant needs across Facebook, Instagram and TikTok.</p>
+    </div>
+    <div class="feat-grid">
+      <div class="card rv">
+        <div class="ic"><svg class="i" width="19" height="19" aria-hidden="true"><use href="#i-calendar"/></svg></div>
+        <h3>30-day content calendar</h3>
+        <p>A full month planned at once: dish spotlights, promos, stories and behind-the-scenes — balanced so your feed never repeats itself.</p>
+      </div>
+      <div class="card rv">
+        <div class="ic"><svg class="i" width="19" height="19" aria-hidden="true"><use href="#i-message"/></svg></div>
+        <h3>Captions in your voice</h3>
+        <p>Warm, appetizing copy with CTAs and local hashtags — tuned to how your restaurant actually talks to guests.</p>
+      </div>
+      <div class="card rv">
+        <div class="ic"><svg class="i" width="19" height="19" aria-hidden="true"><use href="#i-video"/></svg></div>
+        <h3>Reel &amp; TikTok scripts</h3>
+        <p>Shot-by-shot scripts with hooks, timing and audio suggestions — filmable on a phone between lunch and dinner service.</p>
+      </div>
+      <div class="card rv">
+        <div class="ic"><svg class="i" width="19" height="19" aria-hidden="true"><use href="#i-star"/></svg></div>
+        <h3>Holiday campaigns</h3>
+        <p>Songkran, Mother's Day, New Year — MenuBoost plans themed promos weeks ahead so you never scramble the night before.</p>
+      </div>
+      <div class="card rv">
+        <div class="ic"><svg class="i" width="19" height="19" aria-hidden="true"><use href="#i-file"/></svg></div>
+        <h3>Menu-aware promos</h3>
+        <p>Offers built from your real dishes and prices — lunch sets, bundle deals and happy hours that protect your margins.</p>
+      </div>
+      <div class="card rv">
+        <div class="ic"><svg class="i" width="19" height="19" aria-hidden="true"><use href="#i-clock"/></svg></div>
+        <h3>Best-time scheduling</h3>
+        <p>Every post gets a suggested day and time slot based on when diners decide where to eat — no guesswork.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 8 · How it works -->
+<section id="how">
+  <div class="wrap">
+    <div class="center rv">
+      <span class="eyebrow"><span class="idx">05</span> — HOW IT WORKS</span>
+      <h2>Three steps. About five minutes.</h2>
+    </div>
+    <div class="hiw">
+      <div class="hiw-step rv">
+        <span class="hiw-num">01</span>
+        <h3>Upload your menu &amp; photos</h3>
+        <p>Drop in a menu (PDF or photo), your logo and a handful of food shots. That's all MenuBoost needs to learn your restaurant.</p>
+      </div>
+      <div class="hiw-step rv">
+        <span class="hiw-num">02</span>
+        <h3>AI builds your month</h3>
+        <p>MenuBoost drafts 30 days of posts, reels, promos and holiday campaigns — each with captions, hashtags and a suggested time.</p>
+      </div>
+      <div class="hiw-step rv">
+        <span class="hiw-num">03</span>
+        <h3>Review, tweak, post</h3>
+        <p>Swap dishes, edit any caption, then copy to your platforms — or let auto-publishing handle it when it ships.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 9 · Pricing -->
+<section class="alt" id="pricing">
+  <div class="wrap">
+    <div class="center rv">
+      <span class="eyebrow"><span class="idx">06</span> — PRICING</span>
+      <h2>Less than one sponsored post per month</h2>
+      <p class="sec-sub">Early-access pricing, locked in for founding customers. Every plan starts with 7 free posts.</p>
+    </div>
+    <div class="price-grid">
+      <div class="price-card rv">
+        <h3>Starter</h3>
+        <p class="who">Street food · single cafe</p>
+        <div class="price-num">$19<small>/mo</small></div>
+        <span class="early-tag">Early-access pricing</span>
+        <ul>
+          <li><svg class="i" width="14" height="14" aria-hidden="true"><use href="#i-check"/></svg>30-day content calendar</li>
+          <li><svg class="i" width="14" height="14" aria-hidden="true"><use href="#i-check"/></svg>Captions + hashtags</li>
+          <li><svg class="i" width="14" height="14" aria-hidden="true"><use href="#i-check"/></svg>1 location, 2 platforms</li>
+        </ul>
+        <button class="btn btn-secondary" data-cta="pricing-starter">Join the waitlist</button>
+      </div>
+      <div class="price-card popular rv">
+        <span class="pop-badge">Most popular</span>
+        <h3>Pro</h3>
+        <p class="who">Restaurants &amp; cafes</p>
+        <div class="price-num">$49<small>/mo</small></div>
+        <span class="early-tag">Early-access pricing</span>
+        <ul>
+          <li><svg class="i" width="14" height="14" aria-hidden="true"><use href="#i-check"/></svg>Everything in Starter</li>
+          <li><svg class="i" width="14" height="14" aria-hidden="true"><use href="#i-check"/></svg>Reel &amp; TikTok scripts</li>
+          <li><svg class="i" width="14" height="14" aria-hidden="true"><use href="#i-check"/></svg>Promo posters &amp; holiday campaigns</li>
+          <li><svg class="i" width="14" height="14" aria-hidden="true"><use href="#i-check"/></svg>Best-time scheduling</li>
+        </ul>
+        <button class="btn btn-primary" data-cta="pricing-pro">Join the waitlist</button>
+      </div>
+      <div class="price-card rv">
+        <h3>Enterprise</h3>
+        <p class="who">Groups &amp; franchises</p>
+        <div class="price-num">Custom</div>
+        <span class="early-tag">Early-access pricing</span>
+        <ul>
+          <li><svg class="i" width="14" height="14" aria-hidden="true"><use href="#i-check"/></svg>Everything in Pro</li>
+          <li><svg class="i" width="14" height="14" aria-hidden="true"><use href="#i-check"/></svg>Multi-location brand controls</li>
+          <li><svg class="i" width="14" height="14" aria-hidden="true"><use href="#i-check"/></svg>Approval workflows &amp; priority support</li>
+        </ul>
+        <button class="btn btn-secondary" data-cta="pricing-enterprise">Talk to us</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 10 · FAQ -->
+<section id="faq">
+  <div class="wrap">
+    <div class="center rv">
+      <span class="eyebrow"><span class="idx">07</span> — FAQ</span>
+      <h2>Questions, answered</h2>
+    </div>
+    <div class="faq rv">
+      <details>
+        <summary>Do I need good photos for this to work?<svg class="i chev" width="16" height="16" aria-hidden="true"><use href="#i-chev"/></svg></summary>
+        <div class="ans">Phone photos are fine — most of our early testers shoot everything on a phone in daylight. MenuBoost plans posts around the photos you have and tells you which 3&#8211;4 shots would fill the gaps.</div>
+      </details>
+      <details>
+        <summary>Will the captions sound like my restaurant, or like a robot?<svg class="i chev" width="16" height="16" aria-hidden="true"><use href="#i-chev"/></svg></summary>
+        <div class="ans">You pick a tone (warm family spot, modern cafe, playful street food) and MenuBoost writes in it consistently. Every caption is editable before it goes anywhere.</div>
+      </details>
+      <details>
+        <summary>Which platforms are supported?<svg class="i chev" width="16" height="16" aria-hidden="true"><use href="#i-chev"/></svg></summary>
+        <div class="ans">Content is formatted for Facebook, Instagram (feed, stories, reels) and TikTok scripts. At launch you copy posts out with one tap; direct auto-publishing is on the roadmap.</div>
+      </details>
+      <details>
+        <summary>Does it handle Thai holidays and local events?<svg class="i chev" width="16" height="16" aria-hidden="true"><use href="#i-chev"/></svg></summary>
+        <div class="ans">Yes — the calendar is holiday-aware for your region. Songkran, Loy Krathong, Mother's Day and long weekends get themed campaigns planned weeks in advance.</div>
+      </details>
+      <details>
+        <summary>What happens to the menu and photos I upload?<svg class="i chev" width="16" height="16" aria-hidden="true"><use href="#i-chev"/></svg></summary>
+        <div class="ans">They're used only to generate your content, never shared or used to train public models. In this demo page specifically, nothing is uploaded at all — the flow is simulated in your browser.</div>
+      </details>
+      <details>
+        <summary>When can I get access?<svg class="i chev" width="16" height="16" aria-hidden="true"><use href="#i-chev"/></svg></summary>
+        <div class="ans">We're onboarding food businesses from the waitlist in small weekly batches so every kitchen gets set up properly. Join the list and we'll email you when your spot opens.</div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- 11 · Final CTA + footer -->
+<section style="padding-top:0;border-top:none">
+  <div class="wrap">
+    <div class="final rv">
+      <span class="eyebrow" style="justify-content:center"><span class="idx">READY</span> — 7 FREE POSTS WAITING</span>
+      <h2>Your next 30 days of posts are one upload away</h2>
+      <p>Join the early-access list and generate your first week of content free — menu in, marketing out.</p>
+      <button class="btn btn-primary" data-cta="final">Generate 7 Posts Free</button>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot-inner">
+    <span>&#169; 2026 MenuBoost. All rights reserved.</span>
+    <div class="foot-links">
+      <button id="link-privacy" type="button">Privacy</button>
+      <button id="link-contact" type="button">Contact</button>
+    </div>
+  </div>
+</footer>
+
+<!-- Day detail modal -->
+<div class="overlay" id="day-overlay" role="dialog" aria-modal="true" aria-label="Post detail">
+  <div class="modal">
+    <button class="modal-x" data-close="day-overlay" aria-label="Close">
+      <svg class="i" width="14" height="14" aria-hidden="true"><use href="#i-x"/></svg>
+    </button>
+    <div class="dm-img g1" id="dm-img"></div>
+    <div class="dm-body">
+      <div class="dm-meta"><span class="dday" id="dm-day">D01</span><span class="type-chip tc-post" id="dm-chip">Post</span></div>
+      <p class="dm-cap" id="dm-cap"></p>
+      <div class="dm-cta">
+        <svg class="i" width="14" height="14" aria-hidden="true"><use href="#i-target"/></svg>
+        <span id="dm-cta"></span>
+      </div>
+      <div class="dm-tags" id="dm-tags"></div>
+      <div class="dm-actions">
+        <button class="btn btn-primary btn-sm" id="dm-copy">
+          <svg class="i" width="14" height="14" aria-hidden="true"><use href="#i-copy"/></svg>
+          <span>Copy caption</span>
+        </button>
+        <button class="btn btn-secondary btn-sm" data-close="day-overlay">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Waitlist modal -->
+<div class="overlay" id="wl-overlay" role="dialog" aria-modal="true" aria-label="Join the waitlist">
+  <div class="modal">
+    <button class="modal-x" data-close="wl-overlay" aria-label="Close">
+      <svg class="i" width="14" height="14" aria-hidden="true"><use href="#i-x"/></svg>
+    </button>
+    <div class="wl-body">
+      <div id="wl-form-wrap">
+        <h3>Get your 7 free posts</h3>
+        <p>Join the early-access list — we onboard new food businesses every week.</p>
+        <form id="wl-form" novalidate>
+          <div class="wl-field">
+            <label for="wl-email">Email</label>
+            <input type="email" id="wl-email" placeholder="you@yourrestaurant.com" autocomplete="email" required>
+            <p class="wl-err" id="wl-err">Please enter a valid email address.</p>
+          </div>
+          <div class="wl-field">
+            <label for="wl-role">What best describes you? (optional)</label>
+            <select id="wl-role">
+              <option value="">Select one&#8230;</option>
+              <option>Restaurant owner</option>
+              <option>Cafe</option>
+              <option>Bakery</option>
+              <option>Street food</option>
+              <option>Marketing helper</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" type="submit" style="width:100%;margin-top:6px">Join the waitlist</button>
+          <p class="wl-fine">We only store your email to contact you about access. No spam.</p>
+        </form>
+      </div>
+      <div class="wl-success" id="wl-success">
+        <div class="okring"><svg class="i" width="22" height="22" aria-hidden="true"><use href="#i-check"/></svg></div>
+        <h4>You're on the list!</h4>
+        <p>We onboard new teams weekly — keep an eye on your inbox.</p>
+        <button class="btn btn-secondary" id="wl-try-demo">Try the interactive demo</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Privacy / contact modal -->
+<div class="overlay" id="pv-overlay" role="dialog" aria-modal="true" aria-label="Privacy and contact">
+  <div class="modal">
+    <button class="modal-x" data-close="pv-overlay" aria-label="Close">
+      <svg class="i" width="14" height="14" aria-hidden="true"><use href="#i-x"/></svg>
+    </button>
+    <div class="wl-body">
+      <h3>The honest fine print</h3>
+      <p style="margin-bottom:0">We're in early access. We only store the email you submit, to contact you about access. Nothing you do in the demo leaves your browser. Questions? Reply to any email from us once you've joined the list.</p>
+      <div class="dm-actions" style="margin-top:22px">
+        <button class="btn btn-secondary btn-sm" data-close="pv-overlay">Got it</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ============ config + tracking (per shared design brief) ============ */
+const CONFIG = {
+  endpoint: "",                      // optional: URL that accepts POST JSON {email, source, event, idea, ts}
+  idea: "restaurant-marketing-ai",
+};
+function track(event, extra = {}) {
+  const rec = { idea: CONFIG.idea, event, ts: Date.now(), ...extra };
+  const all = JSON.parse(localStorage.getItem("val_events") || "[]");
+  all.push(rec); localStorage.setItem("val_events", JSON.stringify(all));
+  if (CONFIG.endpoint) fetch(CONFIG.endpoint.replace(/\/+$/, "") + "/" + CONFIG.idea, { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify(rec) }).catch(() => {});
+}
+
+/* ============ fake data: 30-day Thai restaurant content plan ============ */
+const POSTS = [
+  { day:1,  type:"Post",  icon:"i-noodles", label:"Pad Thai", g:"g1",
+    cap:"Our Pad Thai starts with tamarind we reduce for three hours — sweet, sour, and a little smoky from the wok. One bite and you'll know why it's been on the menu since day one.",
+    cta:"Reserve a table for tonight — link in bio.",
+    tags:["#PadThai","#ThaiFood","#BangkokEats"] },
+  { day:2,  type:"Reel",  icon:"i-flame", label:"Wok Fire", g:"g2",
+    cap:"POV: it's Friday and you didn't cook. Flames, noodles, and that first chopstick pull — 22 seconds of wok fire from tonight's dinner service.",
+    cta:"Save this for Friday. Walk-ins welcome until 10pm.",
+    tags:["#WokFire","#FoodReels","#ThaiKitchen"] },
+  { day:3,  type:"Post",  icon:"i-bowl", label:"Tom Yum", g:"g2",
+    cap:"Tom Yum Goong the old way: river prawns, lemongrass, galangal, and bird's eye chili — nothing from a paste packet. It arrives still bubbling.",
+    cta:"Ask for it 'pet pet' if you dare — order for pickup.",
+    tags:["#TomYum","#ThaiSoup","#SpicyFood"] },
+  { day:4,  type:"Story", icon:"i-flame", label:"Spice Poll", g:"g6",
+    cap:"Poll: how spicy do you really go? Mild / Thai-ish / Full Thai. Vote and we'll spotlight the winning level this weekend.",
+    cta:"Vote in the poll — results tomorrow.",
+    tags:["#SpiceLevel","#ThaiFood"] },
+  { day:5,  type:"Promo", icon:"i-layers", label:"Lunch Sets", g:"g3",
+    cap:"Weekday Lunch Sets are here: green curry, pad krapow, or tom yum — each with jasmine rice and a Thai iced tea, from ฿129. Monday to Friday, 11:00–14:00.",
+    cta:"Show this post for the lunch set price.",
+    tags:["#LunchDeal","#BangkokLunch","#ThaiFood"] },
+  { day:6,  type:"Post",  icon:"i-curry", label:"Green Curry", g:"g3",
+    cap:"Green curry, made green the honest way — fresh chilies, basil, and kaffir lime pounded in-house every morning. Creamy, fragrant, never neon.",
+    cta:"Pair it with roti — add it to any curry order.",
+    tags:["#GreenCurry","#GaengKeowWan","#ThaiCurry"] },
+  { day:7,  type:"Reel",  icon:"i-dessert", label:"Mango Rice", g:"g4",
+    cap:"The mango sticky rice assembly line: warm coconut rice, cold sweet mango, salted coconut cream on top. Watch the drizzle. You're welcome.",
+    cta:"Last order for dessert is 21:30 — don't miss it.",
+    tags:["#MangoStickyRice","#ThaiDessert","#FoodASMR"] },
+  { day:8,  type:"Post",  icon:"i-spark", label:"Chef Nok", g:"g5",
+    cap:"Meet Chef Nok. She learned this pad krapow from her grandmother's street cart and has been perfecting it for 18 years. Some recipes you don't change — you protect them.",
+    cta:"Come taste the family recipe — open from 11am.",
+    tags:["#MeetTheChef","#BehindTheScenes","#ThaiCooking"] },
+  { day:9,  type:"Post",  icon:"i-salad", label:"Som Tum", g:"g6",
+    cap:"Som Tum, pounded to order. Green papaya, tomatoes, long beans, peanuts, and a dressing that balances fish sauce, lime, and palm sugar in one perfect crunch.",
+    cta:"Tell us your spice level when you order.",
+    tags:["#SomTum","#PapayaSalad","#IsaanFood"] },
+  { day:10, type:"Story", icon:"i-message", label:"Sneak Peek", g:"g1",
+    cap:"Something new is coming to the menu next week… here's a blurry sneak peek from tonight's test kitchen. Guesses in the question box.",
+    cta:"Drop your guess — first correct answer eats it free.",
+    tags:["#NewMenu","#ComingSoon"] },
+  { day:11, type:"Promo", icon:"i-drink", label:"Thai Tea", g:"g5",
+    cap:"Thai Tea Tuesday: buy one Thai iced tea, get the second free — all day, dine-in or takeaway. Creamy, strong, and the perfect partner for anything spicy.",
+    cta:"Bring a friend today — offer ends at close.",
+    tags:["#ThaiIcedTea","#BuyOneGetOne","#TuesdayTreat"] },
+  { day:12, type:"Post",  icon:"i-curry", label:"Massaman", g:"g4",
+    cap:"Massaman curry: slow-braised beef, potatoes that soak up everything, roasted peanuts, and a sauce that took all afternoon. Rich, gentle heat — comfort food, Thai edition.",
+    cta:"Perfect for sharing — reserve a table for the family.",
+    tags:["#Massaman","#ThaiCurry","#ComfortFood"] },
+  { day:13, type:"Promo", icon:"i-star", label:"Songkran", g:"g1",
+    cap:"Songkran at Baan Siam! We're celebrating Thai New Year all weekend: free mango sticky rice with every family set, water-splash decor, and traditional khao chae on special. Sanuk guaranteed — bring the whole crew (towels optional).",
+    cta:"Book your Songkran table now — weekend slots go fast.",
+    tags:["#Songkran","#ThaiNewYear","#SawasdeePeeMai","#FamilyFeast"] },
+  { day:14, type:"Post",  icon:"i-noodles", label:"Khao Soi", g:"g2",
+    cap:"Khao Soi has entered the chat. Northern-style curried noodles, crispy noodle crown, pickled mustard greens, and a squeeze of lime. Chiang Mai's favorite, now in our kitchen.",
+    cta:"Limited bowls daily — come early.",
+    tags:["#KhaoSoi","#NorthernThai","#NoodleLover"] },
+  { day:15, type:"Story", icon:"i-layers", label:"Market Run", g:"g3",
+    cap:"5:30 AM at the fresh market with Chef Nok — picking today's basil, chilies, and river prawns. This is why the menu says 'market fresh' and means it.",
+    cta:"Swipe up to see today's market-fresh specials.",
+    tags:["#MarketRun","#BehindTheScenes"] },
+  { day:16, type:"Post",  icon:"i-skewer", label:"Satay", g:"g5",
+    cap:"Chicken satay off the charcoal grill: marinated overnight in turmeric and coconut milk, served with our house peanut sauce and cucumber relish. Smoky, golden, gone in minutes.",
+    cta:"Order a double skewer set — you'll want it.",
+    tags:["#Satay","#GrilledChicken","#ThaiStreetFood"] },
+  { day:17, type:"Reel",  icon:"i-zap", label:"Spring Rolls", g:"g3",
+    cap:"Turn your volume up. That crunch is a fresh spring roll meeting hot oil — filled with glass noodles, wood ear mushroom, and served with sweet chili sauce.",
+    cta:"Starters from ฿79 — see the full menu in bio.",
+    tags:["#SpringRolls","#CrunchASMR","#ThaiAppetizers"] },
+  { day:18, type:"Promo", icon:"i-layers", label:"Family Set", g:"g4",
+    cap:"Weekend Family Platter: pad thai, green curry, som tum, satay, and mango sticky rice — feeds four, priced for real families. Saturday and Sunday only.",
+    cta:"Reserve your weekend table — platters are limited.",
+    tags:["#FamilyPlatter","#WeekendSpecial","#ThaiFeast"] },
+  { day:19, type:"Post",  icon:"i-salad", label:"Pad Krapow", g:"g6",
+    cap:"Pad Krapow Moo: holy basil, chili, garlic, minced pork, and a crispy fried egg on top. Thailand's true national lunch — ours comes with extra basil, always.",
+    cta:"Add a second egg for ฿10 — just ask.",
+    tags:["#PadKrapow","#HolyBasil","#ThaiLunch"] },
+  { day:20, type:"Post",  icon:"i-chart", label:"Crowd Pick", g:"g1",
+    cap:"You voted, we counted: Pad Thai edges out Green Curry as this month's crowd favorite — by 12 votes! Rematch next month. Champions get a permanent spot on the specials board.",
+    cta:"Disagree? Come cast next month's vote in person.",
+    tags:["#CrowdFavorite","#PadThai","#YouVoted"] },
+  { day:21, type:"Story", icon:"i-message", label:"Staff Pick", g:"g2",
+    cap:"Staff pick of the week: our server Ploy swears by the tom kha gai with extra mushrooms. 'It's a hug in a bowl,' she says. We can't argue.",
+    cta:"Try Ploy's pick — mention her story for a smile.",
+    tags:["#StaffPick","#TomKha"] },
+  { day:22, type:"Reel",  icon:"i-bowl", label:"Tom Kha", g:"g5",
+    cap:"The tom kha pour: coconut milk hitting galangal broth in slow motion, then lime leaves, then that first ladle into the bowl. Silky, citrusy, gently spicy.",
+    cta:"Watch till the end, then come get a bowl.",
+    tags:["#TomKhaGai","#CoconutSoup","#SlowMoFood"] },
+  { day:23, type:"Post",  icon:"i-curry", label:"Panang", g:"g4",
+    cap:"Panang curry doesn't shout — it hums. Thick, nutty, kissed with kaffir lime, clinging to every slice of tender beef. The quiet star of our curry list.",
+    cta:"Curry night is every night — order ahead for pickup.",
+    tags:["#PanangCurry","#ThaiCurry","#DinnerIdeas"] },
+  { day:24, type:"Promo", icon:"i-clock", label:"Happy Hour", g:"g2",
+    cap:"Happy Hour, Thai style: 16:00–18:00 daily. Half-price satay, spring rolls, and crispy prawn cakes with every drink. The best after-work table in the neighborhood.",
+    cta:"Grab a colleague at 4 — first round of snacks is on us*. (*half of it, anyway)",
+    tags:["#HappyHour","#AfterWork","#ThaiSnacks"] },
+  { day:25, type:"Post",  icon:"i-dessert", label:"Khao Pad", g:"g3",
+    cap:"Pineapple fried rice, served in the pineapple — because presentation is half the party. Cashews, raisins, curry powder, and plump prawns in every spoonful.",
+    cta:"Great for birthdays — tell us when you book.",
+    tags:["#PineappleFriedRice","#KhaoPad","#ThaiFood"] },
+  { day:26, type:"Story", icon:"i-message", label:"Ask The Chef", g:"g6",
+    cap:"Ask us anything! Sticky question box is open: recipes we can share, spice secrets, how we make the tamarind sauce — Chef Nok answers the best ones tomorrow.",
+    cta:"Drop your question in the box.",
+    tags:["#AskTheChef","#QandA"] },
+  { day:27, type:"Reel",  icon:"i-video", label:"Plating", g:"g1",
+    cap:"30 seconds of pure plating: som tum tower, curry swoosh, herbs placed with tweezers we absolutely pretend we don't own. Dinner is a performance.",
+    cta:"Book a front-row seat (any table works).",
+    tags:["#PlatingGoals","#FoodArt","#ThaiRestaurant"] },
+  { day:28, type:"Post",  icon:"i-salad", label:"Larb Gai", g:"g5",
+    cap:"Larb Gai: minced chicken tossed with roasted rice powder, mint, shallots, and lime. Bright, herby, and secretly the healthiest crave on the menu.",
+    cta:"Ask for lettuce cups to wrap it — trust us.",
+    tags:["#Larb","#IsaanFood","#HealthyThai"] },
+  { day:29, type:"Promo", icon:"i-percent", label:"Loyalty", g:"g4",
+    cap:"Introducing the Baan Siam loyalty card: every 10th meal is on the house, and members get first taste of every new dish. Free to join, starts today.",
+    cta:"Ask any server to sign you up in 30 seconds.",
+    tags:["#LoyaltyCard","#Regulars","#FreeFood"] },
+  { day:30, type:"Post",  icon:"i-heart", label:"Thank You", g:"g6",
+    cap:"That's a wrap on the month — thank you for every full table, every clean plate, and every spice-level dare. Same kitchen, new specials next month. Khob khun ka!",
+    cta:"Follow along — next month's menu drops Monday.",
+    tags:["#ThankYou","#KhobKhunKa","#SeeYouSoon"] },
+];
+
+/* ============ tiny helpers ============ */
+const $  = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+const TYPE_CLASS = { Post:"tc-post", Reel:"tc-reel", Story:"tc-story", Promo:"tc-promo" };
+const pad2 = (n) => String(n).padStart(2, "0");
+const icon = (id, size) => '<svg class="i" width="' + size + '" height="' + size + '" aria-hidden="true"><use href="#' + id + '"/></svg>';
+
+let toastTimer = null;
+function toast(msg, ic = "i-check") {
+  const t = $("#toast");
+  t.innerHTML = icon(ic, 15) + "<span></span>";
+  t.querySelector("span").textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove("show"), 2400);
+}
+
+/* ============ page_view + reveal on scroll ============ */
+track("page_view");
+
+const revealIO = new IntersectionObserver((entries) => {
+  entries.forEach((e) => {
+    if (e.isIntersecting) {
+      const el = e.target;
+      const siblings = $$(".rv.pending", el.parentElement);
+      const idx = siblings.indexOf(el);
+      setTimeout(() => el.classList.add("in"), Math.max(0, idx) * 50);
+      el.classList.remove("pending");
+      revealIO.unobserve(el);
+    }
+  });
+}, { threshold: 0.1 });
+$$(".rv").forEach((el) => { el.classList.add("pending"); revealIO.observe(el); });
+
+/* pricing_view once */
+const pricingIO = new IntersectionObserver((entries) => {
+  entries.forEach((e) => {
+    if (e.isIntersecting) { track("pricing_view"); pricingIO.disconnect(); }
+  });
+}, { threshold: 0.25 });
+pricingIO.observe($("#pricing"));
+
+/* ============ modals ============ */
+function openOverlay(id) { $("#" + id).classList.add("open"); document.body.style.overflow = "hidden"; }
+function closeOverlay(id) { $("#" + id).classList.remove("open"); document.body.style.overflow = ""; }
+$$("[data-close]").forEach((b) => b.addEventListener("click", () => closeOverlay(b.dataset.close)));
+$$(".overlay").forEach((ov) => ov.addEventListener("click", (e) => { if (e.target === ov) closeOverlay(ov.id); }));
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") $$(".overlay.open").forEach((ov) => closeOverlay(ov.id));
+});
+
+function openWaitlist(source) {
+  track("cta_click", { source });
+  $("#wl-form-wrap").style.display = "";
+  $("#wl-success").style.display = "none";
+  openOverlay("wl-overlay");
+  setTimeout(() => $("#wl-email").focus(), 60);
+}
+$$("[data-cta]").forEach((b) => b.addEventListener("click", () => openWaitlist(b.dataset.cta)));
+
+$("#wl-form").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const email = $("#wl-email").value.trim();
+  const ok = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+  $("#wl-err").style.display = ok ? "none" : "block";
+  if (!ok) { $("#wl-email").focus(); return; }
+  const role = $("#wl-role").value || null;
+  track("signup", { email, role });
+  $("#wl-form-wrap").style.display = "none";
+  $("#wl-success").style.display = "block";
+});
+$("#wl-try-demo").addEventListener("click", () => {
+  closeOverlay("wl-overlay");
+  $("#demo").scrollIntoView({ behavior: "smooth" });
+});
+
+/* privacy / contact honest modal */
+$("#link-privacy").addEventListener("click", () => openOverlay("pv-overlay"));
+$("#link-contact").addEventListener("click", () => openOverlay("pv-overlay"));
+
+/* secondary hero CTA */
+$("#see-sample").addEventListener("click", () => {
+  track("cta_click", { source: "hero-secondary" });
+  $("#demo").scrollIntoView({ behavior: "smooth" });
+});
+
+/* ============ prototype: state ============ */
+const state = {
+  demoStarted: false,
+  menuFile: null,
+  photos: new Set(),
+  generated: false,
+};
+function demoStart() {
+  if (!state.demoStarted) { state.demoStarted = true; track("demo_start"); }
+}
+
+/* --- step 1: menu upload --- */
+const dropZone = $("#drop-zone");
+function acceptMenu(name) {
+  demoStart();
+  if (state.menuFile) return;
+  state.menuFile = name;
+  $("#dz-empty").style.display = "none";
+  $("#dz-done").style.display = "block";
+  $("#dz-filename").textContent = name;
+  dropZone.classList.add("uploaded");
+  dropZone.classList.remove("drag");
+  track("upload", { kind: "menu", file: name });
+  toast("Menu received — nothing was actually uploaded", "i-check");
+  refreshStep1();
+}
+$("#sample-menu").addEventListener("click", (e) => { e.stopPropagation(); acceptMenu("thai-kitchen-menu.pdf"); });
+dropZone.addEventListener("click", () => { if (!state.menuFile) acceptMenu("thai-kitchen-menu.pdf"); });
+dropZone.addEventListener("keydown", (e) => {
+  if ((e.key === "Enter" || e.key === " ") && !state.menuFile) { e.preventDefault(); acceptMenu("thai-kitchen-menu.pdf"); }
+});
+["dragenter", "dragover"].forEach((ev) => dropZone.addEventListener(ev, (e) => {
+  e.preventDefault(); if (!state.menuFile) dropZone.classList.add("drag");
+}));
+["dragleave", "drop"].forEach((ev) => dropZone.addEventListener(ev, (e) => {
+  e.preventDefault(); dropZone.classList.remove("drag");
+}));
+dropZone.addEventListener("drop", (e) => {
+  const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+  acceptMenu(f ? f.name : "thai-kitchen-menu.pdf"); // name only — file is never read
+});
+
+/* --- step 1: photo picking --- */
+$$("#photo-grid .photo-card").forEach((card) => {
+  card.addEventListener("click", () => {
+    demoStart();
+    const name = card.dataset.photo;
+    if (state.photos.has(name)) {
+      state.photos.delete(name);
+      card.classList.remove("sel");
+    } else {
+      if (state.photos.size >= 3) { toast("3 photos max for the demo — deselect one first", "i-x"); return; }
+      state.photos.add(name);
+      card.classList.add("sel");
+      if (state.photos.size === 3) track("photos_selected", { photos: Array.from(state.photos) });
+    }
+    refreshStep1();
+  });
+});
+$("#biz-name").addEventListener("input", refreshStep1);
+
+function refreshStep1() {
+  const n = state.photos.size;
+  $("#photo-hint").textContent = "PICK 3 OF 6 · " + n + " SELECTED";
+  const name = $("#biz-name").value.trim();
+  const ready = !!state.menuFile && n === 3 && name.length > 0;
+  $("#btn-generate").disabled = !ready;
+  const status = $("#step1-status");
+  if (ready) status.textContent = "[ok] Ready — let's build " + name + "'s month";
+  else if (!state.menuFile) status.textContent = "Add a menu and pick 3 photos to continue";
+  else if (n < 3) status.textContent = "Pick " + (3 - n) + " more photo" + (3 - n > 1 ? "s" : "") + " to continue";
+  else status.textContent = "Enter your business name to continue";
+}
+
+/* --- step 2: generation (terminal log) --- */
+function setPill(i, cls) {
+  const p = $("#pill-" + i);
+  p.classList.remove("active", "done");
+  if (cls) p.classList.add(cls);
+}
+function lineOk(line) {
+  line.classList.remove("on");
+  line.classList.add("ok");
+  line.querySelector(".gl-pre").textContent = "[ok]";
+}
+$("#btn-generate").addEventListener("click", () => {
+  const name = $("#biz-name").value.trim() || "Baan Siam Kitchen";
+  track("generate", { business: name, photos: Array.from(state.photos) });
+  $("#step-1").style.display = "none";
+  $("#step-2").style.display = "block";
+  setPill(1, "done"); setPill(2, "active");
+
+  const bar = $("#gen-bar-fill");
+  const lines = [$("#gl-1"), $("#gl-2"), $("#gl-3")];
+  lines.forEach((l) => {
+    l.classList.remove("on", "ok");
+    l.querySelector(".gl-pre").textContent = "▸";
+  });
+  bar.style.width = "4%";
+
+  const stages = [
+    { t: 150,  fn: () => { lines[0].classList.add("on"); bar.style.width = "22%"; } },
+    { t: 900,  fn: () => { lineOk(lines[0]); lines[1].classList.add("on"); bar.style.width = "52%"; } },
+    { t: 1700, fn: () => { lineOk(lines[1]); lines[2].classList.add("on"); bar.style.width = "82%"; } },
+    { t: 2500, fn: () => { lineOk(lines[2]); bar.style.width = "100%"; } },
+    { t: 2850, fn: () => showResults(name) },
+  ];
+  stages.forEach((s) => setTimeout(s.fn, s.t));
+});
+
+/* --- step 3: results --- */
+function showResults(name) {
+  $("#step-2").style.display = "none";
+  $("#step-3").style.display = "block";
+  setPill(2, "done"); setPill(3, "active");
+  $("#res-title").textContent = "Your month is ready, " + name;
+  const handle = name.toLowerCase().replace(/[^a-z0-9]+/g, "");
+  $("#ig-handle").textContent = handle || "baansiamkitchen";
+  $("#fb-name").textContent = name;
+  $("#fb-av").textContent = (name[0] || "B").toUpperCase();
+  $("#poster-brand").textContent = name;
+  renderCalendar();
+  renderIG();
+  renderFB();
+  if (!state.generated) { state.generated = true; track("demo_complete"); }
+}
+
+function renderCalendar() {
+  const grid = $("#cal-grid");
+  grid.innerHTML = "";
+  POSTS.forEach((p, i) => {
+    const btn = document.createElement("button");
+    btn.className = "day-card";
+    btn.type = "button";
+    btn.setAttribute("aria-label", "Day " + p.day + " " + p.type);
+    btn.innerHTML =
+      '<div class="day-thumb"><span class="food-g" style="position:absolute;inset:0"></span>' +
+        '<span class="mark">' + icon(p.icon, 30) + '</span></div>' +
+      '<div class="day-body">' +
+        '<div class="day-top"><span class="day-idx">D' + pad2(p.day) + '</span>' +
+        '<span class="type-chip ' + TYPE_CLASS[p.type] + '">' + p.type + '</span></div>' +
+        '<div class="day-cap"></div>' +
+        '<div class="day-tags"></div>' +
+      '</div>';
+    btn.querySelector(".food-g").style.background = "var(--warm-" + p.g.slice(1) + ")";
+    btn.querySelector(".day-cap").textContent = p.cap.split(/[.!?]/)[0].trim() + "…";
+    btn.querySelector(".day-tags").textContent = p.tags.slice(0, 2).join(" ");
+    btn.addEventListener("click", () => openDay(i));
+    grid.appendChild(btn);
+  });
+}
+
+function renderIG() {
+  const grid = $("#ig-grid");
+  grid.innerHTML = "";
+  POSTS.slice(0, 9).forEach((p) => {
+    const cell = document.createElement("div");
+    cell.className = "ig-cell " + p.g;
+    cell.innerHTML =
+      '<span class="food-g"></span>' +
+      '<span class="mark">' + icon(p.icon, 30) + '</span>' +
+      '<span class="lbl"></span>' +
+      (p.type === "Reel" ? '<span class="reel-badge">' + icon("i-play", 12) + '</span>' : "");
+    cell.querySelector(".lbl").textContent = p.label;
+    grid.appendChild(cell);
+  });
+}
+
+function renderFB() {
+  const p = POSTS[2]; // Tom Yum spotlight
+  $("#fb-cap").textContent = p.cap + "\n\n" + p.cta + "\n" + p.tags.join(" ");
+  const img = $("#fb-img");
+  img.className = "fb-img " + p.g;
+  img.querySelector(".mark").innerHTML = icon(p.icon, 96);
+  $("#fb-img-lbl").textContent = p.label;
+}
+$("#fb-like").addEventListener("click", function () {
+  this.classList.toggle("liked");
+  toast(this.classList.contains("liked") ? "Liked! (demo only)" : "Unliked", "i-heart");
+});
+$("#fb-comment").addEventListener("click", () => toast("Comments open in the full product", "i-message"));
+$("#fb-share").addEventListener("click", () => toast("Sharing works once you're onboarded", "i-share"));
+
+/* tabs */
+$$(".tab").forEach((tab) => {
+  tab.addEventListener("click", () => {
+    $$(".tab").forEach((t) => t.classList.remove("active"));
+    $$(".tab-panel").forEach((p) => p.classList.remove("active"));
+    tab.classList.add("active");
+    $("#tab-" + tab.dataset.tab).classList.add("active");
+  });
+});
+
+/* day detail modal */
+let currentDay = 0;
+function openDay(i) {
+  currentDay = i;
+  const p = POSTS[i];
+  const img = $("#dm-img");
+  img.className = "dm-img " + p.g;
+  img.innerHTML =
+    '<span class="food-g"></span>' +
+    '<span class="mark">' + icon(p.icon, 72) + '</span>' +
+    '<span class="lbl"></span>';
+  img.querySelector(".lbl").textContent = p.label;
+  $("#dm-day").textContent = "D" + pad2(p.day);
+  const chip = $("#dm-chip");
+  chip.className = "type-chip " + TYPE_CLASS[p.type];
+  chip.textContent = p.type;
+  $("#dm-cap").textContent = p.cap;
+  $("#dm-cta").textContent = p.cta;
+  const tagWrap = $("#dm-tags");
+  tagWrap.innerHTML = "";
+  p.tags.forEach((t) => {
+    const c = document.createElement("span");
+    c.className = "tag-chip";
+    c.textContent = t;
+    tagWrap.appendChild(c);
+  });
+  track("calendar_day_open", { day: p.day, type: p.type });
+  openOverlay("day-overlay");
+}
+const copyBtn = $("#dm-copy");
+const copyBtnDefault = copyBtn.innerHTML;
+let copyResetTimer = null;
+copyBtn.addEventListener("click", () => {
+  const p = POSTS[currentDay];
+  const text = p.cap + "\n\n" + p.cta + "\n\n" + p.tags.join(" ");
+  const done = () => {
+    track("copy_caption", { day: p.day });
+    copyBtn.innerHTML = icon("i-check", 14) + "<span>Copied</span>";
+    clearTimeout(copyResetTimer);
+    copyResetTimer = setTimeout(() => { copyBtn.innerHTML = copyBtnDefault; }, 1800);
+    toast("Caption copied — ready to paste", "i-copy");
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(done).catch(() => { fallbackCopy(text); done(); });
+  } else { fallbackCopy(text); done(); }
+});
+function fallbackCopy(text) {
+  const ta = document.createElement("textarea");
+  ta.value = text;
+  ta.style.position = "fixed";
+  ta.style.opacity = "0";
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand("copy"); } catch (e) { /* best effort */ }
+  document.body.removeChild(ta);
+}
+
+/* ============ founder stats peek (?stats=1) ============ */
+if (new URLSearchParams(location.search).get("stats") === "1") {
+  const events = JSON.parse(localStorage.getItem("val_events") || "[]");
+  const counts = {};
+  const emails = [];
+  events.forEach((r) => {
+    counts[r.event] = (counts[r.event] || 0) + 1;
+    if (r.event === "signup" && r.email) emails.push(r.email);
+  });
+  const panel = document.createElement("div");
+  panel.className = "stats-peek";
+  let html = "<h5>stats · " + CONFIG.idea + "</h5>";
+  Object.keys(counts).sort().forEach((k) => {
+    html += "<div><span>" + k + "</span><b>" + counts[k] + "</b></div>";
+  });
+  html += "<div style='margin-top:8px;border-top:1px solid var(--border);padding-top:8px'><span>emails</span><b>" + emails.length + "</b></div>";
+  emails.slice(-8).forEach((em) => { html += "<div style='color:var(--ink-3)'>" + em.replace(/</g, "&lt;") + "</div>"; });
+  panel.innerHTML = html;
+  document.body.appendChild(panel);
+}
+</script>
+</body>
+</html>

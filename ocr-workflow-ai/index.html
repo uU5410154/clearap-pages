@@ -1,0 +1,1837 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Docuflow — Build AI Document Automation Without Writing Code</title>
+<meta name="description" content="Connect OCR, AI and your business systems using visual workflows. Drag blocks, run your pipeline, and move documents from inbox to ERP — no engineers required.">
+<script>document.documentElement.classList.add("js");</script>
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #08090d;
+    --bg-2: #0b0d13;
+    --panel: #10131a;
+    --panel-2: #151926;
+    --border: rgba(255,255,255,.07);
+    --border-strong: rgba(255,255,255,.14);
+    --ink: #eef1f7;
+    --ink-2: #a3aab8;
+    --ink-3: #656e80;
+    --accent: #4d8dff;
+    --accent-2: #7c5cff;
+    --grad: linear-gradient(120deg, #4d8dff, #7c5cff);
+    --wash: rgba(77,141,255,.10);
+    --ok: #2dd882;
+    --warn: #f5b83d;
+    --danger: #ff5c5c;
+    --radius: 12px;
+    --mono: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.55;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: rgba(77,141,255,.35); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  img, svg { max-width: 100%; }
+  a { color: var(--accent); text-decoration: none; }
+  button { font: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+
+  svg.ic {
+    fill: none; stroke: currentColor; stroke-width: 1.75;
+    stroke-linecap: round; stroke-linejoin: round; flex: none;
+  }
+
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 20px; }
+  section { padding: 76px 0; position: relative; }
+  .alt { background: var(--bg-2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+
+  .sec-idx {
+    font-family: var(--mono); font-size: 12px; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--ink-3); margin-bottom: 14px;
+  }
+  h1 {
+    font-size: clamp(38px, 6.5vw, 68px); line-height: 1.05;
+    letter-spacing: -0.03em; font-weight: 750;
+  }
+  h1 .gt {
+    background: var(--grad);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent; color: transparent;
+  }
+  h2 {
+    font-size: clamp(26px, 4vw, 38px); letter-spacing: -0.03em;
+    font-weight: 700; line-height: 1.12;
+  }
+  h3 { letter-spacing: -0.01em; }
+  .sec-head { max-width: 660px; margin: 0 auto 46px; text-align: center; }
+  .sec-head .sec-idx { margin-bottom: 12px; }
+  .sec-head p { color: var(--ink-2); margin-top: 12px; font-size: 16.5px; }
+  .num { font-variant-numeric: tabular-nums; }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 12px 24px; border-radius: 9px; font-weight: 600; font-size: 15px;
+    transition: box-shadow .2s ease, background .2s ease, border-color .2s ease, filter .2s ease;
+    white-space: nowrap; letter-spacing: -0.005em;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { filter: brightness(1.12); box-shadow: 0 0 24px rgba(77,141,255,.35); }
+  .btn-secondary {
+    background: transparent; color: var(--ink);
+    border: 1px solid var(--border-strong);
+  }
+  .btn-secondary:hover { border-color: var(--accent); }
+  .btn-sm { padding: 9px 16px; font-size: 13.5px; }
+  .btn:disabled { opacity: .5; cursor: not-allowed; filter: none !important; box-shadow: none !important; }
+
+  /* Nav */
+  .nav {
+    position: sticky; top: 0; z-index: 60;
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    background: rgba(8,9,13,.7); border-bottom: 1px solid var(--border);
+  }
+  .nav-inner { display: flex; align-items: center; gap: 26px; height: 60px; }
+  .logo { display: flex; align-items: center; gap: 9px; font-weight: 700; font-size: 17px; letter-spacing: -0.02em; color: var(--ink); }
+  .nav-links { display: none; gap: 22px; margin-left: 8px; }
+  .nav-links a { color: var(--ink-2); font-size: 13.5px; font-weight: 500; }
+  .nav-links a:hover { color: var(--ink); }
+  .nav-cta { margin-left: auto; }
+
+  /* Dot grid + glow grounds */
+  .ground {
+    position: absolute; inset: 0; pointer-events: none;
+    background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,.05) 1px, transparent 0);
+    background-size: 26px 26px;
+    -webkit-mask-image: radial-gradient(90% 80% at 50% 20%, #000 30%, transparent 100%);
+    mask-image: radial-gradient(90% 80% at 50% 20%, #000 30%, transparent 100%);
+  }
+  .glow { position: absolute; pointer-events: none; filter: blur(100px); border-radius: 50%; }
+  .glow.g1 { width: 560px; height: 400px; top: -140px; right: -80px; background: rgba(77,141,255,.13); }
+  .glow.g2 { width: 420px; height: 340px; bottom: -120px; left: -120px; background: rgba(124,92,255,.09); }
+
+  /* Hero */
+  .hero { padding: 84px 0 92px; overflow: hidden; }
+  .hero-grid { position: relative; display: grid; gap: 52px; align-items: center; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 9px;
+    font-family: var(--mono); font-size: 12px; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--ink-3);
+    border: 1px solid var(--border); border-radius: 999px;
+    padding: 6px 14px; margin-bottom: 22px; background: rgba(255,255,255,.02);
+  }
+  .eyebrow .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px rgba(77,141,255,.8); }
+  .hero-copy p.sub { color: var(--ink-2); font-size: 17.5px; margin: 22px 0 30px; max-width: 520px; }
+  .hero-ctas { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+  .hero-note {
+    margin-top: 18px; color: var(--ink-3); font-size: 12px;
+    font-family: var(--mono); letter-spacing: .04em;
+  }
+
+  /* App frame (hero mock + builder) */
+  .frame {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 14px;
+    overflow: hidden; box-shadow: 0 40px 80px -40px rgba(0,0,0,.7);
+  }
+  .frame-bar {
+    display: flex; align-items: center; gap: 8px; padding: 10px 14px;
+    border-bottom: 1px solid var(--border); background: var(--bg-2);
+  }
+  .fdot { width: 10px; height: 10px; border-radius: 50%; background: var(--ink-3); opacity: .45; flex: none; }
+  .frame-url {
+    margin-left: 8px; font-family: var(--mono); font-size: 11.5px; color: var(--ink-3);
+    background: var(--panel); border: 1px solid var(--border); border-radius: 6px;
+    padding: 4px 12px; letter-spacing: .02em;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0;
+  }
+  .frame-chip {
+    margin-left: auto; display: inline-flex; align-items: center; gap: 7px; flex: none;
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--ink-2); border: 1px solid var(--border); border-radius: 999px; padding: 4px 11px;
+  }
+  .frame-chip .okd { width: 6px; height: 6px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 7px rgba(45,216,130,.7); }
+
+  /* Hero visual */
+  .hero-visual { position: relative; }
+  .mock-body {
+    padding: 30px 22px 22px; position: relative;
+    background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,.05) 1px, transparent 0);
+    background-size: 26px 26px;
+  }
+  .mini-flow { display: flex; align-items: center; justify-content: center; }
+  .mini-node {
+    background: var(--panel-2); border: 1px solid var(--border); border-radius: 10px;
+    padding: 12px 13px; display: flex; flex-direction: column; align-items: center; gap: 9px;
+    min-width: 94px;
+  }
+  .mini-node .tile {
+    width: 34px; height: 34px; border-radius: 8px; background: var(--wash);
+    display: grid; place-items: center; color: var(--accent);
+  }
+  .mini-node span.lbl {
+    font-family: var(--mono); font-size: 10.5px; color: var(--ink-2);
+    letter-spacing: .02em; white-space: nowrap;
+  }
+  .mini-conn { position: relative; width: 38px; height: 1.5px; background: var(--border-strong); flex: none; }
+  .mini-conn::before, .mini-conn::after {
+    content: ""; position: absolute; top: -1.5px; width: 4.5px; height: 4.5px;
+    border-radius: 50%; background: var(--ink-3);
+  }
+  .mini-conn::before { left: -2px; } .mini-conn::after { right: -2px; }
+  .mini-conn .pulse {
+    position: absolute; top: -3px; left: 0; width: 7px; height: 7px; border-radius: 50%;
+    background: var(--accent); box-shadow: 0 0 10px rgba(77,141,255,.9);
+    animation: heroPulse 2.6s ease-in-out infinite;
+  }
+  .mini-conn.c2 .pulse { animation-delay: 1.3s; }
+  @keyframes heroPulse {
+    0% { left: -3px; opacity: 0; }
+    12% { opacity: 1; }
+    46% { left: calc(100% - 4px); opacity: 1; }
+    58%, 100% { left: calc(100% - 4px); opacity: 0; }
+  }
+  .mock-log {
+    margin-top: 22px; border: 1px solid var(--border); border-radius: 8px;
+    background: rgba(0,0,0,.35); padding: 12px 14px;
+    font-family: var(--mono); font-size: 11.5px; line-height: 1.8; color: var(--ink-2);
+  }
+  .mock-log .lg-ok { color: var(--ok); }
+  .mock-log .lg-run { color: var(--accent); }
+  .float-chip {
+    position: absolute; z-index: 2; display: none; align-items: center; gap: 8px;
+    background: rgba(16,19,26,.85); backdrop-filter: blur(8px);
+    border: 1px solid var(--border-strong); border-radius: 9px; padding: 8px 13px;
+    font-family: var(--mono); font-size: 11px; color: var(--ink-2); letter-spacing: .02em;
+    box-shadow: 0 16px 40px -16px rgba(0,0,0,.8);
+  }
+  .float-chip b { color: var(--ink); font-weight: 600; }
+  .float-chip .ic { color: var(--accent); }
+  .fc1 { top: -14px; left: -16px; }
+  .fc2 { bottom: -14px; right: -12px; }
+  .fc2 .ic { color: var(--ok); }
+
+  /* Social proof */
+  .proof { padding: 38px 0 44px; border-bottom: 1px solid var(--border); }
+  .proof p {
+    text-align: center; color: var(--ink-3); font-family: var(--mono);
+    font-size: 11px; letter-spacing: .14em; text-transform: uppercase; margin-bottom: 24px;
+  }
+  .logos { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px 44px; align-items: center; }
+  .wordmark {
+    font-family: var(--mono); color: var(--ink-3); opacity: .55;
+    font-size: 13px; letter-spacing: .1em; text-transform: uppercase; font-weight: 500;
+  }
+
+  /* Cards grid */
+  .grid { display: grid; gap: 16px; }
+  .card {
+    position: relative; background: var(--panel); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 26px 24px;
+    transition: border-color .25s ease;
+  }
+  .card::before {
+    content: ""; position: absolute; top: -1px; left: 10%; right: 10%; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(77,141,255,.5), transparent);
+    opacity: 0; transition: opacity .25s ease;
+  }
+  .card:hover { border-color: var(--border-strong); }
+  .card:hover::before { opacity: 1; }
+  .card h3 { font-size: 16.5px; font-weight: 650; margin: 15px 0 8px; }
+  .card p { color: var(--ink-2); font-size: 14px; }
+  .icon-tile {
+    width: 40px; height: 40px; border-radius: 10px; background: var(--wash);
+    border: 1px solid rgba(77,141,255,.18);
+    display: grid; place-items: center; color: var(--accent);
+  }
+
+  /* Solution before/after */
+  .ba { display: grid; gap: 16px; }
+  .ba-col {
+    position: relative; border-radius: var(--radius); border: 1px solid var(--border);
+    padding: 28px 26px; background: var(--panel); overflow: hidden;
+  }
+  .ba-col.after { border-color: rgba(77,141,255,.3); }
+  .ba-col.after::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(77,141,255,.7), transparent);
+  }
+  .ba-tag {
+    font-family: var(--mono); font-size: 11px; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--ink-3);
+  }
+  .ba-col.after .ba-tag { color: var(--accent); }
+  .ba-col h3 { font-size: 18px; margin: 10px 0 18px; }
+  .ba-col ul { list-style: none; display: grid; gap: 12px; }
+  .ba-col li { display: flex; gap: 11px; color: var(--ink-2); font-size: 14px; align-items: flex-start; }
+  .ba-col li .b {
+    flex: none; width: 20px; height: 20px; border-radius: 6px; display: grid;
+    place-items: center; margin-top: 1px; border: 1px solid var(--border);
+  }
+  .ba-col.before li .b { color: var(--danger); background: rgba(255,92,92,.08); }
+  .ba-col.after li .b { color: var(--ok); background: rgba(45,216,130,.08); }
+
+  /* ============ PROTOTYPE / BUILDER ============ */
+  .builder { display: grid; grid-template-columns: 1fr; }
+  .palette {
+    border-bottom: 1px solid var(--border); background: var(--bg-2);
+    padding: 14px 14px 10px;
+  }
+  .palette-title {
+    font-family: var(--mono); font-size: 11px; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--ink-3); margin-bottom: 10px; padding-left: 2px;
+  }
+  .palette-list { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: thin; }
+  .pal-item {
+    display: flex; align-items: center; gap: 10px; flex: none;
+    background: var(--panel); border: 1px solid var(--border); border-radius: 8px;
+    padding: 8px 12px; font-size: 13px; font-weight: 550; color: var(--ink-2);
+    cursor: grab; user-select: none; text-align: left;
+    transition: border-color .15s, background .15s, color .15s;
+  }
+  .pal-item .ic { color: var(--ink-3); transition: color .15s; }
+  .pal-item:hover { background: var(--wash); border-color: rgba(77,141,255,.35); color: var(--ink); }
+  .pal-item:hover .ic { color: var(--accent); }
+  .pal-item:active { cursor: grabbing; }
+  .pal-item .plus { margin-left: 2px; color: var(--ink-3); }
+
+  .canvas-side { padding: 16px 16px 18px; min-width: 0; }
+  .tmpl-row { display: flex; gap: 7px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 10px; scrollbar-width: thin; align-items: center; }
+  .tmpl-label {
+    flex: none; font-family: var(--mono); font-size: 10.5px; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--ink-3); margin-right: 4px;
+  }
+  .chip {
+    flex: none; background: transparent; color: var(--ink-2);
+    border: 1px solid var(--border); border-radius: 6px; padding: 6px 12px;
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase;
+    transition: border-color .15s, color .15s, background .15s;
+  }
+  .chip:hover { border-color: var(--border-strong); color: var(--ink); }
+  .chip.active { border-color: var(--accent); color: var(--accent); background: var(--wash); }
+
+  .canvas {
+    position: relative; border: 1px solid var(--border); border-radius: 10px;
+    background-color: var(--panel);
+    background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,.05) 1px, transparent 0);
+    background-size: 22px 22px;
+    min-height: 244px; overflow-x: auto; overflow-y: hidden;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .canvas.dragover { border-color: var(--accent); box-shadow: inset 0 0 0 1px rgba(77,141,255,.4), 0 0 24px rgba(77,141,255,.12); }
+  .canvas.locked { pointer-events: none; }
+  .lane {
+    display: flex; align-items: center; min-height: 242px;
+    padding: 28px 26px; width: max-content; min-width: 100%;
+  }
+  .empty-hint {
+    position: absolute; inset: 0; display: grid; place-items: center; text-align: center;
+    color: var(--ink-3); pointer-events: none; padding: 20px;
+  }
+  .empty-hint .eh-icon {
+    width: 50px; height: 50px; border-radius: 12px; border: 1.5px dashed var(--border-strong);
+    display: grid; place-items: center; margin: 0 auto 12px; color: var(--ink-3);
+  }
+  .empty-hint p { font-size: 14px; font-weight: 550; color: var(--ink-2); }
+  .empty-hint small { font-family: var(--mono); font-size: 11px; color: var(--ink-3); letter-spacing: .02em; }
+
+  .node {
+    position: relative; flex: none; background: var(--panel-2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 13px 12px 12px; width: 118px;
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+    transition: border-color .2s, box-shadow .2s, opacity .18s, transform .18s;
+  }
+  .node.enter { animation: nodeIn .32s cubic-bezier(.2,.9,.3,1.15) backwards; }
+  @keyframes nodeIn {
+    from { opacity: 0; transform: translateY(12px) scale(.88); }
+    to { opacity: 1; transform: none; }
+  }
+  .node.leave { opacity: 0; transform: scale(.82); }
+  .node .tile {
+    position: relative; width: 36px; height: 36px; border-radius: 9px;
+    background: var(--wash); border: 1px solid rgba(77,141,255,.15);
+    color: var(--accent); display: grid; place-items: center;
+  }
+  .node .nm {
+    font-family: var(--mono); font-size: 11px; color: var(--ink-2);
+    text-align: center; line-height: 1.35; letter-spacing: .01em;
+  }
+  .node .rm {
+    position: absolute; top: -8px; right: -8px; width: 21px; height: 21px; border-radius: 50%;
+    background: var(--panel-2); border: 1px solid var(--border-strong); color: var(--ink-3);
+    display: grid; place-items: center;
+    opacity: 0; transform: scale(.7); transition: opacity .15s, transform .15s, color .15s, border-color .15s;
+  }
+  .node:hover .rm { opacity: 1; transform: scale(1); }
+  .node .rm:hover { color: var(--danger); border-color: var(--danger); }
+  .node .spin {
+    position: absolute; inset: 0; border-radius: 9px; display: none; place-items: center;
+    background: rgba(16,19,26,.75);
+  }
+  .node .spin i {
+    width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgba(77,141,255,.25);
+    border-top-color: var(--accent); animation: rot .7s linear infinite; display: block;
+  }
+  @keyframes rot { to { transform: rotate(360deg); } }
+  .node .chk {
+    position: absolute; bottom: -4px; right: -4px; width: 9px; height: 9px; border-radius: 50%;
+    background: var(--ok); box-shadow: 0 0 8px rgba(45,216,130,.8), 0 0 0 2.5px var(--panel);
+    display: none;
+  }
+  .node.running {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px rgba(77,141,255,.5), 0 0 22px rgba(77,141,255,.18);
+  }
+  .node.running .spin { display: grid; }
+  .node.done { border-color: rgba(45,216,130,.35); }
+  .node.done .chk { display: block; animation: nodeIn .25s ease backwards; }
+
+  .conn { position: relative; flex: none; width: 44px; height: 1.5px; background: var(--border-strong); margin: 0 2px; }
+  .conn::before, .conn::after {
+    content: ""; position: absolute; top: -1.75px; width: 5px; height: 5px;
+    border-radius: 50%; background: var(--ink-3);
+  }
+  .conn::before { left: -2.5px; } .conn::after { right: -2.5px; }
+  .conn.enter { animation: connIn .3s ease backwards; transform-origin: left center; }
+  @keyframes connIn { from { transform: scaleX(0); opacity: 0; } to { transform: scaleX(1); opacity: 1; } }
+  .canvas.run .conn {
+    background-image: repeating-linear-gradient(90deg, rgba(77,141,255,.35) 0 5px, transparent 5px 10px);
+    background-size: 10px 1.5px; animation: dashMove .6s linear infinite;
+  }
+  @keyframes dashMove { to { background-position: 10px 0; } }
+  .conn .tok {
+    position: absolute; top: -3.25px; left: -4px; width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent); box-shadow: 0 0 12px rgba(77,141,255,.9); opacity: 0;
+  }
+  .conn.go .tok { animation: tokGo .32s linear forwards; }
+  @keyframes tokGo {
+    from { left: -4px; opacity: 1; }
+    to { left: calc(100% - 4px); opacity: 1; }
+  }
+  .conn.passed, .canvas.run .conn.passed {
+    background: rgba(77,141,255,.6); background-image: none; animation: none;
+  }
+  .conn.passed::before, .conn.passed::after { background: var(--accent); }
+
+  .canvas-actions { display: flex; align-items: center; gap: 14px; margin-top: 14px; flex-wrap: wrap; }
+  .block-count { font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); letter-spacing: .04em; }
+  .clear-link {
+    font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); letter-spacing: .04em;
+    text-decoration: underline; text-underline-offset: 3px;
+  }
+  .clear-link:hover { color: var(--danger); }
+
+  /* Results panel */
+  .results {
+    margin-top: 16px; border: 1px solid var(--border); border-radius: 10px; background: var(--panel);
+    overflow: hidden; opacity: 0; transform: translateY(16px);
+    transition: opacity .4s ease, transform .4s ease;
+  }
+  .results.open { opacity: 1; transform: none; }
+  .res-head {
+    display: flex; align-items: center; gap: 10px; padding: 12px 16px;
+    border-bottom: 1px solid var(--border); background: var(--bg-2); flex-wrap: wrap;
+  }
+  .res-title {
+    font-family: var(--mono); font-size: 11.5px; color: var(--ink-2); letter-spacing: .02em;
+    display: flex; align-items: center; gap: 9px;
+  }
+  .res-title .okdot { width: 7px; height: 7px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 8px rgba(45,216,130,.7); flex: none; }
+  .res-tabs { display: flex; gap: 6px; margin-left: auto; }
+  .res-tab {
+    padding: 6px 12px; border-radius: 6px; font-family: var(--mono); font-size: 10.5px;
+    letter-spacing: .08em; text-transform: uppercase;
+    color: var(--ink-3); border: 1px solid transparent;
+    transition: background .15s, color .15s, border-color .15s;
+  }
+  .res-tab:hover { color: var(--ink); }
+  .res-tab.active { background: var(--wash); color: var(--accent); border-color: rgba(77,141,255,.3); }
+  .res-body { padding: 16px; }
+  .res-pane { display: none; }
+  .res-pane.active { display: block; animation: fadeUp .3s ease; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  .code {
+    background: #0a0c12; color: var(--ink-2); border: 1px solid var(--border); border-radius: 8px;
+    padding: 16px 18px; font-family: var(--mono);
+    font-size: 12px; line-height: 1.65; overflow-x: auto; white-space: pre; tab-size: 2;
+  }
+  .j-key { color: #7ea6e8; }
+  .j-str { color: #7fc9a3; }
+  .j-num { color: #d4ab7a; }
+  .j-bool { color: #ab93e0; }
+  .j-null { color: var(--ink-3); }
+
+  .sheet-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; }
+  table.sheet { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 12.5px; }
+  table.sheet th, table.sheet td {
+    border: 1px solid var(--border); padding: 7px 12px; text-align: left; white-space: nowrap;
+    color: var(--ink-2);
+  }
+  table.sheet thead th {
+    background: var(--panel-2); color: var(--ink-3); font-family: var(--mono);
+    font-weight: 500; font-size: 10.5px; letter-spacing: .08em;
+    text-align: center; width: 25%;
+  }
+  table.sheet td.rowno, table.sheet th.rowno {
+    background: var(--panel-2); color: var(--ink-3); font-family: var(--mono);
+    font-weight: 500; font-size: 10.5px;
+    text-align: center; width: 36px; min-width: 36px;
+  }
+  table.sheet td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  table.sheet tr.hdr td { background: var(--wash); font-weight: 600; color: var(--accent); }
+  table.sheet tr.total td { font-weight: 650; color: var(--ink); background: rgba(255,255,255,.02); }
+  .sheet-note { margin-top: 10px; font-family: var(--mono); font-size: 11px; color: var(--ink-3); letter-spacing: .02em; }
+  .sheet-note b { color: var(--ink-2); font-weight: 600; }
+
+  .appr-card {
+    border: 1px solid var(--border); border-radius: 10px; padding: 20px; max-width: 520px;
+    margin: 0 auto; background: var(--panel-2);
+  }
+  .appr-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .appr-vendor { font-weight: 650; font-size: 16px; letter-spacing: -0.01em; }
+  .appr-sub { color: var(--ink-3); font-family: var(--mono); font-size: 11px; margin-top: 4px; letter-spacing: .02em; }
+  .conf-badge {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--ok); border: 1px solid rgba(45,216,130,.3); background: rgba(45,216,130,.08);
+    border-radius: 999px; padding: 5px 12px;
+  }
+  .conf-badge .okd { width: 6px; height: 6px; border-radius: 50%; background: var(--ok); }
+  .appr-rows { margin: 18px 0; display: grid; gap: 9px; }
+  .appr-row { display: flex; justify-content: space-between; font-size: 14px; gap: 14px; align-items: baseline; }
+  .appr-row span { color: var(--ink-2); }
+  .appr-row b { font-variant-numeric: tabular-nums; font-weight: 600; text-align: right; }
+  .appr-row.big { border-top: 1px solid var(--border); padding-top: 12px; margin-top: 4px; }
+  .appr-row.big b { font-size: 18px; font-weight: 700; }
+  .appr-actions { display: flex; gap: 10px; margin-top: 18px; }
+  .btn-approve {
+    flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    background: var(--ok); color: #052e17; border-radius: 9px; padding: 11px; font-weight: 650;
+    transition: filter .15s, box-shadow .15s;
+  }
+  .btn-approve:hover { filter: brightness(1.08); box-shadow: 0 0 20px rgba(45,216,130,.3); }
+  .btn-reject {
+    flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    background: transparent; border: 1px solid var(--border-strong); color: var(--danger);
+    border-radius: 9px; padding: 11px; font-weight: 650; transition: border-color .15s, background .15s;
+  }
+  .btn-reject:hover { border-color: var(--danger); background: rgba(255,92,92,.08); }
+  .appr-status { margin-top: 16px; text-align: center; font-weight: 600; font-size: 14px; display: none; }
+  .appr-card.decided .appr-actions { display: none; }
+  .appr-card.decided .appr-status { display: block; animation: fadeUp .3s ease; }
+
+  /* Features + templates */
+  .feat-grid { grid-template-columns: 1fr; }
+  .tmpl-cards { display: grid; gap: 14px; grid-template-columns: 1fr 1fr; margin-top: 18px; }
+  .tmpl-card {
+    position: relative; background: var(--panel); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 18px; transition: border-color .2s;
+  }
+  .tmpl-card::before {
+    content: ""; position: absolute; top: -1px; left: 10%; right: 10%; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(77,141,255,.5), transparent);
+    opacity: 0; transition: opacity .25s ease;
+  }
+  .tmpl-card:hover { border-color: var(--border-strong); }
+  .tmpl-card:hover::before { opacity: 1; }
+  .tmpl-card h4 { font-size: 14px; font-weight: 650; margin-bottom: 8px; letter-spacing: -0.005em; }
+  .tmpl-card .chain { font-family: var(--mono); font-size: 10.5px; color: var(--ink-3); line-height: 1.7; letter-spacing: .01em; }
+  .tmpl-card .open-b {
+    margin-top: 12px; font-family: var(--mono); font-size: 11px; letter-spacing: .06em;
+    text-transform: uppercase; color: var(--accent); display: inline-flex; align-items: center; gap: 6px;
+  }
+  .tmpl-card .open-b:hover { filter: brightness(1.2); }
+  .tmpl-head { display: flex; align-items: center; gap: 12px; margin: 50px 0 4px; }
+  .tmpl-head h3 { font-size: 20px; }
+  .tmpl-head p { color: var(--ink-2); font-size: 14px; margin-top: 4px; }
+
+  /* Steps */
+  .steps { grid-template-columns: 1fr; }
+  .step { position: relative; padding: 26px 24px; }
+  .step .n {
+    font-family: var(--mono); font-size: 12px; letter-spacing: .14em; color: var(--accent);
+    border: 1px solid rgba(77,141,255,.3); background: var(--wash);
+    border-radius: 7px; padding: 5px 11px; display: inline-block; margin-bottom: 16px;
+  }
+  .step h3 { font-size: 16.5px; font-weight: 650; margin-bottom: 8px; }
+  .step p { color: var(--ink-2); font-size: 14px; }
+
+  /* Pricing */
+  .plans { grid-template-columns: 1fr; align-items: stretch; }
+  .plan { display: flex; flex-direction: column; position: relative; padding: 30px 26px; overflow: hidden; }
+  .plan.pop { border-color: rgba(77,141,255,.35); }
+  .plan.pop::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px; opacity: 1;
+    background: linear-gradient(90deg, transparent, #4d8dff, #7c5cff, transparent);
+  }
+  .plan .tag {
+    position: absolute; top: 14px; right: 14px;
+    font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--accent); background: var(--wash); border: 1px solid rgba(77,141,255,.3);
+    padding: 4px 10px; border-radius: 999px; white-space: nowrap;
+  }
+  .plan h3 { font-size: 17px; margin: 0 0 4px; font-weight: 650; }
+  .plan .for { color: var(--ink-3); font-size: 13px; }
+  .plan .price { font-size: 38px; font-weight: 700; letter-spacing: -0.03em; margin: 18px 0 2px; font-variant-numeric: tabular-nums; }
+  .plan .price small { font-size: 14px; font-weight: 500; color: var(--ink-3); letter-spacing: 0; }
+  .plan .ea {
+    font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--ink-3); border: 1px solid var(--border); display: inline-block;
+    border-radius: 999px; padding: 4px 10px; margin-bottom: 18px; align-self: flex-start;
+  }
+  .plan ul { list-style: none; display: grid; gap: 10px; margin-bottom: 24px; }
+  .plan li { display: flex; gap: 10px; font-size: 13.5px; color: var(--ink-2); align-items: flex-start; }
+  .plan li .ic { margin-top: 2.5px; color: var(--accent); }
+  .plan .btn { margin-top: auto; width: 100%; }
+
+  /* FAQ */
+  .faq { max-width: 720px; margin: 0 auto; display: grid; gap: 10px; }
+  .faq details {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 0 20px;
+    transition: border-color .2s;
+  }
+  .faq details[open] { border-color: var(--border-strong); }
+  .faq summary {
+    cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between;
+    gap: 14px; padding: 16px 0; font-weight: 550; font-size: 14.5px;
+  }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary .car { flex: none; transition: transform .25s; color: var(--ink-3); }
+  .faq details[open] summary .car { transform: rotate(180deg); }
+  .faq .a { padding: 0 0 18px; color: var(--ink-2); font-size: 14px; }
+
+  /* Final CTA */
+  .final {
+    position: relative; overflow: hidden; text-align: center;
+    border: 1px solid var(--border); border-radius: 16px;
+    background: var(--panel); padding: 72px 26px;
+  }
+  .final .ground { -webkit-mask-image: radial-gradient(70% 100% at 50% 0%, #000 20%, transparent 90%); mask-image: radial-gradient(70% 100% at 50% 0%, #000 20%, transparent 90%); }
+  .final .glow.g1 { top: -180px; right: 22%; }
+  .final h2, .final p, .final .hero-ctas { position: relative; }
+  .final p { color: var(--ink-2); margin: 14px auto 30px; max-width: 480px; }
+  .final .hero-ctas { justify-content: center; }
+
+  footer { padding: 34px 0 44px; border-top: 1px solid var(--border); }
+  .foot { display: flex; flex-wrap: wrap; gap: 14px 26px; align-items: center; justify-content: space-between; color: var(--ink-3); font-size: 13px; }
+  .foot .fbrand { font-family: var(--mono); font-size: 11.5px; letter-spacing: .04em; }
+  .foot .links { display: flex; gap: 20px; }
+  .foot button { color: var(--ink-3); font-size: 13px; }
+  .foot button:hover { color: var(--ink); }
+
+  /* Modal */
+  .overlay {
+    position: fixed; inset: 0; background: rgba(4,5,8,.7); z-index: 100;
+    display: none; align-items: center; justify-content: center; padding: 20px;
+    backdrop-filter: blur(4px);
+  }
+  .overlay.show { display: flex; animation: fadeIn .2s ease; }
+  @keyframes fadeIn { from { opacity: 0; } }
+  .modal {
+    background: var(--panel); border: 1px solid var(--border-strong);
+    border-radius: 14px; padding: 30px 28px; width: 100%; max-width: 440px;
+    box-shadow: 0 40px 90px -30px rgba(0,0,0,.8); position: relative;
+    animation: modalIn .28s cubic-bezier(.2,.9,.3,1.15);
+  }
+  @keyframes modalIn { from { opacity: 0; transform: translateY(18px) scale(.96); } }
+  .modal h3 { font-size: 20px; letter-spacing: -0.02em; margin-bottom: 6px; font-weight: 700; }
+  .modal .msub { color: var(--ink-2); font-size: 14px; margin-bottom: 20px; }
+  .modal .x {
+    position: absolute; top: 14px; right: 14px; width: 32px; height: 32px; border-radius: 8px;
+    display: grid; place-items: center; color: var(--ink-3);
+  }
+  .modal .x:hover { background: var(--panel-2); color: var(--ink); }
+  .field { margin-bottom: 14px; }
+  .field label {
+    display: block; font-family: var(--mono); font-size: 11px; letter-spacing: .1em;
+    text-transform: uppercase; margin-bottom: 7px; color: var(--ink-3);
+  }
+  .field input, .field select {
+    width: 100%; border: 1px solid var(--border-strong); border-radius: 9px; padding: 11px 13px;
+    font: inherit; font-size: 14.5px; color: var(--ink); background: var(--panel-2); outline: none;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .field input::placeholder { color: var(--ink-3); }
+  .field input:focus, .field select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(77,141,255,.18); }
+  .field .err { color: var(--danger); font-size: 12.5px; margin-top: 6px; display: none; }
+  .field.invalid input { border-color: var(--danger); }
+  .field.invalid .err { display: block; }
+  .modal .btn { width: 100%; margin-top: 6px; }
+  .modal .fine { font-size: 12px; color: var(--ink-3); text-align: center; margin-top: 12px; }
+  .m-success { display: none; text-align: center; padding: 10px 0 4px; }
+  .m-success .big {
+    width: 54px; height: 54px; border-radius: 50%; border: 1px solid rgba(45,216,130,.35);
+    background: rgba(45,216,130,.1); color: var(--ok);
+    display: grid; place-items: center; margin: 0 auto 16px;
+  }
+  .modal.done .m-form { display: none; }
+  .modal.done .m-success { display: block; animation: fadeUp .3s ease; }
+
+  /* Toast */
+  .toasts { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%); z-index: 120; display: grid; gap: 8px; width: min(92vw, 420px); }
+  .toast {
+    background: var(--panel-2); color: var(--ink); border: 1px solid var(--border-strong);
+    border-radius: 9px; padding: 12px 16px; font-size: 13.5px; font-weight: 500;
+    box-shadow: 0 16px 40px -14px rgba(0,0,0,.8);
+    display: flex; align-items: center; gap: 11px;
+    animation: toastIn .3s cubic-bezier(.2,.9,.3,1.2);
+  }
+  .toast.out { opacity: 0; transform: translateY(8px); transition: opacity .3s, transform .3s; }
+  @keyframes toastIn { from { opacity: 0; transform: translateY(14px); } }
+  .toast .t-ic { color: var(--ok); display: grid; place-items: center; flex: none; }
+  .toast.warn .t-ic { color: var(--warn); }
+
+  /* Stats peek */
+  .stats-peek {
+    position: fixed; bottom: 16px; right: 16px; z-index: 130; background: var(--panel);
+    border: 1px solid var(--border-strong); border-radius: 10px;
+    box-shadow: 0 20px 50px -20px rgba(0,0,0,.8);
+    padding: 14px 16px; font-family: var(--mono); font-size: 11px; max-width: 280px; max-height: 50vh; overflow: auto;
+  }
+  .stats-peek h4 { font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 8px; }
+  .stats-peek div { display: flex; justify-content: space-between; gap: 12px; padding: 2px 0; color: var(--ink-2); }
+  .stats-peek b { font-variant-numeric: tabular-nums; color: var(--ink); }
+  .stats-peek .em { color: var(--accent); word-break: break-all; }
+
+  /* Reveal on scroll (JS-gated so no-JS users always see content) */
+  html.js .reveal { opacity: 0; transform: translateY(14px); transition: opacity .35s ease, transform .35s ease; }
+  html.js .reveal.in { opacity: 1; transform: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    html.js .reveal { opacity: 1; transform: none; }
+  }
+
+  /* ===== Breakpoints ===== */
+  @media (min-width: 640px) {
+    .nav-links { display: flex; }
+    .grid.cols2 { grid-template-columns: 1fr 1fr; }
+    .feat-grid { grid-template-columns: 1fr 1fr; }
+    .steps { grid-template-columns: 1fr 1fr 1fr; }
+    .ba { grid-template-columns: 1fr 1fr; }
+    .tmpl-cards { grid-template-columns: repeat(4, 1fr); }
+  }
+  @media (min-width: 960px) {
+    section { padding: 96px 0; }
+    .hero-grid { grid-template-columns: 1.05fr 1fr; }
+    .float-chip { display: inline-flex; }
+    .grid.cols4 { grid-template-columns: repeat(4, 1fr); }
+    .feat-grid { grid-template-columns: repeat(3, 1fr); }
+    .plans { grid-template-columns: 1fr 1fr 1fr; }
+    .builder { grid-template-columns: 224px 1fr; }
+    .palette { border-bottom: 0; border-right: 1px solid var(--border); padding: 16px 14px; }
+    .palette-list { flex-direction: column; overflow: visible; padding-bottom: 0; }
+    .pal-item { width: 100%; }
+    .pal-item .plus { margin-left: auto; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SVG symbol set — the only icon source on this page -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-zap" viewBox="0 0 24 24"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 11.5 2 2 4-4"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></symbol>
+  <symbol id="i-database" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 5v14c0 1.7-4 3-9 3s-9-1.3-9-3V5"/><path d="M3 12c0 1.7 4 3 9 3s9-1.3 9-3"/></symbol>
+  <symbol id="i-mail" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></symbol>
+  <symbol id="i-cpu" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M1 9h3M1 15h3M20 9h3M20 15h3"/></symbol>
+  <symbol id="i-terminal" viewBox="0 0 24 24"><path d="m4 17 6-5-6-5"/><path d="M12 19h8"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-arrow-r" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+  <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 2 9 5-9 5-9-5 9-5z"/><path d="m3 12 9 5 9-5"/><path d="m3 17 9 5 9-5"/></symbol>
+  <symbol id="i-workflow" viewBox="0 0 24 24"><rect x="3" y="3" width="6" height="6" rx="1"/><rect x="15" y="15" width="6" height="6" rx="1"/><path d="M9 6h6a2 2 0 0 1 2 2v7"/></symbol>
+  <symbol id="i-scan" viewBox="0 0 24 24"><path d="M4 7V5a1 1 0 0 1 1-1h2M17 4h2a1 1 0 0 1 1 1v2M20 17v2a1 1 0 0 1-1 1h-2M7 20H5a1 1 0 0 1-1-1v-2"/><path d="M8 9h8M8 12h8M8 15h5"/></symbol>
+  <symbol id="i-user-check" viewBox="0 0 24 24"><path d="M8 11.5a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M2.5 19c.6-2.8 2.9-4.5 5.5-4.5 1 0 2 .3 2.8.7"/><path d="m14 17 2.2 2.2 4.3-4.2"/></symbol>
+  <symbol id="i-erp" viewBox="0 0 24 24"><rect x="4" y="3" width="10" height="18" rx="1"/><path d="M14 9h5a1 1 0 0 1 1 1v11"/><path d="M8 7h2M8 11h2M8 15h2M17 13h1M17 17h1M4 21h16"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><path d="M10 3 8 21M16 3l-2 18M4 8h17M3 16h17"/></symbol>
+  <symbol id="i-table" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 4v16M15 9v11"/></symbol>
+  <symbol id="i-braces" viewBox="0 0 24 24"><path d="M9 4c-2 0-2.5 1-2.5 2.5v2C6.5 10 6 11 4.5 11v2c1.5 0 2 1 2 2.5v2C6.5 19 7 20 9 20M15 4c2 0 2.5 1 2.5 2.5v2c0 1.5.5 2.5 2 2.5v2c-1.5 0-2 1-2 2.5v2c0 1.5-.5 2.5-2.5 2.5"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5-11-6.5z"/></symbol>
+  <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4M12 17.3v.5"/></symbol>
+  <symbol id="i-code" viewBox="0 0 24 24"><path d="m8 6-6 6 6 6M16 6l6 6-6 6"/></symbol>
+  <symbol id="i-nodes" viewBox="0 0 24 24"><circle cx="5" cy="6" r="2.2"/><circle cx="19" cy="6" r="2.2"/><circle cx="5" cy="18" r="2.2"/><circle cx="19" cy="18" r="2.2"/><circle cx="12" cy="12" r="2.2"/></symbol>
+</svg>
+
+<!-- 1 · Sticky nav -->
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a class="logo" href="#top" aria-label="Docuflow home">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <rect x="1" y="1" width="22" height="22" rx="6" fill="url(#lg)"/>
+        <rect x="5.5" y="5.5" width="5" height="5" rx="1.2" stroke="#fff" stroke-width="1.6"/>
+        <rect x="13.5" y="13.5" width="5" height="5" rx="1.2" stroke="#fff" stroke-width="1.6"/>
+        <path d="M10.5 8h3.5a2 2 0 0 1 2 2v3.5" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/>
+        <defs><linearGradient id="lg" x1="1" y1="1" x2="23" y2="23"><stop stop-color="#4d8dff"/><stop offset="1" stop-color="#7c5cff"/></linearGradient></defs>
+      </svg>
+      Docuflow
+    </a>
+    <nav class="nav-links" aria-label="Sections">
+      <a href="#prototype">Builder</a>
+      <a href="#features">Features</a>
+      <a href="#how">How it works</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <div class="nav-cta">
+      <button class="btn btn-primary btn-sm" data-open-waitlist data-cta="nav">Get early access</button>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+
+<!-- 2 · Hero -->
+<section class="hero">
+  <div class="ground"></div>
+  <div class="glow g1"></div>
+  <div class="glow g2"></div>
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <span class="eyebrow"><span class="dot"></span> Early access — AI document automation</span>
+      <h1>Build AI Document Automation Without Writing <span class="gt">Code</span></h1>
+      <p class="sub">Connect OCR, AI and your business systems using visual workflows. Drag blocks onto a canvas, press run, and move documents from inbox to ERP — no engineers, no six-week projects.</p>
+      <div class="hero-ctas">
+        <button class="btn btn-primary" data-scroll-proto data-cta="hero_primary">Build My First Workflow</button>
+        <button class="btn btn-secondary" data-open-waitlist data-cta="hero_demo">Book a demo</button>
+      </div>
+      <p class="hero-note">FREE DURING EARLY ACCESS · NO CREDIT CARD REQUIRED</p>
+    </div>
+    <div class="hero-visual reveal">
+      <div class="float-chip fc1"><svg class="ic" width="14" height="14"><use href="#i-zap"></use></svg> <b>Invoice Processing</b> · live</div>
+      <div class="frame">
+        <div class="frame-bar">
+          <span class="fdot"></span><span class="fdot"></span><span class="fdot"></span>
+          <span class="frame-url">docuflow.app/workflows/invoices</span>
+          <span class="frame-chip"><span class="okd"></span>Live</span>
+        </div>
+        <div class="mock-body">
+          <div class="mini-flow">
+            <div class="mini-node">
+              <span class="tile"><svg class="ic" width="17" height="17"><use href="#i-upload"></use></svg></span>
+              <span class="lbl">upload_pdf</span>
+            </div>
+            <div class="mini-conn"><span class="pulse"></span></div>
+            <div class="mini-node">
+              <span class="tile"><svg class="ic" width="17" height="17"><use href="#i-cpu"></use></svg></span>
+              <span class="lbl">ai_extract</span>
+            </div>
+            <div class="mini-conn c2"><span class="pulse"></span></div>
+            <div class="mini-node">
+              <span class="tile"><svg class="ic" width="17" height="17"><use href="#i-erp"></use></svg></span>
+              <span class="lbl">erp_sync</span>
+            </div>
+          </div>
+          <div class="mock-log" aria-hidden="true">
+            <div><span class="lg-ok">[ok]</span> ocr &mdash; 2 pages read in 342ms</div>
+            <div><span class="lg-ok">[ok]</span> extract &mdash; 12 fields, confidence 0.98</div>
+            <div><span class="lg-run">&#9656;</span> sync &mdash; posting INV-2026-0847 to ERP</div>
+          </div>
+        </div>
+      </div>
+      <div class="float-chip fc2"><svg class="ic" width="14" height="14"><use href="#i-check"></use></svg> <b>invoice_0847.pdf</b> approved</div>
+    </div>
+  </div>
+</section>
+
+<!-- 3 · Social proof -->
+<section class="proof" aria-label="Social proof">
+  <div class="wrap">
+    <p>Trusted by operations teams at</p>
+    <div class="logos reveal">
+      <span class="wordmark">Northwind Ops</span>
+      <span class="wordmark">Lumina Foods</span>
+      <span class="wordmark">Atlas Freight</span>
+      <span class="wordmark">corely.health</span>
+      <span class="wordmark">Vantage Assurance</span>
+      <span class="wordmark">Brightpath HR</span>
+    </div>
+  </div>
+</section>
+
+<!-- 4 · Problem -->
+<section id="problem">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="sec-idx">01 — Problem</div>
+      <h2>Document automation shouldn't need a dev team</h2>
+      <p>Every company runs on documents. Almost every company processes them the hard way.</p>
+    </div>
+    <div class="grid cols2 pain">
+      <div class="card reveal">
+        <div class="icon-tile"><svg class="ic" width="19" height="19"><use href="#i-code"></use></svg></div>
+        <h3>Every workflow needs a developer</h3>
+        <p>Automating a single document type means custom code, sprints and a backlog. By the time it ships, the process has changed.</p>
+      </div>
+      <div class="card reveal">
+        <div class="icon-tile"><svg class="ic" width="19" height="19"><use href="#i-file"></use></svg></div>
+        <h3>Manual re-keying never dies</h3>
+        <p>Invoices, claims and forms still get retyped from PDF into spreadsheets and ERPs — slow, expensive and error-prone.</p>
+      </div>
+      <div class="card reveal">
+        <div class="icon-tile"><svg class="ic" width="19" height="19"><use href="#i-nodes"></use></svg></div>
+        <h3>Documents live in ten systems</h3>
+        <p>Email, shared drives, the ERP, the accounting tool, Slack threads. Nothing connects, so people become the integration layer.</p>
+      </div>
+      <div class="card reveal">
+        <div class="icon-tile"><svg class="ic" width="19" height="19"><use href="#i-clock"></use></svg></div>
+        <h3>Automation projects take months</h3>
+        <p>Classic RPA and IDP tools demand consultants and long implementations. Small process changes turn into change requests.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 · Solution -->
+<section class="alt" id="solution">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="sec-idx">02 — Solution</div>
+      <h2>From custom code to drag-and-drop</h2>
+      <p>Docuflow is Zapier + OCR + AI, purpose-built for business documents. Your ops team builds the automation — visually.</p>
+    </div>
+    <div class="ba">
+      <div class="ba-col before reveal">
+        <span class="ba-tag">Before</span>
+        <h3>The engineering-project way</h3>
+        <ul>
+          <li><span class="b"><svg class="ic" width="11" height="11"><use href="#i-x"></use></svg></span> Write a spec, wait for a developer sprint</li>
+          <li><span class="b"><svg class="ic" width="11" height="11"><use href="#i-x"></use></svg></span> Glue together OCR APIs, scripts and cron jobs</li>
+          <li><span class="b"><svg class="ic" width="11" height="11"><use href="#i-x"></use></svg></span> Weeks per document type, more for every change</li>
+          <li><span class="b"><svg class="ic" width="11" height="11"><use href="#i-x"></use></svg></span> Exceptions handled by email and retyping</li>
+        </ul>
+      </div>
+      <div class="ba-col after reveal">
+        <span class="ba-tag">After — with Docuflow</span>
+        <h3>The visual-workflow way</h3>
+        <ul>
+          <li><span class="b"><svg class="ic" width="11" height="11"><use href="#i-check"></use></svg></span> Drag blocks: Upload &rarr; OCR &rarr; AI Extraction &rarr; your systems</li>
+          <li><span class="b"><svg class="ic" width="11" height="11"><use href="#i-check"></use></svg></span> AI reads any layout — no templates to maintain</li>
+          <li><span class="b"><svg class="ic" width="11" height="11"><use href="#i-check"></use></svg></span> Built-in validation and human approval steps</li>
+          <li><span class="b"><svg class="ic" width="11" height="11"><use href="#i-check"></use></svg></span> Ship a new workflow in an afternoon, not a quarter</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 · Interactive prototype -->
+<section id="prototype">
+  <div class="ground"></div>
+  <div class="wrap" style="position:relative">
+    <div class="sec-head reveal">
+      <div class="sec-idx">03 — Live builder</div>
+      <h2>Try the builder — right here</h2>
+      <p>Click blocks (or drag them in), pick a template, then run the workflow and watch a document flow through it. Interactive preview with sample data — nothing is uploaded, everything runs in your browser.</p>
+    </div>
+    <div class="frame reveal">
+      <div class="frame-bar">
+        <span class="fdot"></span><span class="fdot"></span><span class="fdot"></span>
+        <span class="frame-url">docuflow.app/builder/new-workflow</span>
+        <span class="frame-chip"><span class="okd"></span>Draft</span>
+      </div>
+      <div class="builder">
+        <aside class="palette" aria-label="Block library">
+          <div class="palette-title">Block library</div>
+          <div class="palette-list" id="paletteList"></div>
+        </aside>
+        <div class="canvas-side">
+          <div class="tmpl-row" id="tmplRow" aria-label="Workflow templates">
+            <span class="tmpl-label">Templates</span>
+          </div>
+          <div class="canvas" id="canvas" aria-label="Workflow canvas">
+            <div class="lane" id="lane"></div>
+            <div class="empty-hint" id="emptyHint">
+              <div>
+                <div class="eh-icon"><svg class="ic" width="20" height="20"><use href="#i-plus"></use></svg></div>
+                <p>Add your first block or pick a template</p>
+                <small>click a block on the left — or drag it onto the canvas</small>
+              </div>
+            </div>
+          </div>
+          <div class="canvas-actions">
+            <button class="btn btn-primary btn-sm" id="runBtn">
+              <svg class="ic" width="13" height="13"><use href="#i-play"></use></svg>
+              Run workflow
+            </button>
+            <span class="block-count" id="blockCount"></span>
+            <button class="clear-link" id="clearBtn" hidden>clear canvas</button>
+          </div>
+          <div class="results" id="results" hidden>
+            <div class="res-head">
+              <span class="res-title"><span class="okdot"></span> run complete · invoice_meridian_supply_0847.pdf</span>
+              <div class="res-tabs" role="tablist" aria-label="Result views">
+                <button class="res-tab active" data-pane="json" role="tab">Extracted JSON</button>
+                <button class="res-tab" data-pane="excel" role="tab">Excel export</button>
+                <button class="res-tab" data-pane="approval" role="tab">Approval</button>
+              </div>
+            </div>
+            <div class="res-body">
+              <div class="res-pane active" data-pane="json">
+                <pre class="code" id="jsonOut"></pre>
+              </div>
+              <div class="res-pane" data-pane="excel">
+                <div class="sheet-wrap">
+                  <table class="sheet" id="sheetOut">
+                    <thead>
+                      <tr><th class="rowno"></th><th>A</th><th>B</th><th>C</th><th>D</th></tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+                </div>
+                <p class="sheet-note">ready to download as <b>invoices_export_2026-07.xlsx</b> — in the real product this syncs straight to your sheet or ERP.</p>
+              </div>
+              <div class="res-pane" data-pane="approval">
+                <div class="appr-card" id="apprCard">
+                  <div class="appr-top">
+                    <div>
+                      <div class="appr-vendor" id="apprVendor"></div>
+                      <div class="appr-sub" id="apprSub"></div>
+                    </div>
+                    <span class="conf-badge" id="apprConf"><span class="okd"></span><span id="apprConfTxt"></span></span>
+                  </div>
+                  <div class="appr-rows" id="apprRows"></div>
+                  <div class="appr-actions">
+                    <button class="btn-approve" id="approveBtn"><svg class="ic" width="15" height="15"><use href="#i-check"></use></svg>Approve</button>
+                    <button class="btn-reject" id="rejectBtn"><svg class="ic" width="15" height="15"><use href="#i-x"></use></svg>Reject</button>
+                  </div>
+                  <div class="appr-status" id="apprStatus"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 7 · Features + templates -->
+<section class="alt" id="features">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="sec-idx">04 — Capabilities</div>
+      <h2>Everything a document pipeline needs</h2>
+      <p>Blocks for reading, understanding, checking and delivering — plus templates so you never start from a blank canvas.</p>
+    </div>
+    <div class="grid feat-grid">
+      <div class="card reveal">
+        <div class="icon-tile"><svg class="ic" width="19" height="19"><use href="#i-workflow"></use></svg></div>
+        <h3>No-code visual canvas</h3>
+        <p>Drag, connect and rearrange blocks. What you see on the canvas is exactly what runs in production.</p>
+      </div>
+      <div class="card reveal">
+        <div class="icon-tile"><svg class="ic" width="19" height="19"><use href="#i-cpu"></use></svg></div>
+        <h3>AI extraction, any layout</h3>
+        <p>OCR plus language models pull structured fields from invoices, forms and contracts — no per-vendor templates.</p>
+      </div>
+      <div class="card reveal">
+        <div class="icon-tile"><svg class="ic" width="19" height="19"><use href="#i-shield"></use></svg></div>
+        <h3>Validation rules built in</h3>
+        <p>Totals must add up, dates must parse, POs must match. Failures route to a human instead of your ERP.</p>
+      </div>
+      <div class="card reveal">
+        <div class="icon-tile"><svg class="ic" width="19" height="19"><use href="#i-user-check"></use></svg></div>
+        <h3>Human-in-the-loop approvals</h3>
+        <p>Add an approval block anywhere. Reviewers see the document and the extracted data side by side, one click to release.</p>
+      </div>
+      <div class="card reveal">
+        <div class="icon-tile"><svg class="ic" width="19" height="19"><use href="#i-braces"></use></svg></div>
+        <h3>Connect the tools you run on</h3>
+        <p>Deliver results to your database, ERP, email, Slack, Excel — or any system with an API. Data lands where work happens.</p>
+      </div>
+      <div class="card reveal">
+        <div class="icon-tile"><svg class="ic" width="19" height="19"><use href="#i-chart"></use></svg></div>
+        <h3>Full audit trail</h3>
+        <p>Every document, every field, every approval is logged. See exactly what ran, when, and who signed off.</p>
+      </div>
+    </div>
+
+    <div class="tmpl-head reveal">
+      <div>
+        <h3>Start from a template</h3>
+        <p>Proven workflows for the documents your team touches every day — open one in the builder above.</p>
+      </div>
+    </div>
+    <div class="tmpl-cards" id="tmplCards"></div>
+  </div>
+</section>
+
+<!-- 8 · How it works -->
+<section id="how">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="sec-idx">05 — How it works</div>
+      <h2>How it works</h2>
+      <p>From messy PDFs to structured data in three steps.</p>
+    </div>
+    <div class="grid steps">
+      <div class="card step reveal">
+        <div class="n">01</div>
+        <h3>Pick a template or start blank</h3>
+        <p>Choose Invoice Processing, Insurance Claims, Resume Screening — or drag your own chain of blocks onto the canvas.</p>
+      </div>
+      <div class="card step reveal">
+        <div class="n">02</div>
+        <h3>Connect AI to your systems</h3>
+        <p>Add OCR and AI Extraction, set validation rules, then point the output at your database, ERP, Slack or Excel.</p>
+      </div>
+      <div class="card step reveal">
+        <div class="n">03</div>
+        <h3>Run, approve, relax</h3>
+        <p>Documents flow through automatically. Anything uncertain waits for a one-click human approval. Everything is logged.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 9 · Pricing -->
+<section class="alt" id="pricing">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="sec-idx">06 — Pricing</div>
+      <h2>Simple, early-access pricing</h2>
+      <p>Lock in early-access rates. Every plan starts with a guided onboarding call.</p>
+    </div>
+    <div class="grid plans">
+      <div class="card plan reveal">
+        <h3>Starter</h3>
+        <span class="for">For one team automating its first workflow</span>
+        <div class="price">$49<small>/mo</small></div>
+        <span class="ea">Early-access pricing</span>
+        <ul>
+          <li><svg class="ic" width="13" height="13"><use href="#i-check"></use></svg>500 pages / month</li>
+          <li><svg class="ic" width="13" height="13"><use href="#i-check"></use></svg>3 active workflows</li>
+          <li><svg class="ic" width="13" height="13"><use href="#i-check"></use></svg>OCR + AI extraction blocks</li>
+          <li><svg class="ic" width="13" height="13"><use href="#i-check"></use></svg>Excel &amp; email delivery</li>
+        </ul>
+        <button class="btn btn-secondary" data-open-waitlist data-cta="plan_starter">Join the waitlist</button>
+      </div>
+      <div class="card plan pop reveal">
+        <span class="tag">Most popular</span>
+        <h3>Pro</h3>
+        <span class="for">For ops teams running document pipelines daily</span>
+        <div class="price">$199<small>/mo</small></div>
+        <span class="ea">Early-access pricing</span>
+        <ul>
+          <li><svg class="ic" width="13" height="13"><use href="#i-check"></use></svg>5,000 pages / month</li>
+          <li><svg class="ic" width="13" height="13"><use href="#i-check"></use></svg>Unlimited workflows</li>
+          <li><svg class="ic" width="13" height="13"><use href="#i-check"></use></svg>Approvals &amp; validation rules</li>
+          <li><svg class="ic" width="13" height="13"><use href="#i-check"></use></svg>ERP, Slack, database &amp; API blocks</li>
+          <li><svg class="ic" width="13" height="13"><use href="#i-check"></use></svg>Priority support</li>
+        </ul>
+        <button class="btn btn-primary" data-open-waitlist data-cta="plan_pro">Join the waitlist</button>
+      </div>
+      <div class="card plan reveal">
+        <h3>Enterprise</h3>
+        <span class="for">For regulated and high-volume operations</span>
+        <div class="price">Custom</div>
+        <span class="ea">Early-access pricing</span>
+        <ul>
+          <li><svg class="ic" width="13" height="13"><use href="#i-check"></use></svg>Unlimited volume</li>
+          <li><svg class="ic" width="13" height="13"><use href="#i-check"></use></svg>SSO &amp; role-based access</li>
+          <li><svg class="ic" width="13" height="13"><use href="#i-check"></use></svg>Private cloud / VPC deployment</li>
+          <li><svg class="ic" width="13" height="13"><use href="#i-check"></use></svg>SLA &amp; dedicated onboarding</li>
+        </ul>
+        <button class="btn btn-secondary" data-open-waitlist data-cta="plan_enterprise">Talk to us</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 10 · FAQ -->
+<section id="faq">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="sec-idx">07 — FAQ</div>
+      <h2>Frequently asked questions</h2>
+    </div>
+    <div class="faq reveal">
+      <details>
+        <summary>What kinds of documents can Docuflow handle? <svg class="ic car" width="16" height="16"><use href="#i-chevron"></use></svg></summary>
+        <p class="a">Anything paper-shaped: invoices, purchase orders, receipts, bank statements, contracts, insurance claims, medical forms, resumes. If it arrives as a PDF, scan or photo, the OCR + AI Extraction blocks can read it — including mixed layouts from many different senders.</p>
+      </details>
+      <details>
+        <summary>Do I really need zero engineering help? <svg class="ic car" width="16" height="16"><use href="#i-chevron"></use></svg></summary>
+        <p class="a">For most workflows, yes — you drag blocks and configure them with plain-language settings. The API block exists for teams that want to push data into custom systems; that's the only place a developer might get involved, and even then it's a webhook, not a project.</p>
+      </details>
+      <details>
+        <summary>How accurate is the AI extraction? <svg class="ic car" width="16" height="16"><use href="#i-chevron"></use></svg></summary>
+        <p class="a">Accuracy depends on your documents, which is why every workflow can include Validation and Approval blocks: the AI flags anything it isn't confident about and routes it to a person instead of guessing. You get automation for the easy 90% and human judgment for the rest.</p>
+      </details>
+      <details>
+        <summary>Which systems does it connect to? <svg class="ic car" width="16" height="16"><use href="#i-chevron"></use></svg></summary>
+        <p class="a">Out of the box: databases, email, ERP systems, Slack and Excel, plus a generic API/webhook block for everything else. During early access we prioritize integrations based on what waitlist members ask for — tell us yours when you sign up.</p>
+      </details>
+      <details>
+        <summary>Is my document data secure? <svg class="ic car" width="16" height="16"><use href="#i-chevron"></use></svg></summary>
+        <p class="a">Documents are encrypted in transit and at rest, processed only to run your workflows, and never used to train shared models. Enterprise plans add SSO, role-based access and private-cloud deployment for regulated industries.</p>
+      </details>
+      <details>
+        <summary>When can I get access? <svg class="ic car" width="16" height="16"><use href="#i-chevron"></use></svg></summary>
+        <p class="a">We're in early access and onboard new teams from the waitlist every week, prioritizing by use case. Join the list, tell us which documents you process, and we'll reach out to schedule your onboarding.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- 11 · Final CTA + footer -->
+<section>
+  <div class="wrap">
+    <div class="final reveal">
+      <div class="ground"></div>
+      <div class="glow g1"></div>
+      <h2>Automate your first document workflow today</h2>
+      <p>Try the builder above, then get on the list — we onboard new teams every week.</p>
+      <div class="hero-ctas">
+        <button class="btn btn-primary" data-scroll-proto data-cta="final_primary">Build My First Workflow</button>
+        <button class="btn btn-secondary" data-open-waitlist data-cta="final_demo">Book a demo</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <span class="fbrand">&copy; 2026 Docuflow</span>
+    <div class="links">
+      <button data-open-honest>Privacy</button>
+      <button data-open-honest>Contact</button>
+    </div>
+  </div>
+</footer>
+
+<!-- Waitlist modal -->
+<div class="overlay" id="waitlistOverlay" role="dialog" aria-modal="true" aria-labelledby="wlTitle">
+  <div class="modal" id="waitlistModal">
+    <button class="x" data-close-modal aria-label="Close"><svg class="ic" width="15" height="15"><use href="#i-x"></use></svg></button>
+    <div class="m-form">
+      <h3 id="wlTitle">Get early access to Docuflow</h3>
+      <p class="msub">Tell us where to send your invite. We onboard new teams from the waitlist every week.</p>
+      <form id="waitlistForm" novalidate>
+        <div class="field" id="emailField">
+          <label for="wlEmail">Work email</label>
+          <input type="email" id="wlEmail" placeholder="you@company.com" autocomplete="email" required>
+          <p class="err">Please enter a valid email address.</p>
+        </div>
+        <div class="field">
+          <label for="wlRole">What best describes you?</label>
+          <select id="wlRole">
+            <option value="">Select one (optional)</option>
+            <option>Operations</option>
+            <option>Finance</option>
+            <option>HR</option>
+            <option>Procurement</option>
+            <option>Logistics</option>
+            <option>Insurance</option>
+            <option>Healthcare</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Request early access</button>
+        <p class="fine">We only use your email to contact you about access. No spam.</p>
+      </form>
+    </div>
+    <div class="m-success">
+      <div class="big"><svg class="ic" width="24" height="24"><use href="#i-check"></use></svg></div>
+      <h3>You're on the list!</h3>
+      <p class="msub">We onboard new teams weekly — keep an eye on your inbox.</p>
+      <button class="btn btn-secondary" id="tryDemoBtn">Try the interactive demo</button>
+    </div>
+  </div>
+</div>
+
+<!-- Honest privacy/contact modal -->
+<div class="overlay" id="honestOverlay" role="dialog" aria-modal="true" aria-labelledby="hoTitle">
+  <div class="modal">
+    <button class="x" data-close-modal aria-label="Close"><svg class="ic" width="15" height="15"><use href="#i-x"></use></svg></button>
+    <h3 id="hoTitle">A quick honest note</h3>
+    <p class="msub">We're in early access. We only store the email you submit, to contact you about access. Nothing else is collected or shared.</p>
+    <button class="btn btn-secondary" data-close-modal>Got it</button>
+  </div>
+</div>
+
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script>
+"use strict";
+
+/* ============ Config & tracking ============ */
+const CONFIG = {
+  endpoint: "",            // optional: URL that accepts POST JSON {email, source, event, idea, ts}
+  idea: "ocr-workflow-ai",
+  brand: "Docuflow"
+};
+function track(event, extra = {}) {
+  const rec = { idea: CONFIG.idea, event, ts: Date.now(), ...extra };
+  try {
+    const all = JSON.parse(localStorage.getItem("val_events") || "[]");
+    all.push(rec);
+    localStorage.setItem("val_events", JSON.stringify(all));
+  } catch (e) { /* storage unavailable */ }
+  if (CONFIG.endpoint) {
+    fetch(CONFIG.endpoint.replace(/\/+$/, "") + "/" + CONFIG.idea, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(rec)
+    }).catch(() => {});
+  }
+}
+track("page_view");
+
+const $ = (sel, root) => (root || document).querySelector(sel);
+const $$ = (sel, root) => Array.from((root || document).querySelectorAll(sel));
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const icon = (id, size) =>
+  '<svg class="ic" width="' + (size || 18) + '" height="' + (size || 18) +
+  '" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-' + id + '"></use></svg>';
+
+/* ============ Sample data ============ */
+const INVOICE = {
+  document: "invoice_meridian_supply_0847.pdf",
+  pages: 2,
+  confidence: 0.98,
+  vendor: {
+    name: "Meridian Supply Co.",
+    tax_id: "TH-0105561234567",
+    email: "billing@meridiansupply.example"
+  },
+  invoice_number: "INV-2026-0847",
+  issue_date: "2026-07-14",
+  due_date: "2026-08-13",
+  currency: "USD",
+  line_items: [
+    { description: "Thermal shipping labels 4x6 (12 rolls)", qty: 12, unit_price: 18.5, amount: 222.0 },
+    { description: "Industrial packaging tape (36 pack)", qty: 3, unit_price: 42.0, amount: 126.0 },
+    { description: "Corrugated boxes, size M (250 units)", qty: 1, unit_price: 387.5, amount: 387.5 }
+  ],
+  subtotal: 735.5,
+  tax: 51.49,
+  total: 786.99,
+  payment_terms: "Net 30",
+  po_match: { po_number: "PO-1192", status: "matched" }
+};
+
+/* ============ Block library ============ */
+const BLOCKS = [
+  { id: "upload", name: "Upload PDF", icon: "upload" },
+  { id: "ocr", name: "OCR", icon: "scan" },
+  { id: "ai", name: "AI Extraction", icon: "cpu" },
+  { id: "validation", name: "Validation", icon: "shield" },
+  { id: "approval", name: "Approval", icon: "user-check" },
+  { id: "database", name: "Database", icon: "database" },
+  { id: "email", name: "Email", icon: "mail" },
+  { id: "erp", name: "ERP", icon: "erp" },
+  { id: "slack", name: "Slack", icon: "grid" },
+  { id: "excel", name: "Excel", icon: "table" },
+  { id: "api", name: "API", icon: "braces" }
+];
+const blockById = (id) => BLOCKS.find((b) => b.id === id);
+
+const TEMPLATES = [
+  { name: "Invoice Processing", blocks: ["upload", "ocr", "ai", "validation", "approval", "erp"] },
+  { name: "Resume Screening", blocks: ["upload", "ocr", "ai", "validation", "database", "email"] },
+  { name: "Purchase Orders", blocks: ["upload", "ocr", "ai", "validation", "approval", "erp"] },
+  { name: "Bank Statements", blocks: ["upload", "ocr", "ai", "validation", "excel"] },
+  { name: "Receipts", blocks: ["upload", "ocr", "ai", "excel", "slack"] },
+  { name: "Contracts", blocks: ["upload", "ocr", "ai", "approval", "database"] },
+  { name: "Insurance Claims", blocks: ["upload", "ocr", "ai", "validation", "approval", "api"] },
+  { name: "Medical Forms", blocks: ["upload", "ocr", "ai", "validation", "database"] }
+];
+
+/* ============ Builder state ============ */
+let chain = [];           // [{uid, id}]
+let uidSeq = 0;
+let running = false;
+let demoStarted = false;
+let workflowCreatedFired = false;
+let demoCompleteFired = false;
+
+const laneEl = $("#lane");
+const canvasEl = $("#canvas");
+const emptyHint = $("#emptyHint");
+const runBtn = $("#runBtn");
+const clearBtn = $("#clearBtn");
+const blockCountEl = $("#blockCount");
+const resultsEl = $("#results");
+
+function markDemoStarted() {
+  if (!demoStarted) { demoStarted = true; track("demo_start"); }
+}
+
+/* ============ Toasts ============ */
+function toast(msg, warn = false) {
+  const t = document.createElement("div");
+  t.className = "toast" + (warn ? " warn" : "");
+  t.innerHTML = '<span class="t-ic">' + icon(warn ? "alert" : "check", 15) + "</span><span></span>";
+  t.lastElementChild.textContent = msg;
+  $("#toasts").appendChild(t);
+  setTimeout(() => {
+    t.classList.add("out");
+    setTimeout(() => t.remove(), 350);
+  }, 3200);
+}
+
+/* ============ Palette ============ */
+const paletteList = $("#paletteList");
+BLOCKS.forEach((b) => {
+  const el = document.createElement("button");
+  el.className = "pal-item";
+  el.type = "button";
+  el.draggable = true;
+  el.innerHTML = icon(b.icon, 16) + "<span></span><span class=\"plus\">" + icon("plus", 12) + "</span>";
+  el.children[1].textContent = b.name;
+  el.addEventListener("click", () => addBlock(b.id));
+  el.addEventListener("dragstart", (e) => {
+    e.dataTransfer.setData("text/plain", b.id);
+    e.dataTransfer.effectAllowed = "copy";
+  });
+  paletteList.appendChild(el);
+});
+
+canvasEl.addEventListener("dragover", (e) => {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = "copy";
+  canvasEl.classList.add("dragover");
+});
+canvasEl.addEventListener("dragleave", () => canvasEl.classList.remove("dragover"));
+canvasEl.addEventListener("drop", (e) => {
+  e.preventDefault();
+  canvasEl.classList.remove("dragover");
+  const id = e.dataTransfer.getData("text/plain");
+  if (blockById(id)) addBlock(id);
+});
+
+/* ============ Templates ============ */
+const tmplRow = $("#tmplRow");
+TEMPLATES.forEach((t) => {
+  const chip = document.createElement("button");
+  chip.className = "chip";
+  chip.type = "button";
+  chip.textContent = t.name;
+  chip.addEventListener("click", () => applyTemplate(t, chip));
+  tmplRow.appendChild(chip);
+});
+
+function applyTemplate(t, chip) {
+  if (running) return;
+  markDemoStarted();
+  track("template", { name: t.name });
+  $$(".chip", tmplRow).forEach((c) => c.classList.toggle("active", c === chip));
+  chain = t.blocks.map((id) => ({ uid: ++uidSeq, id }));
+  hideResults();
+  renderLane({ animateAll: true });
+  checkWorkflowCreated();
+  toast('Template "' + t.name + '" loaded — hit Run workflow');
+}
+
+/* Template cards in features section */
+const tmplCards = $("#tmplCards");
+TEMPLATES.forEach((t) => {
+  const card = document.createElement("div");
+  card.className = "tmpl-card reveal";
+  const chainText = t.blocks.map((id) => blockById(id).name).join(" → ");
+  card.innerHTML = "<h4></h4><p class=\"chain\"></p><button class=\"open-b\" type=\"button\">Open in builder " + icon("arrow-r", 12) + "</button>";
+  card.querySelector("h4").textContent = t.name;
+  card.querySelector(".chain").textContent = chainText;
+  card.querySelector(".open-b").addEventListener("click", () => {
+    const chip = $$(".chip", tmplRow).find((c) => c.textContent === t.name);
+    applyTemplate(t, chip);
+    $("#prototype").scrollIntoView({ behavior: "smooth" });
+  });
+  tmplCards.appendChild(card);
+});
+
+/* ============ Lane rendering ============ */
+function makeNode(item, animate, delayMs) {
+  const b = blockById(item.id);
+  const node = document.createElement("div");
+  node.className = "node" + (animate ? " enter" : "");
+  if (animate && delayMs) node.style.animationDelay = delayMs + "ms";
+  node.dataset.uid = item.uid;
+  node.innerHTML =
+    '<span class="tile">' + icon(b.icon, 17) + '<span class="spin"><i></i></span></span>' +
+    '<span class="nm"></span>' +
+    '<button class="rm" type="button" aria-label="Remove block">' + icon("x", 11) + "</button>" +
+    '<span class="chk" aria-hidden="true"></span>';
+  node.querySelector(".nm").textContent = b.name;
+  node.querySelector(".rm").addEventListener("click", () => removeBlock(item.uid));
+  return node;
+}
+function makeConnector(animate, delayMs) {
+  const c = document.createElement("div");
+  c.className = "conn" + (animate ? " enter" : "");
+  if (animate && delayMs) c.style.animationDelay = delayMs + "ms";
+  c.innerHTML = '<span class="tok"></span>';
+  return c;
+}
+
+function renderLane(opts) {
+  const o = opts || {};
+  laneEl.innerHTML = "";
+  chain.forEach((item, i) => {
+    const animate = o.animateAll || item.uid === o.animateUid;
+    const delay = o.animateAll ? i * 70 : 0;
+    if (i > 0) laneEl.appendChild(makeConnector(animate, delay));
+    laneEl.appendChild(makeNode(item, animate, delay));
+  });
+  emptyHint.hidden = chain.length > 0;
+  clearBtn.hidden = chain.length === 0;
+  blockCountEl.textContent = chain.length
+    ? chain.length + (chain.length === 1 ? " block" : " blocks")
+    : "";
+}
+
+function addBlock(id) {
+  if (running) return;
+  markDemoStarted();
+  const item = { uid: ++uidSeq, id };
+  chain.push(item);
+  track("block_add", { block: id, position: chain.length });
+  renderLane({ animateUid: item.uid });
+  checkWorkflowCreated();
+  // keep the newest block in view
+  canvasEl.scrollTo({ left: canvasEl.scrollWidth, behavior: "smooth" });
+}
+
+function removeBlock(uid) {
+  if (running) return;
+  const node = laneEl.querySelector('.node[data-uid="' + uid + '"]');
+  if (node) node.classList.add("leave");
+  setTimeout(() => {
+    chain = chain.filter((c) => c.uid !== uid);
+    renderLane({});
+  }, 160);
+}
+
+function checkWorkflowCreated() {
+  if (!workflowCreatedFired && chain.length >= 3) {
+    workflowCreatedFired = true;
+    track("workflow_created", { blocks: chain.map((c) => c.id) });
+  }
+}
+
+clearBtn.addEventListener("click", () => {
+  if (running) return;
+  chain = [];
+  hideResults();
+  $$(".chip", tmplRow).forEach((c) => c.classList.remove("active"));
+  renderLane({});
+});
+
+/* ============ Run workflow ============ */
+runBtn.addEventListener("click", runWorkflow);
+
+async function runWorkflow() {
+  if (running) return;
+  if (chain.length === 0) {
+    toast("Add a block or pick a template first", true);
+    return;
+  }
+  if (chain.length === 1) {
+    toast("Add at least one more block to run a workflow", true);
+    return;
+  }
+  markDemoStarted();
+  running = true;
+  runBtn.disabled = true;
+  canvasEl.classList.add("locked", "run");
+  hideResults();
+  track("workflow_run", { blocks: chain.map((c) => c.id) });
+
+  const nodes = $$(".node", laneEl);
+  const conns = $$(".conn", laneEl);
+  nodes.forEach((n) => n.classList.remove("running", "done"));
+  conns.forEach((c) => c.classList.remove("go", "passed"));
+
+  for (let i = 0; i < nodes.length; i++) {
+    const node = nodes[i];
+    node.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
+    node.classList.add("running");
+    await sleep(480 + Math.random() * 260);
+    node.classList.remove("running");
+    node.classList.add("done");
+    if (i < conns.length) {
+      conns[i].classList.add("go");
+      await sleep(330);
+      conns[i].classList.remove("go");
+      conns[i].classList.add("passed");
+    }
+  }
+
+  await sleep(350);
+  showResults();
+  toast("Workflow completed — 12 fields extracted from sample invoice");
+  if (!demoCompleteFired) { demoCompleteFired = true; track("demo_complete"); }
+  running = false;
+  runBtn.disabled = false;
+  canvasEl.classList.remove("locked", "run");
+}
+
+/* ============ Results panel ============ */
+function hideResults() {
+  resultsEl.classList.remove("open");
+  resultsEl.hidden = true;
+}
+function showResults() {
+  resultsEl.hidden = false;
+  requestAnimationFrame(() => requestAnimationFrame(() => resultsEl.classList.add("open")));
+  resultsEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+/* tabs */
+$$(".res-tab").forEach((tab) => {
+  tab.addEventListener("click", () => {
+    $$(".res-tab").forEach((t) => t.classList.toggle("active", t === tab));
+    $$(".res-pane").forEach((p) =>
+      p.classList.toggle("active", p.dataset.pane === tab.dataset.pane)
+    );
+  });
+});
+
+/* JSON view with syntax tinting */
+function escapeHtml(s) {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+function highlightJSON(obj) {
+  const json = escapeHtml(JSON.stringify(obj, null, 2));
+  return json.replace(
+    /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d+)?(?:[eE][+\-]?\d+)?)/g,
+    (m) => {
+      let cls = "j-num";
+      if (m.charAt(0) === '"') cls = /:$/.test(m) ? "j-key" : "j-str";
+      else if (m === "true" || m === "false") cls = "j-bool";
+      else if (m === "null") cls = "j-null";
+      return '<span class="' + cls + '">' + m + "</span>";
+    }
+  );
+}
+$("#jsonOut").innerHTML = highlightJSON(INVOICE);
+
+/* Excel-style sheet */
+(function buildSheet() {
+  const money = (n) => "$" + n.toFixed(2);
+  const rows = [
+    ["Vendor", INVOICE.vendor.name, "Invoice #", INVOICE.invoice_number],
+    ["Issue date", INVOICE.issue_date, "Due date", INVOICE.due_date],
+    ["", "", "", ""],
+    { hdr: ["Description", "Qty", "Unit price", "Amount"] }
+  ];
+  INVOICE.line_items.forEach((li) => {
+    rows.push({ item: [li.description, String(li.qty), money(li.unit_price), money(li.amount)] });
+  });
+  rows.push({ item: ["Subtotal", "", "", money(INVOICE.subtotal)] });
+  rows.push({ item: ["Tax (7%)", "", "", money(INVOICE.tax)] });
+  rows.push({ total: ["Total (" + INVOICE.currency + ")", "", "", money(INVOICE.total)] });
+
+  const tbody = $("#sheetOut tbody");
+  rows.forEach((r, i) => {
+    const tr = document.createElement("tr");
+    let cells = r;
+    if (r.hdr) { tr.className = "hdr"; cells = r.hdr; }
+    else if (r.item) { cells = r.item; }
+    else if (r.total) { tr.className = "total"; cells = r.total; }
+    const rowno = document.createElement("td");
+    rowno.className = "rowno";
+    rowno.textContent = String(i + 1);
+    tr.appendChild(rowno);
+    cells.forEach((c, ci) => {
+      const td = document.createElement("td");
+      td.textContent = c;
+      if (ci >= 1 && /^[$\d]/.test(c)) td.className = "num";
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+})();
+
+/* Approval card */
+(function buildApproval() {
+  $("#apprVendor").textContent = INVOICE.vendor.name;
+  $("#apprSub").textContent = INVOICE.invoice_number + " · " + INVOICE.payment_terms + " · " + INVOICE.po_match.po_number + " matched";
+  $("#apprConfTxt").textContent = Math.round(INVOICE.confidence * 100) + "% confidence";
+  const rows = [
+    ["Subtotal", "$" + INVOICE.subtotal.toFixed(2)],
+    ["Tax", "$" + INVOICE.tax.toFixed(2)],
+    ["Due date", INVOICE.due_date],
+    ["Total due", "$" + INVOICE.total.toFixed(2), true]
+  ];
+  const wrapEl = $("#apprRows");
+  rows.forEach((r) => {
+    const div = document.createElement("div");
+    div.className = "appr-row" + (r[2] ? " big" : "");
+    div.innerHTML = "<span></span><b></b>";
+    div.firstElementChild.textContent = r[0];
+    div.lastElementChild.textContent = r[1];
+    wrapEl.appendChild(div);
+  });
+})();
+
+$("#approveBtn").addEventListener("click", () => {
+  const card = $("#apprCard");
+  card.classList.add("decided");
+  const st = $("#apprStatus");
+  st.style.color = "var(--ok)";
+  st.textContent = "Approved — " + INVOICE.invoice_number + " sent to ERP for payment";
+  track("approve", { invoice: INVOICE.invoice_number });
+  toast("Invoice approved — payment scheduled in ERP");
+});
+$("#rejectBtn").addEventListener("click", () => {
+  const card = $("#apprCard");
+  card.classList.add("decided");
+  const st = $("#apprStatus");
+  st.style.color = "var(--danger)";
+  st.textContent = "Rejected — " + INVOICE.invoice_number + " returned to vendor with a note";
+  toast("Invoice rejected — vendor notified", true);
+});
+
+/* ============ CTAs, modals ============ */
+function scrollToProto() {
+  $("#prototype").scrollIntoView({ behavior: "smooth" });
+}
+$$("[data-scroll-proto]").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    track("cta_click", { cta: btn.dataset.cta || "scroll_proto" });
+    scrollToProto();
+  });
+});
+
+const wlOverlay = $("#waitlistOverlay");
+const wlModal = $("#waitlistModal");
+let wlSource = "unknown";
+$$("[data-open-waitlist]").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    wlSource = btn.dataset.cta || "unknown";
+    track("cta_click", { cta: wlSource });
+    openOverlay(wlOverlay);
+    setTimeout(() => $("#wlEmail").focus(), 120);
+  });
+});
+
+const honestOverlay = $("#honestOverlay");
+$$("[data-open-honest]").forEach((btn) => {
+  btn.addEventListener("click", () => openOverlay(honestOverlay));
+});
+
+function openOverlay(ov) { ov.classList.add("show"); document.body.style.overflow = "hidden"; }
+function closeOverlay(ov) { ov.classList.remove("show"); document.body.style.overflow = ""; }
+$$(".overlay").forEach((ov) => {
+  ov.addEventListener("click", (e) => { if (e.target === ov) closeOverlay(ov); });
+  $$("[data-close-modal]", ov).forEach((b) => b.addEventListener("click", () => closeOverlay(ov)));
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") $$(".overlay.show").forEach(closeOverlay);
+});
+
+$("#waitlistForm").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const emailField = $("#emailField");
+  const email = $("#wlEmail").value.trim();
+  const valid = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+  emailField.classList.toggle("invalid", !valid);
+  if (!valid) return;
+  const role = $("#wlRole").value || "unspecified";
+  track("signup", { email, role, source: wlSource });
+  wlModal.classList.add("done");
+});
+$("#tryDemoBtn").addEventListener("click", () => {
+  closeOverlay(wlOverlay);
+  scrollToProto();
+});
+
+/* ============ Reveal on scroll ============ */
+(function initReveal() {
+  const els = $$(".reveal");
+  // stagger siblings that share a parent
+  const byParent = new Map();
+  els.forEach((el) => {
+    const p = el.parentElement;
+    const idx = byParent.get(p) || 0;
+    byParent.set(p, idx + 1);
+    el.style.transitionDelay = Math.min(idx * 50, 350) + "ms";
+  });
+  if (!("IntersectionObserver" in window)) {
+    els.forEach((el) => el.classList.add("in"));
+    return;
+  }
+  const io = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((en) => {
+        if (en.isIntersecting) {
+          en.target.classList.add("in");
+          io.unobserve(en.target);
+        }
+      });
+    },
+    { threshold: 0.1, rootMargin: "0px 0px -40px 0px" }
+  );
+  els.forEach((el) => io.observe(el));
+})();
+
+/* pricing_view */
+(function initPricingView() {
+  const pricing = $("#pricing");
+  if (!pricing || !("IntersectionObserver" in window)) return;
+  const io = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((en) => {
+        if (en.isIntersecting) {
+          track("pricing_view");
+          io.disconnect();
+        }
+      });
+    },
+    { threshold: 0.25 }
+  );
+  io.observe(pricing);
+})();
+
+/* ============ Stats peek (?stats=1) ============ */
+(function statsPeek() {
+  if (!/[?&]stats=1/.test(location.search)) return;
+  let all = [];
+  try { all = JSON.parse(localStorage.getItem("val_events") || "[]"); } catch (e) { all = []; }
+  const mine = all.filter((r) => r.idea === CONFIG.idea);
+  const counts = {};
+  const emails = [];
+  mine.forEach((r) => {
+    counts[r.event] = (counts[r.event] || 0) + 1;
+    if (r.event === "signup" && r.email) emails.push(r.email);
+  });
+  const panel = document.createElement("div");
+  panel.className = "stats-peek";
+  let html = "<h4>[stats] " + CONFIG.idea + " &mdash; " + mine.length + " events</h4>";
+  Object.keys(counts).sort().forEach((k) => {
+    html += "<div><span>" + escapeHtml(k) + "</span><b>" + counts[k] + "</b></div>";
+  });
+  if (emails.length) {
+    html += "<h4 style=\"margin-top:10px\">emails (" + emails.length + ")</h4>";
+    emails.forEach((em) => { html += "<div class=\"em\">" + escapeHtml(em) + "</div>"; });
+  }
+  panel.innerHTML = html;
+  document.body.appendChild(panel);
+})();
+
+/* initial paint */
+renderLane({});
+</script>
+</body>
+</html>

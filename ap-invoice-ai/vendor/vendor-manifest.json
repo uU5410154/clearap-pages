@@ -1,0 +1,76 @@
+{
+ "retrieved": "2026-07-31",
+ "note": "Offline/self-contained landing page vendor set. sourceMappingURL comments stripped from ogl/lenis/anime (they pointed at absolute jsDelivr paths that 404 offline). gsap files left byte-identical: its licence forbids altering proprietary notices.",
+ "files": {
+  "three.module.min.js": {
+   "package": "three@0.185.1",
+   "license": "MIT",
+   "license_text": "licenses/three-LICENSE.txt",
+   "status": "evaluated-not-shipped",
+   "source": "https://unpkg.com/three@0.185.1/build/three.module.min.js",
+   "bytes": 365552,
+   "gzip_bytes": 86549,
+   "sha256": "86bcee248b64f44bcfc23c331ae74619061957d59cab040171dcb6fb5900beb6"
+  },
+  "three.core.min.js": {
+   "package": "three@0.185.1",
+   "license": "MIT",
+   "license_text": "licenses/three-LICENSE.txt",
+   "status": "evaluated-not-shipped",
+   "source": "https://unpkg.com/three@0.185.1/build/three.core.min.js",
+   "bytes": 385386,
+   "gzip_bytes": 100960,
+   "sha256": "05b2609338c76cd65daf74f3ac515bc9a5045e1b3b33edc07d8c9bd55250fa90"
+  },
+  "ogl.esm.js": {
+   "package": "ogl@1.0.11",
+   "license": "Unlicense (public domain)",
+   "license_text": "licenses/ogl-LICENSE.txt",
+   "status": "SHIP",
+   "source": "https://cdn.jsdelivr.net/npm/ogl@1.0.11/+esm",
+   "bytes": 133536,
+   "gzip_bytes": 39188,
+   "sha256": "00fea59ee9b70c5812314a12ce77f68305fa4be02b19b99a3e0f4a10ee479050"
+  },
+  "lenis.min.js": {
+   "package": "lenis@1.3.11",
+   "license": "MIT",
+   "license_text": "licenses/lenis-LICENSE.txt",
+   "status": "SHIP-optional",
+   "source": "https://unpkg.com/lenis@1.3.11/dist/lenis.min.js",
+   "bytes": 16732,
+   "gzip_bytes": 4740,
+   "sha256": "10f00688bc3f5d0725f746c7dec03465c501edc968fff86c81a7cd5c2deb60a0"
+  },
+  "gsap.min.js": {
+   "package": "gsap@3.13.0",
+   "license": "Proprietary (Webflow 'no charge')",
+   "license_text": "licenses/gsap-LICENSE.txt",
+   "status": "evaluated-not-shipped",
+   "source": "https://unpkg.com/gsap@3.13.0/dist/gsap.min.js",
+   "bytes": 72435,
+   "gzip_bytes": 28170,
+   "sha256": "96c01b81f44a3290e2b4532f55e2c9534b2adc43273a19f3756b2cb41f0fd0b6"
+  },
+  "ScrollTrigger.min.js": {
+   "package": "gsap@3.13.0",
+   "license": "Proprietary (Webflow 'no charge')",
+   "license_text": "licenses/gsap-LICENSE.txt",
+   "status": "evaluated-not-shipped",
+   "source": "https://unpkg.com/gsap@3.13.0/dist/ScrollTrigger.min.js",
+   "bytes": 44157,
+   "gzip_bytes": 17820,
+   "sha256": "308219390e5e3b84cda0c481e70caa9820883ae10bda44e6e9a149a81aac4b3f"
+  },
+  "anime.esm.js": {
+   "package": "animejs@4.2.2",
+   "license": "MIT",
+   "license_text": "licenses/animejs-LICENSE.txt",
+   "status": "evaluated-not-shipped",
+   "source": "https://cdn.jsdelivr.net/npm/animejs@4.2.2/+esm",
+   "bytes": 90348,
+   "gzip_bytes": 32707,
+   "sha256": "786eb6a525048a071767eb87bb6979ee7e3eae5ca426358e5ef249688fe67991"
+  }
+ }
+}
